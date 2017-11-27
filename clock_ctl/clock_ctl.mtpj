@@ -205,16 +205,16 @@
     <Instance Guid="dd2b6a97-aa1b-4fb7-b17f-a563d5696ee0">
       <MemoCount>0</MemoCount>
     </Instance>
-    <Instance Guid="de90fbf6-0102-4930-addd-036c7461337a">
-      <MemoCount>0</MemoCount>
-    </Instance>
-    <Instance Guid="e42dbd94-e931-46cb-827e-5757c6492e97">
-      <MemoCount>0</MemoCount>
-    </Instance>
     <Instance Guid="4c244095-95cb-421a-9a41-51a650bfc305">
       <MemoCount>0</MemoCount>
     </Instance>
     <Instance Guid="1dc42a77-653c-449d-b6aa-a5daf025ecd8">
+      <MemoCount>0</MemoCount>
+    </Instance>
+    <Instance Guid="de90fbf6-0102-4930-addd-036c7461337a">
+      <MemoCount>0</MemoCount>
+    </Instance>
+    <Instance Guid="e42dbd94-e931-46cb-827e-5757c6492e97">
       <MemoCount>0</MemoCount>
     </Instance>
   </Class>
@@ -243,6 +243,12 @@
   <Class Guid="c21e0010-0644-48ec-a5d2-2b06674b0390">
     <Instance Guid="c21e0010-0644-48ec-a5d2-2b06674b0390">
       <IsStructuredNaming>True</IsStructuredNaming>
+    </Instance>
+  </Class>
+  <Class Guid="873c9a58-9bc5-439a-b476-78629a4553ed">
+    <Instance Guid="873c9a58-9bc5-439a-b476-78629a4553ed">
+      <ProjectDeviceChangedCounter>0</ProjectDeviceChangedCounter>
+      <ProjectInitialDeviceName>R7F701056xxFP</ProjectInitialDeviceName>
     </Instance>
   </Class>
   <Class Guid="c3835e31-dea3-4c93-b02b-d2db997f7630">
@@ -1019,15 +1025,214 @@ Driver\Inc
       <IsBootLoader>False</IsBootLoader>
     </Instance>
   </Class>
+  <Class Guid="606767c3-4bf3-4e65-90c1-19075517355d">
+    <Instance Guid="606767c3-4bf3-4e65-90c1-19075517355d">
+      <CurrentToolKey>4a734220-ac9a-474b-bde9-fac27f567276</CurrentToolKey>
+    </Instance>
+  </Class>
   <Class Guid="8b5af363-dcc2-48e6-919c-6cdb80d50173">
     <Instance Guid="8b5af363-dcc2-48e6-919c-6cdb80d50173">
       <DataFormatVersionPlugin>1.0</DataFormatVersionPlugin>
       <DataFormatVersionDebugger>1.0</DataFormatVersionDebugger>
     </Instance>
   </Class>
+  <Class Guid="9a065877-3b93-453c-9b72-940c69f10716">
+    <Instance Guid="00000000-0000-0000-0000-000000000000">
+      <SubDebugger>00000000-0000-0000-0000-000000000000</SubDebugger>
+    </Instance>
+  </Class>
+  <Class Guid="52e1ea47-4c41-4f6c-b81e-9caa42437088">
+    <Instance Guid="d0534c29-4366-4056-9e09-bb28c173fcf6">
+      <DeviceChangedCounter>0</DeviceChangedCounter>
+      <DeviceName>R7F701056xxFP</DeviceName>
+      <DebuggerProperty-EssentialProperty-Clock-MainClockFrequency>320000</DebuggerProperty-EssentialProperty-Clock-MainClockFrequency>
+      <DebuggerProperty-EssentialProperty-Clock-SelectTimerTraceClockFrequency>SelectCpuClockFrequency</DebuggerProperty-EssentialProperty-Clock-SelectTimerTraceClockFrequency>
+      <DebuggerProperty-EssentialProperty-Clock-UnitOfTimerTraceClockFrequency>MHz</DebuggerProperty-EssentialProperty-Clock-UnitOfTimerTraceClockFrequency>
+      <DebuggerProperty-EssentialProperty-Clock-TimerTraceClockFrequency>8000000</DebuggerProperty-EssentialProperty-Clock-TimerTraceClockFrequency>
+      <DebuggerProperty-EssentialProperty-Configuration-UseSimulatorConfigurationFile>No</DebuggerProperty-EssentialProperty-Configuration-UseSimulatorConfigurationFile>
+      <DebuggerProperty-EssentialProperty-Configuration-SimulatorConfigurationFile />
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>1</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DebuggerGuid />
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DefaultItemProjectGuid>60de01b0-3287-417e-8a78-603d9396a655</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DefaultItemProjectGuid>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileName>DefaultBuild\clock_ctl.abs</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileName>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileType>LoadModuleFile</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileType>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-CompilerType>Auto</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-CompilerType>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-Offset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-Offset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-StartAddress>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-StartAddress>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-ObjectDownload>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-ObjectDownload>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-SymbolDownload>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-SymbolDownload>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-UsePicPidOffset>False</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-UsePicPidOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PicOffset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PicOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PidOffset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PidOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-GenerateInformationForInputCompletion>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-GenerateInformationForInputCompletion>
+      <DebuggerProperty-DownloadProperty-DebugInformation-CpuReset>True</DebuggerProperty-DownloadProperty-DebugInformation-CpuReset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-FlashErase>False</DebuggerProperty-DownloadProperty-DebugInformation-FlashErase>
+      <DebuggerProperty-DownloadProperty-DebugInformation-EventCorrection>SuspendEvent</DebuggerProperty-DownloadProperty-DebugInformation-EventCorrection>
+      <DebuggerProperty-DownloadProperty-DebugInformation-SkipStartup>True</DebuggerProperty-DownloadProperty-DebugInformation-SkipStartup>
+      <DebuggerProperty-DownloadProperty-DebugInformation-MainSymbol>XwBtAGEAaQBuAA==</DebuggerProperty-DownloadProperty-DebugInformation-MainSymbol>
+      <DebuggerProperty-DownloadProperty-DebugInformation-MaxLoaderMemorySize>500</DebuggerProperty-DownloadProperty-DebugInformation-MaxLoaderMemorySize>
+      <DebuggerProperty-DownloadProperty-None-DefaultDownloadItemSupported>True</DebuggerProperty-DownloadProperty-None-DefaultDownloadItemSupported>
+      <DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>No</DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>
+      <DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>500</DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-Length>0</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-Length>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>500</DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>
+      <DebuggerProperty-OptionalProperty-Trace-UseTrace>No</DebuggerProperty-OptionalProperty-Trace-UseTrace>
+      <DebuggerProperty-OptionalProperty-Trace-TraceBranchPCAndDataAccess>True</DebuggerProperty-OptionalProperty-Trace-TraceBranchPCAndDataAccess>
+      <DebuggerProperty-OptionalProperty-Trace-TraceSoftwareTrace>False</DebuggerProperty-OptionalProperty-Trace-TraceSoftwareTrace>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBCP>True</DebuggerProperty-OptionalProperty-Trace-TraceDBCP>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBTAG>True</DebuggerProperty-OptionalProperty-Trace-TraceDBTAG>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>
+      <DebuggerProperty-OptionalProperty-Trace-ClearTraceMemory>Yes</DebuggerProperty-OptionalProperty-Trace-ClearTraceMemory>
+      <DebuggerProperty-OptionalProperty-Trace-TraceMode>Free</DebuggerProperty-OptionalProperty-Trace-TraceMode>
+      <DebuggerProperty-OptionalProperty-Trace-AddUptimeTag>No</DebuggerProperty-OptionalProperty-Trace-AddUptimeTag>
+      <DebuggerProperty-OptionalProperty-Trace-TraceMemorySize>4096</DebuggerProperty-OptionalProperty-Trace-TraceMemorySize>
+      <DebuggerProperty-OptionalProperty-Trace-TraceRate>0</DebuggerProperty-OptionalProperty-Trace-TraceRate>
+      <DebuggerProperty-OptionalProperty-Timer-UseTimer>No</DebuggerProperty-OptionalProperty-Timer-UseTimer>
+      <DebuggerProperty-OptionalProperty-Coverage-UseCoverage>No</DebuggerProperty-OptionalProperty-Coverage-UseCoverage>
+      <DebuggerProperty-OptionalProperty-Coverage-ReuseCoverageData>No</DebuggerProperty-OptionalProperty-Coverage-ReuseCoverageData>
+      <DebuggerProperty-OptionalProperty-Coverage-CoverageAreaAddress>1048576</DebuggerProperty-OptionalProperty-Coverage-CoverageAreaAddress>
+      <DebuggerProperty-OptionalProperty-Step-SectionSkipStep>False</DebuggerProperty-OptionalProperty-Step-SectionSkipStep>
+      <DebuggerProperty-OptionalProperty-Step-SelectSectionList-Length>0</DebuggerProperty-OptionalProperty-Step-SelectSectionList-Length>
+      <DebuggerProperty-ExtraAreaProperty-ExtraArea-ExtraInformation-OptionByte0>4196925391</DebuggerProperty-ExtraAreaProperty-ExtraArea-ExtraInformation-OptionByte0>
+      <DebuggerProperty-HookProperty-HookTransaction-Downloading-Length>0</DebuggerProperty-HookProperty-HookTransaction-Downloading-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Downloaded-Length>0</DebuggerProperty-HookProperty-HookTransaction-Downloaded-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Reset-Length>0</DebuggerProperty-HookProperty-HookTransaction-Reset-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Going-Length>0</DebuggerProperty-HookProperty-HookTransaction-Going-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Broke-Length>0</DebuggerProperty-HookProperty-HookTransaction-Broke-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
+      <Debugger-DebugTarget-ProcessorElementNumber>1</Debugger-DebugTarget-ProcessorElementNumber>
+    </Instance>
+    <Instance Guid="ba0ed618-1359-4f25-a84a-ab64c731842a">
+      <DeviceChangedCounter>0</DeviceChangedCounter>
+      <DeviceName>R7F701056xxFP</DeviceName>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Length>16</DebuggerProperty-EssentialProperty-Flash-IdCode-Length>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code0>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code0>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code1>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code1>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code2>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code2>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code3>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code3>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code4>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code4>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code5>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code5>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code6>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code6>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code7>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code7>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code8>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code8>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code9>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code9>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code10>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code10>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code11>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code11>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code12>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code12>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code13>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code13>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code14>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code14>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code15>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code15>
+      <DebuggerProperty-EssentialProperty-Clock-MountMainClock>True</DebuggerProperty-EssentialProperty-Clock-MountMainClock>
+      <DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>16000</DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>
+      <DebuggerProperty-EssentialProperty-Clock-CpuClock-CpuClockInformation1-CpuClockGeneration>80000</DebuggerProperty-EssentialProperty-Clock-CpuClock-CpuClockInformation1-CpuClockGeneration>
+      <DebuggerProperty-EssentialProperty-TargetConnect-LpdMode>Four</DebuggerProperty-EssentialProperty-TargetConnect-LpdMode>
+      <DebuggerProperty-EssentialProperty-TargetConnect-Baudrate>500</DebuggerProperty-EssentialProperty-TargetConnect-Baudrate>
+      <DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>4294967295</DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>
+      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>Yes</DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>
+      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>Use3_3V</DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>
+      <DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>Yes</DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>
+      <DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>No</DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>
+      <DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>True</DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>
+      <DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>False</DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>
+      <DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>No</DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>
+      <DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>Yes</DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>4276083200</DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>9728</DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>1</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DebuggerGuid />
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DefaultItemProjectGuid>60de01b0-3287-417e-8a78-603d9396a655</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DefaultItemProjectGuid>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileName>DefaultBuild\clock_ctl.abs</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileName>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileType>LoadModuleFile</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileType>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-CompilerType>Auto</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-CompilerType>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-Offset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-Offset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-StartAddress>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-StartAddress>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-ObjectDownload>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-ObjectDownload>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-SymbolDownload>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-SymbolDownload>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-UsePicPidOffset>False</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-UsePicPidOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PicOffset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PicOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PidOffset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PidOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-GenerateInformationForInputCompletion>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-GenerateInformationForInputCompletion>
+      <DebuggerProperty-DownloadProperty-DebugInformation-CpuReset>True</DebuggerProperty-DownloadProperty-DebugInformation-CpuReset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-FlashErase>False</DebuggerProperty-DownloadProperty-DebugInformation-FlashErase>
+      <DebuggerProperty-DownloadProperty-DebugInformation-EventCorrection>SuspendEvent</DebuggerProperty-DownloadProperty-DebugInformation-EventCorrection>
+      <DebuggerProperty-DownloadProperty-DebugInformation-SkipStartup>True</DebuggerProperty-DownloadProperty-DebugInformation-SkipStartup>
+      <DebuggerProperty-DownloadProperty-DebugInformation-MainSymbol>XwBtAGEAaQBuAA==</DebuggerProperty-DownloadProperty-DebugInformation-MainSymbol>
+      <DebuggerProperty-DownloadProperty-DebugInformation-MaxLoaderMemorySize>500</DebuggerProperty-DownloadProperty-DebugInformation-MaxLoaderMemorySize>
+      <DebuggerProperty-DownloadProperty-None-DefaultDownloadItemSupported>True</DebuggerProperty-DownloadProperty-None-DefaultDownloadItemSupported>
+      <DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>No</DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>
+      <DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>500</DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>
+      <DebuggerProperty-OptionalProperty-Memory-VerifyCheck>Yes</DebuggerProperty-OptionalProperty-Memory-VerifyCheck>
+      <DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>100</DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>
+      <DebuggerProperty-OptionalProperty-EventSetting-PermitToStopAndSetEvent>No</DebuggerProperty-OptionalProperty-EventSetting-PermitToStopAndSetEvent>
+      <DebuggerProperty-OptionalProperty-ResetSetting-UseForceReset>False</DebuggerProperty-OptionalProperty-ResetSetting-UseForceReset>
+      <DebuggerProperty-OptionalProperty-Break-UseSoftwareBreak>No</DebuggerProperty-OptionalProperty-Break-UseSoftwareBreak>
+      <DebuggerProperty-OptionalProperty-Break-BreakpointPriority>HardwareBreak</DebuggerProperty-OptionalProperty-Break-BreakpointPriority>
+      <DebuggerProperty-OptionalProperty-Break-PeripheralBreak>No</DebuggerProperty-OptionalProperty-Break-PeripheralBreak>
+      <DebuggerProperty-OptionalProperty-Trace-ClearTraceMemory>Yes</DebuggerProperty-OptionalProperty-Trace-ClearTraceMemory>
+      <DebuggerProperty-OptionalProperty-Trace-TraceMode>Nonstop</DebuggerProperty-OptionalProperty-Trace-TraceMode>
+      <DebuggerProperty-OptionalProperty-Trace-TraceBranchPC>True</DebuggerProperty-OptionalProperty-Trace-TraceBranchPC>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDataAccessPC>True</DebuggerProperty-OptionalProperty-Trace-TraceDataAccessPC>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDataAccessRead>True</DebuggerProperty-OptionalProperty-Trace-TraceDataAccessRead>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDataAccessWrite>True</DebuggerProperty-OptionalProperty-Trace-TraceDataAccessWrite>
+      <DebuggerProperty-OptionalProperty-Trace-TraceLocalVariable>True</DebuggerProperty-OptionalProperty-Trace-TraceLocalVariable>
+      <DebuggerProperty-OptionalProperty-Trace-TraceSoftwareTrace>False</DebuggerProperty-OptionalProperty-Trace-TraceSoftwareTrace>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBCP>True</DebuggerProperty-OptionalProperty-Trace-TraceDBCP>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBTAG>True</DebuggerProperty-OptionalProperty-Trace-TraceDBTAG>
+      <DebuggerProperty-OptionalProperty-Trace-TracePCOfDBTAG>True</DebuggerProperty-OptionalProperty-Trace-TracePCOfDBTAG>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>
+      <DebuggerProperty-OptionalProperty-Trace-TracePCOfDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TracePCOfDBPUSH>
+      <DebuggerProperty-OptionalProperty-Trace-TracePriority>SpeedPriority</DebuggerProperty-OptionalProperty-Trace-TracePriority>
+      <DebuggerProperty-OptionalProperty-Trace-TraceRange>RangeIn</DebuggerProperty-OptionalProperty-Trace-TraceRange>
+      <DebuggerProperty-OptionalProperty-PinMask-WaitMask>No</DebuggerProperty-OptionalProperty-PinMask-WaitMask>
+      <DebuggerProperty-OptionalProperty-PinMask-ResetMask>No</DebuggerProperty-OptionalProperty-PinMask-ResetMask>
+      <DebuggerProperty-OptionalProperty-PinMask-ResetMaskSelect>TargetAndInternal</DebuggerProperty-OptionalProperty-PinMask-ResetMaskSelect>
+      <DebuggerProperty-OptionalProperty-PinMask-PWRGDMask>True</DebuggerProperty-OptionalProperty-PinMask-PWRGDMask>
+      <DebuggerProperty-OptionalProperty-Assemble-DisplaySymbol>SymbolOffset</DebuggerProperty-OptionalProperty-Assemble-DisplaySymbol>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-Length>4</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-Length>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-StartAddress>33554432</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-EndAddress>34603007</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-AccessSize>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-StartAddress>37748736</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-EndAddress>38797311</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-AccessSize>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-StartAddress>41943040</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-EndAddress>42991615</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-AccessSize>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-StartAddress>50331648</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-EndAddress>51380223</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-AccessSize>
+      <DebuggerProperty-OptionalProperty-Step-SectionSkipStep>False</DebuggerProperty-OptionalProperty-Step-SectionSkipStep>
+      <DebuggerProperty-OptionalProperty-Step-SelectSectionList-Length>0</DebuggerProperty-OptionalProperty-Step-SelectSectionList-Length>
+      <DebuggerProperty-ExtraAreaProperty-ExtraArea-ExtraInformation-OptionByte0>4196925391</DebuggerProperty-ExtraAreaProperty-ExtraArea-ExtraInformation-OptionByte0>
+      <DebuggerProperty-HookProperty-HookTransaction-Downloading-Length>0</DebuggerProperty-HookProperty-HookTransaction-Downloading-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Downloaded-Length>0</DebuggerProperty-HookProperty-HookTransaction-Downloaded-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Reset-Length>0</DebuggerProperty-HookProperty-HookTransaction-Reset-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Going-Length>0</DebuggerProperty-HookProperty-HookTransaction-Going-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Broke-Length>0</DebuggerProperty-HookProperty-HookTransaction-Broke-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
+      <Debugger-DebugTarget-ProcessorElementNumber>1</Debugger-DebugTarget-ProcessorElementNumber>
+      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
+    </Instance>
+  </Class>
   <Class Guid="932085a2-9361-4df9-a3f7-12e6de7681a8">
     <Instance Guid="932085a2-9361-4df9-a3f7-12e6de7681a8">
-      <DebugToolManager>f2aacdac-89aa-4f89-8fbf-25090bc24c51</DebugToolManager>
+      <DebugToolManager>99f55032-f012-4b4e-afd0-07710f37568e</DebugToolManager>
+    </Instance>
+  </Class>
+  <Class Guid="104fc540-14b6-4fb9-bd7a-0d4844b95028">
+    <Instance Guid="00000000-0000-0000-0000-000000000000">
+      <SubDebugger>4a734220-ac9a-474b-bde9-fac27f567276</SubDebugger>
     </Instance>
   </Class>
   <Class Guid="e4df8d71-236e-4af2-aaea-56345a08da25">
@@ -1093,6 +1298,125 @@ Driver\Inc
       <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
       <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
       <Debugger-DebugTarget-ProcessorElementNumber>1</Debugger-DebugTarget-ProcessorElementNumber>
+    </Instance>
+    <Instance Guid="ba0ed618-1359-4f25-a84a-ab64c731842a">
+      <DeviceChangedCounter>0</DeviceChangedCounter>
+      <DeviceName>R7F701056xxFP</DeviceName>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Length>16</DebuggerProperty-EssentialProperty-Flash-IdCode-Length>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code0>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code0>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code1>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code1>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code2>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code2>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code3>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code3>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code4>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code4>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code5>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code5>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code6>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code6>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code7>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code7>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code8>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code8>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code9>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code9>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code10>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code10>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code11>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code11>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code12>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code12>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code13>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code13>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code14>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code14>
+      <DebuggerProperty-EssentialProperty-Flash-IdCode-Code15>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code15>
+      <DebuggerProperty-EssentialProperty-Clock-MountMainClock>True</DebuggerProperty-EssentialProperty-Clock-MountMainClock>
+      <DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>16000</DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>
+      <DebuggerProperty-EssentialProperty-Clock-CpuClock-CpuClockInformation1-CpuClockGeneration>80000</DebuggerProperty-EssentialProperty-Clock-CpuClock-CpuClockInformation1-CpuClockGeneration>
+      <DebuggerProperty-EssentialProperty-TargetConnect-LpdMode>Four</DebuggerProperty-EssentialProperty-TargetConnect-LpdMode>
+      <DebuggerProperty-EssentialProperty-TargetConnect-Baudrate>500</DebuggerProperty-EssentialProperty-TargetConnect-Baudrate>
+      <DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>4294967295</DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>
+      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>Yes</DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>
+      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>Use3_3V</DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>
+      <DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>Yes</DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>
+      <DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>No</DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>
+      <DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>True</DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>
+      <DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>False</DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>
+      <DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>No</DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>
+      <DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>Yes</DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>4276083200</DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>9728</DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>1</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DebuggerGuid />
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DefaultItemProjectGuid>60de01b0-3287-417e-8a78-603d9396a655</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DefaultItemProjectGuid>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileName>DefaultBuild\clock_ctl.abs</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileName>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileType>LoadModuleFile</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-FileType>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-CompilerType>Auto</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-CompilerType>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-Offset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-Offset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-StartAddress>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-StartAddress>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-ObjectDownload>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-ObjectDownload>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-SymbolDownload>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-SymbolDownload>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-UsePicPidOffset>False</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-UsePicPidOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PicOffset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PicOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PidOffset>0</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-PidOffset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-GenerateInformationForInputCompletion>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-GenerateInformationForInputCompletion>
+      <DebuggerProperty-DownloadProperty-DebugInformation-CpuReset>True</DebuggerProperty-DownloadProperty-DebugInformation-CpuReset>
+      <DebuggerProperty-DownloadProperty-DebugInformation-FlashErase>False</DebuggerProperty-DownloadProperty-DebugInformation-FlashErase>
+      <DebuggerProperty-DownloadProperty-DebugInformation-EventCorrection>SuspendEvent</DebuggerProperty-DownloadProperty-DebugInformation-EventCorrection>
+      <DebuggerProperty-DownloadProperty-DebugInformation-SkipStartup>True</DebuggerProperty-DownloadProperty-DebugInformation-SkipStartup>
+      <DebuggerProperty-DownloadProperty-DebugInformation-MainSymbol>XwBtAGEAaQBuAA==</DebuggerProperty-DownloadProperty-DebugInformation-MainSymbol>
+      <DebuggerProperty-DownloadProperty-DebugInformation-MaxLoaderMemorySize>500</DebuggerProperty-DownloadProperty-DebugInformation-MaxLoaderMemorySize>
+      <DebuggerProperty-DownloadProperty-None-DefaultDownloadItemSupported>True</DebuggerProperty-DownloadProperty-None-DefaultDownloadItemSupported>
+      <DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>No</DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>
+      <DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>500</DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>
+      <DebuggerProperty-OptionalProperty-Memory-VerifyCheck>Yes</DebuggerProperty-OptionalProperty-Memory-VerifyCheck>
+      <DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>100</DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>
+      <DebuggerProperty-OptionalProperty-EventSetting-PermitToStopAndSetEvent>No</DebuggerProperty-OptionalProperty-EventSetting-PermitToStopAndSetEvent>
+      <DebuggerProperty-OptionalProperty-ResetSetting-UseForceReset>False</DebuggerProperty-OptionalProperty-ResetSetting-UseForceReset>
+      <DebuggerProperty-OptionalProperty-Break-UseSoftwareBreak>No</DebuggerProperty-OptionalProperty-Break-UseSoftwareBreak>
+      <DebuggerProperty-OptionalProperty-Break-BreakpointPriority>HardwareBreak</DebuggerProperty-OptionalProperty-Break-BreakpointPriority>
+      <DebuggerProperty-OptionalProperty-Break-PeripheralBreak>No</DebuggerProperty-OptionalProperty-Break-PeripheralBreak>
+      <DebuggerProperty-OptionalProperty-Trace-ClearTraceMemory>Yes</DebuggerProperty-OptionalProperty-Trace-ClearTraceMemory>
+      <DebuggerProperty-OptionalProperty-Trace-TraceMode>Nonstop</DebuggerProperty-OptionalProperty-Trace-TraceMode>
+      <DebuggerProperty-OptionalProperty-Trace-TraceBranchPC>True</DebuggerProperty-OptionalProperty-Trace-TraceBranchPC>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDataAccessPC>True</DebuggerProperty-OptionalProperty-Trace-TraceDataAccessPC>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDataAccessRead>True</DebuggerProperty-OptionalProperty-Trace-TraceDataAccessRead>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDataAccessWrite>True</DebuggerProperty-OptionalProperty-Trace-TraceDataAccessWrite>
+      <DebuggerProperty-OptionalProperty-Trace-TraceLocalVariable>True</DebuggerProperty-OptionalProperty-Trace-TraceLocalVariable>
+      <DebuggerProperty-OptionalProperty-Trace-TraceSoftwareTrace>False</DebuggerProperty-OptionalProperty-Trace-TraceSoftwareTrace>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBCP>True</DebuggerProperty-OptionalProperty-Trace-TraceDBCP>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBTAG>True</DebuggerProperty-OptionalProperty-Trace-TraceDBTAG>
+      <DebuggerProperty-OptionalProperty-Trace-TracePCOfDBTAG>True</DebuggerProperty-OptionalProperty-Trace-TracePCOfDBTAG>
+      <DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>
+      <DebuggerProperty-OptionalProperty-Trace-TracePCOfDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TracePCOfDBPUSH>
+      <DebuggerProperty-OptionalProperty-Trace-TracePriority>SpeedPriority</DebuggerProperty-OptionalProperty-Trace-TracePriority>
+      <DebuggerProperty-OptionalProperty-Trace-TraceRange>RangeIn</DebuggerProperty-OptionalProperty-Trace-TraceRange>
+      <DebuggerProperty-OptionalProperty-PinMask-WaitMask>No</DebuggerProperty-OptionalProperty-PinMask-WaitMask>
+      <DebuggerProperty-OptionalProperty-PinMask-ResetMask>No</DebuggerProperty-OptionalProperty-PinMask-ResetMask>
+      <DebuggerProperty-OptionalProperty-PinMask-ResetMaskSelect>TargetAndInternal</DebuggerProperty-OptionalProperty-PinMask-ResetMaskSelect>
+      <DebuggerProperty-OptionalProperty-PinMask-PWRGDMask>True</DebuggerProperty-OptionalProperty-PinMask-PWRGDMask>
+      <DebuggerProperty-OptionalProperty-Assemble-DisplaySymbol>SymbolOffset</DebuggerProperty-OptionalProperty-Assemble-DisplaySymbol>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-Length>4</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-Length>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-StartAddress>33554432</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-EndAddress>34603007</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem0-AccessSize>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-StartAddress>37748736</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-EndAddress>38797311</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem1-AccessSize>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-StartAddress>41943040</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-EndAddress>42991615</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem2-AccessSize>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-MapType>External</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-MapType>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-StartAddress>50331648</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-StartAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-EndAddress>51380223</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-EndAddress>
+      <DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-AccessSize>16</DebuggerProperty-OptionalProperty-Memory-MemoryMappings-MemoryMapItem3-AccessSize>
+      <DebuggerProperty-OptionalProperty-Step-SectionSkipStep>False</DebuggerProperty-OptionalProperty-Step-SectionSkipStep>
+      <DebuggerProperty-OptionalProperty-Step-SelectSectionList-Length>0</DebuggerProperty-OptionalProperty-Step-SelectSectionList-Length>
+      <DebuggerProperty-ExtraAreaProperty-ExtraArea-ExtraInformation-OptionByte0>4196925391</DebuggerProperty-ExtraAreaProperty-ExtraArea-ExtraInformation-OptionByte0>
+      <DebuggerProperty-HookProperty-HookTransaction-Downloading-Length>0</DebuggerProperty-HookProperty-HookTransaction-Downloading-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Downloaded-Length>0</DebuggerProperty-HookProperty-HookTransaction-Downloaded-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Reset-Length>0</DebuggerProperty-HookProperty-HookTransaction-Reset-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Going-Length>0</DebuggerProperty-HookProperty-HookTransaction-Going-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Broke-Length>0</DebuggerProperty-HookProperty-HookTransaction-Broke-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
+      <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
+      <Debugger-DebugTarget-ProcessorElementNumber>1</Debugger-DebugTarget-ProcessorElementNumber>
+      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
     </Instance>
   </Class>
   <Class Guid="100f3761-3d7e-4559-b1d8-375a0c7bf682">
@@ -1230,6 +1554,17 @@ Driver\Inc
       <ChannelColor14>c0317f0c</ChannelColor14>
       <ChannelColor15>c060493e</ChannelColor15>
       <ChannelColor16>c072808e</ChannelColor16>
+    </Instance>
+  </Class>
+  <Class Guid="08dbcb1a-af14-4bd0-9bd6-b8e875384f4f">
+    <Instance Guid="bd16e4b5-bf8f-47ba-813b-c8ddd962bded">
+      <UseApplyAddress>False</UseApplyAddress>
+      <ApplyAddress />
+    </Instance>
+  </Class>
+  <Class Guid="2a2c2a43-ecdb-4e88-80bd-e75f3e33db90">
+    <Instance Guid="2a2c2a43-ecdb-4e88-80bd-e75f3e33db90">
+      <ProductVersion>8.00.00.00</ProductVersion>
     </Instance>
   </Class>
 </CubeSuiteProject>

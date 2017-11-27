@@ -30,8 +30,8 @@ void Board_MCU_Init(void)
 void System_Clock_Config(void)
 {
 
-    while(Clock_ROSC_Get_Status() == OSC_INACTIVE)
-    {
-
-    }
+    while(Clock_ROSC_Get_Status() == OSC_INACTIVE); //HI IntOSC is not actived,just loop
+    //while(Clock_ROSC_Get_Status() == OSC_ACTIVED);//Just for test,del later
+    //HI Int OSc is actived
+    Clock_MOSC_Config(MOSC_ENABLE);
 }

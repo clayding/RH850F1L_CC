@@ -13,4 +13,9 @@
 void main(void)
 {
     Board_MCU_Init();
+
+    while(1)
+    {
+        //LOOP
+    }
 }
