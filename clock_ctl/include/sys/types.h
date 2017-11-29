@@ -32,7 +32,7 @@ typedef int bool;
 #include <stddef.h>
 #include <limits.h>
 #include <stdint.h>
-
+/*
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
@@ -58,6 +58,7 @@ typedef int kobj_id;
 
 typedef unsigned long time_t;
 typedef unsigned long long bigtime_t;
+*/
 #define INFINITE_TIME ULONG_MAX
 
 #define TIME_GTE(a, b) ((long)((a) - (b)) >= 0)

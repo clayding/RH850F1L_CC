@@ -12,17 +12,16 @@
 
 #include "rh850f1l.h"
 
- #define ROSCCLK_FREQUENCY   (8*1024*1024) //Hi IntOSC frequency8MHz
 
 typedef enum {
-    MOSC_DISABLE,
-    MOSC_ENABLE = !MOSC_DISABLE,
-}MOSC_OPT_Type;
+    OSC_DISABLE,
+    OSC_ENABLE = !OSC_DISABLE,
+}OSC_OPT_Type;
 
 typedef enum {
     OSC_INACTIVE,
     OSC_ACTIVED = !OSC_INACTIVE,
-}MOSC_STATUS_Type,ROSCSTATUS_Type;
+}OSC_STATUS_Type;
 
 typedef enum {
     MOSC_AMP_HIGH,      //00b,20 MHz < fX ≤ 24 MHz
@@ -31,8 +30,31 @@ typedef enum {
     MOSC_AMP_LOW,       //11b,8 MHz
 }MOSC_AMP_GAIN_Type;
 
+typedef enum {
+    M_OSC_TYPE,//Main OSC
+    R_OSC_TYPE,//HI Int OSC
+    PLL_TYPE,//PLL
+}X_OSC_Type;
 
+typedef enum { //Domain Clock
+    CPUCLK,
+    IPERI1,
+    IPERI2,
+}DOMAIN_CLK_Type;
 
-void Clock_MOSC_Config(MOSC_OPT_Type opt);
+typedef enum { //return after Setting CLock Domain 
+    SET_SRC_CLK_FAIL,
+    SET_CLK_DIVIDER_FAIL = SET_SRC_CLK_FAIL,
+    SET_CLK_DOMAIN_SUCCESS,
+}SET_CLK_DOMAIN_RET_Type;
+
+typedef struct {
+    uint32_t src_clk_ctl_val;
+    uint32_t clk_divider_val;
+}SET_CLK_DOMAIN_Struct;
+
+void Clock_MOSC_Config(OSC_OPT_Type opt);
+OSC_STATUS_Type Clock_OSC_Get_Status(X_OSC_Type otp);
+void Clock_PLL_Config(OSC_OPT_Type opt);
 
 #endif //RH850F1L_CLK_H
