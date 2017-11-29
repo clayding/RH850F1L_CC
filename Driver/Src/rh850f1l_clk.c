@@ -46,7 +46,21 @@
 #define PLLC_PAR            4 //60 MHz to 80 MHz
 #define PLLC_NR             40
 
-/*Clock Selector registers mask*/
+/*Clock Selector registers mask or value*/
+#define CPUCLK_SRC_EMCLK    ((uint32_t)0x01) //01B: EMCLK (default)
+#define CPUCLK_SRC_MOSC     ((uint32_t)0x02) //10B: MainOSC
+#define CPUCLK_SRC_CPLLCLK  ((uint32_t)0x03) //11B: CPLLCLK
+
+#define CPUCLK_CTL_DIVI_1   ((uint32_t)0x01) //001B: CKSC_CPUCLKS_CTL selection /1 (Default)
+#define CPUCLK_CTL_DIVI_2   ((uint32_t)0x02) //010B: CKSC_CPUCLKS_CTL selection /2
+#define CPUCLK_CTL_DIVI_4   ((uint32_t)0x03) //011B: CKSC_CPUCLKS_CTL selection /4
+#define CPUCLK_CTL_DIVI_8   ((uint32_t)0x04) //100B: CKSC_CPUCLKS_CTL selection /8
+
+#define IPERI1_SRC_CPUCLK2  ((uint32_t)0x01) //01B: CPUCLK2 (default)
+#define IPERI1_SRC_PPLLCLK  ((uint32_t)0x02) //10B: PPLLCLK
+
+#define IPERI2_SRC_CPUCLK2  ((uint32_t)0x01) //01B: CPUCLK2 (default)
+#define IPERI2_SRC_PPLLCLK  ((uint32_t)0x02) //10B: PPLLCLK2
 
 #define CPUCLKS_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
 #define CPUCLKS_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask
@@ -213,14 +227,14 @@ SET_CLK_DOMAIN_RET_Type C_ISO_CPUCLK_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     WP_Opt_Reg *ptr = wp_reg_ptr; 
     SET_CLK_DOMAIN_Struct val_;
     /*Step 1 Set up a source clock*/
-    val_.src_clk_ctl_val = 0x02;//Source Clock Setting for C_ISO_CPUCLK is MainOSC
+    val_.src_clk_ctl_val = CPUCLK_SRC_CPLLCLK;//Source Clock Setting for C_ISO_CPUCLK
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,CPUCLK,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(CPUCLK,S_CTL_MASK))) != ERROR);//Select a source clock
     if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,CPUCLK,S_ACT) & STR_CONCAT2(CPUCLK,S_ACT_MASK))) { //Confirm completion of selection
         return SET_SRC_CLK_FAIL;
     }
     /*Step 2 Set up a clock divider*/
-    val_.clk_divider_val = 0x01;//CKSC_CPUCLKS_CTL selection /1 (Default)
+    val_.clk_divider_val = CPUCLK_CTL_DIVI_1;//CKSC_CPUCLKS_CTL selection /1 (Default)
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,CPUCLK,D_CTL);
     while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(CPUCLK,D_CTL_MASK))) != ERROR);//Select a clock divider
 
@@ -236,7 +250,7 @@ SET_CLK_DOMAIN_RET_Type C_ISO_IPERI1_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     WP_Opt_Reg *ptr = wp_reg_ptr;
     SET_CLK_DOMAIN_Struct val_;
     /*Source Clock Setting for C_ISO_PERI1*/
-    val_.src_clk_ctl_val = 0x01;//Source Clock Setting for C_ISO_CPUCLK is CPUCLK2
+    val_.src_clk_ctl_val = IPERI1_SRC_PPLLCLK;//Source Clock Setting for C_ISO_CPUCLK
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,IPERI1,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(IPERI1,S_CTL_MASK))) != ERROR);//Select a source clock
     if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,IPERI1,S_ACT) & STR_CONCAT2(IPERI1,S_ACT_MASK))) { //Confirm completion of selection
@@ -251,7 +265,7 @@ SET_CLK_DOMAIN_RET_Type C_ISO_IPERI2_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     WP_Opt_Reg *ptr = wp_reg_ptr;
     SET_CLK_DOMAIN_Struct val_;
     /*Source Clock Setting for C_ISO_PERI2*/
-    val_.src_clk_ctl_val = 0x01;//Source Clock Setting for C_ISO_CPUCLK is CPUCLK2
+    val_.src_clk_ctl_val = IPERI2_SRC_PPLLCLK;//Source Clock Setting for C_ISO_CPUCLK
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,IPERI2,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(IPERI2,S_CTL_MASK))) != ERROR);//Select a source clock
     if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,IPERI2,S_ACT) & STR_CONCAT2(IPERI2,S_ACT_MASK))) { //Confirm completion of selection
