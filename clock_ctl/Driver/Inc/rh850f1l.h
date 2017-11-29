@@ -84,9 +84,9 @@ typedef enum
 
 #define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
 
-#define _STR_CONCAT2(s1)      s1
-#define STR_CONCAT2(s1,s2)    (_STR_CONCAT2()##s2)
-#define _STR_CONCAT3(s2)      s2
-//#define STR_CONCAT3(s1,s2,s3) (s1##_STR_CONCAT3(s2)##s3)
+#define STR_CONCAT2(s1,s2)    (s1##s2)
+
 #define STR_CONCAT3(s1,s2,s3) (s1##s2##s3)
+
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 #endif //RH850F1L_H

@@ -37,15 +37,16 @@ typedef enum {
 }X_OSC_Type;
 
 typedef enum { //Domain Clock
-    CPUCLK,
-    IPERI1,
-    IPERI2,
+    AWDTA,ATAUJ,ARTCA,AADCA,AFOUT,//AWO_Domain
+    CPUCLK,IPERI1,IPERI2,ILIN,IADCA,ICAN,ICANOSC,ICSI,//ISO Domain
+    DOMAIN_CLK_TYPE_MAX,
 }DOMAIN_CLK_Type;
 
 typedef enum { //return after Setting CLock Domain 
     SET_SRC_CLK_FAIL,
     SET_CLK_DIVIDER_FAIL = SET_SRC_CLK_FAIL,
     SET_CLK_DOMAIN_SUCCESS,
+    SET_OTHER_FAIL,
 }SET_CLK_DOMAIN_RET_Type;
 
 typedef struct {
