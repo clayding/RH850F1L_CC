@@ -16,60 +16,6 @@
 #include "rh850f1l_clk.h"
 #include "rh850f1l_wp.h"
 
-/*Clock Oscillator registers mask or value*/
-#define ROSCCLKACT_MASK     ((uint32_t)(0x01 << 2))
-#define ROSCCLK_FREQUENCY   (8*1024*1024) //Hi IntOSC frequency8MHz
-
-#define MOSCENTRG_MASK      ((uint32_t)(0x01))
-#define MOSCDISTRG_MASK     ((uint32_t)(0x01 << 1))
-#define MOSCCLKACT_MASK     ((uint32_t)(0x01 << 2))
-#define MOSCAMPSEL_MASK     ((uint32_t)(0x03))
-#define MOSCCLKST_MASK      ((uint32_t)0x0FFFF)
-#define STABLIZATION_TIME   (2*ROSCCLK_FREQUENCY/1000) //when HI OSC actived,about 2ms
-
-#define PLLENTRG_MASK       ((uint32_t)0x01 << 0)
-#define PLLDISTRG_MASK      ((uint32_t)0x01 << 1)
-#define PLLCLKACT_MASK      ((uint32_t)0x01 << 2)
-
-#define PLLC_OUTBSEL_OFFSET 16
-#define PLLC_OUTBSEL_MASK   ((uint32_t)0x01 << PLLC_OUTBSEL_OFFSET) //bit 16
-#define PLLC_M_BITOFFSET    11
-#define PLLC_M_MASK         ((uint32_t)0x03 << PLLC_M_BITOFFSET) //bit 12,11
-#define PLLC_PA_BITOFFSET   8
-#define PLLC_PA_MASK        ((uint32_t)0x07 << PLLC_PA_BITOFFSET)  //bit 10,9,8
-#define PLLC_N_BITOFFSET    0
-#define PLLC_N_MASK         ((uint32_t)0x3F << PLLC_N_BITOFFSET)  //bit 5,4,3,2,1,0
-#define PLLC_MASK           (PLLC_OUTBSEL_MASK | PLLC_M_MASK| PLLC_PA_MASK | PLLC_N_MASK)
-/*MainOSC 16MHz outsel =0 ,Mr = 2 -- > M Bit[12:11] = 01,pa = 4,Nr = 40 --> N Bit[5:0] = 10 0111*/ 
-#define PLLC_OUTBSEL        0
-#define PLLC_MR             2 //16 MHz ≤ fX ≤ 24 MHz
-#define PLLC_PAR            4 //60 MHz to 80 MHz
-#define PLLC_NR             40
-
-/*Clock Selector registers mask or value*/
-#define CPUCLK_SRC_EMCLK    ((uint32_t)0x01) //01B: EMCLK (default)
-#define CPUCLK_SRC_MOSC     ((uint32_t)0x02) //10B: MainOSC
-#define CPUCLK_SRC_CPLLCLK  ((uint32_t)0x03) //11B: CPLLCLK
-
-#define CPUCLK_CTL_DIVI_1   ((uint32_t)0x01) //001B: CKSC_CPUCLKS_CTL selection /1 (Default)
-#define CPUCLK_CTL_DIVI_2   ((uint32_t)0x02) //010B: CKSC_CPUCLKS_CTL selection /2
-#define CPUCLK_CTL_DIVI_4   ((uint32_t)0x03) //011B: CKSC_CPUCLKS_CTL selection /4
-#define CPUCLK_CTL_DIVI_8   ((uint32_t)0x04) //100B: CKSC_CPUCLKS_CTL selection /8
-
-#define IPERI1_SRC_CPUCLK2  ((uint32_t)0x01) //01B: CPUCLK2 (default)
-#define IPERI1_SRC_PPLLCLK  ((uint32_t)0x02) //10B: PPLLCLK
-
-#define IPERI2_SRC_CPUCLK2  ((uint32_t)0x01) //01B: CPUCLK2 (default)
-#define IPERI2_SRC_PPLLCLK  ((uint32_t)0x02) //10B: PPLLCLK2
-
-#define CPUCLKS_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
-#define CPUCLKS_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask
-#define CPUCLKD_CTL_MASK    ((uint32_t)0x07) //CKSC_CPUCLKD_CTL Bit Mask
-#define CPUCLKD_ACT_MASK    ((uint32_t)0x07) //CKSC_CPUCLKD_ACT Bit Mask
-#define IPERI1S_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
-#define IPERI1S_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask
-#define IPERI2S_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
-#define IPERI2S_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask
 
 
 #define __OSCE_CLK_ENABLE(wp_reg,mask) do{ \
@@ -96,6 +42,14 @@ set the PLL output clock frequencies fPPLLCLK and fCPLLCLK*/
                                         MOSCST = tmp_val; \
                                     }while(0)
 
+#define __SET_FOUTDIV_RATIO(value)  do { \
+                                        uint32_t tmp_val; \
+                                        tmp_val = value & FOUT_DIV_MASK; \
+                                        FOUTDIV = tmp_val;\
+                                    }while(0)
+
+#define __GET_FOUTDIV_STATUS()      (FOUTSTAT & (FOUTSYNC_MASK | FOUTCLKACT_MASK))
+
 typedef struct{
     DOMAIN_CLK_Type index;
     SET_CLK_DOMAIN_RET_Type (*Domain_Set_Func)(WP_Opt_Reg*);
@@ -103,12 +57,16 @@ typedef struct{
 
 #define SET_DOMAIN_ISO_FUNC_DECLARE(index) static SET_CLK_DOMAIN_RET_Type \
                                             C_ISO_##index##_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+#define SET_DOMAIN_AWO_FUNC_DECLARE(index) static SET_CLK_DOMAIN_RET_Type \
+                                            C_AWO_##index##_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 
+SET_DOMAIN_AWO_FUNC_DECLARE(AFOUT);
 SET_DOMAIN_ISO_FUNC_DECLARE(CPUCLK);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI1);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI2);
 
 DOMAIN_SET_Ref dsf[] = {
+    {AFOUT, C_AWO_AFOUT_Domain_Set},
     {CPUCLK,C_ISO_CPUCLK_Domain_Set},
     {IPERI1,C_ISO_IPERI1_Domain_Set},
     {IPERI2,C_ISO_IPERI2_Domain_Set},
@@ -269,6 +227,37 @@ SET_CLK_DOMAIN_RET_Type C_ISO_IPERI2_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,IPERI2,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(IPERI2,S_CTL_MASK))) != ERROR);//Select a source clock
     if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,IPERI2,S_ACT) & STR_CONCAT2(IPERI2,S_ACT_MASK))) { //Confirm completion of selection
+        return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+
+}
+
+void Clock_Fout_Config(void)
+{
+    uint32_t mask = 0,flag = FOUTCLKACT_MASK ;//| FOUTSYNC_MASK;
+
+    __SET_FOUTDIV_RATIO(0x01);//set the clock division ratio to 1
+
+    mask = __GET_FOUTDIV_STATUS();
+
+    while((mask & flag) != flag) {
+        //Frequency output is stopped or
+        //The clock divider is in the process of synchronization
+    }
+
+
+}
+
+SET_CLK_DOMAIN_RET_Type C_AWO_AFOUT_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Source Clock Setting for C_ISO_PERI2*/
+    val_.src_clk_ctl_val = AFOUT_SRC_MOSC;//Source Clock Setting for C_AWO_FOUT
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AFOUT,S_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(AFOUT,S_CTL_MASK))) != ERROR);//Select a source clock
+    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,AFOUT,S_ACT) & STR_CONCAT2(AFOUT,S_ACT_MASK))) { //Confirm completion of selection
         return SET_SRC_CLK_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;

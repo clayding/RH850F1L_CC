@@ -38,5 +38,7 @@ void System_Clock_Config(void)
     Clock_Domain_Set(CPUCLK);//set clock domain for cpuclk
     Clock_Domain_Set(IPERI1);//set clock domain for iperi1
     Clock_Domain_Set(IPERI2);//set clock domain for iperi2
+    //Clock_Domain_Set(AFOUT);
+    //Clock_Fout_Config();
       
 }
