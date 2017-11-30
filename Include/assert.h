@@ -25,6 +25,7 @@
 
 #include <compiler.h>
 #include <debug.h>
+#include <stdint.h>
 
 #define ASSERT(x) \
 	do { if (unlikely(!(x))) { panic("ASSERT FAILED at (%s:%d): %s\n", __FILE__, __LINE__, #x); } } while (0)
@@ -36,5 +37,16 @@
 #define DEBUG_ASSERT(x) \
 	do { } while(0)
 #endif
+
+#define ASSERT_EN 1
+
+#if ASSERT_EN
+#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t*)__FILE__, __LINE__))
+#else
+#define assert_param(expr) \
+	do {} while(0)
+#endif
+
+void assert_failed(uint8_t* file, uint32_t line);
 
 #endif
