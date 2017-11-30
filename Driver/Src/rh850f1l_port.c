@@ -245,7 +245,7 @@ void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_T
 }
 
 /**
-  * @brief  Reads the specified output data port bit.
+  * @brief  Reads the specified data port bit.
   * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
   * @param  mask_bit:  specifies the port bit to read.
   *   This parameter can be PORT_PIN_x where x can be (0..15).
@@ -272,7 +272,7 @@ uint8_t Port_Read_Data_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
 }
 
 /**
-  * @brief  Reads the specified Port output data port.
+  * @brief  Reads the specified Port data port.
   * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
   * @retval Port output data port value.
   */
@@ -284,3 +284,91 @@ uint16_t Port_Read_Data(Port_Group_Index_Type portx)
 #endif
   return ((uint16_t)REG(PPR,portx));
 }
+
+
+/**
+  * @brief  Reads the specified output data port bit.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @param  mask_bit:  specifies the port bit to read.
+  *   This parameter can be PORT_PIN_x where x can be (0..15).
+  * @retval The output port pin value.
+  */
+uint8_t Port_Read_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
+{
+  uint8_t bitstatus = 0x00;
+
+#if ASSERT_EN
+  assert_param(IS_Port_Group(portx));
+  assert_param(IS_Port_Pin(mask_bit));
+#endif
+
+  if ((REG(P,portx) & mask_bit) != (uint32_t)Bit_RESET)
+  {
+    bitstatus = (uint8_t)Bit_SET;//Outputs low level
+  }
+  else
+  {
+    bitstatus = (uint8_t)Bit_RESET;//Outputs low level
+  }
+  return bitstatus;
+}
+
+/**
+  * @brief  Reads the specified Port output data port.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @retval Port output data port value.
+  */
+uint16_t Port_Read_OutputData(Port_Group_Index_Type portx)
+{
+#if ASSERT_EN
+  /* Check the parameters */
+  assert_param(IS_Port_Group(portx));
+#endif
+  return ((uint16_t)REG(P,portx));
+}
+
+/**
+  * @brief  Write the specified data to output  port bit.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @param  mask_bit:  specifies the port bit to read.
+  *   This parameter can be PORT_PIN_x where x can be (0..15).
+  * @retval The output port pin value.
+  */
+uint8_t Port_Write_OutputData_Bit(Port_Group_Index_Type portx,  uint16_t mask_bit,BitAction bit_val)
+{
+
+#if ASSERT_EN
+  assert_param(IS_Port_Group(portx));
+  assert_param(IS_Port_Pin(mask_bit));
+#endif
+
+  if(bit_val != Bit_RESET){
+    SET_BIT(REG(P,portx),mask_bit);
+  }else{
+    CLEAR_BIT(REG(P,portx),mask_bit);
+  }
+
+}
+
+/**
+  * @brief  Write the specified data to output port..
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @retval Port output data port value.
+  */
+uint16_t Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data)
+{
+#if ASSERT_EN
+  /* Check the parameters */
+  assert_param(IS_Port_Group(portx));
+#endif
+  if(data ==(uint16_t)0x00){
+    CLEAR_REG(REG(P,portx));
+  }else{
+    WRITE_REG(REG(P,portx),data);
+  
+  }
+}
+
+/*Configuration of Electrical Characteristics*/
+
+

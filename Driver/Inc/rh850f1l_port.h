@@ -138,11 +138,16 @@ typedef enum{
   BIDIRECTION_MODE_ENABLED = !BIDIRECTION_MODE_DISABLED,
 }Bidirect_Mode_Ctl_Type;
 
-typedef enum
-{ Bit_RESET = 0,
+typedef enum{ 
+  Bit_RESET = 0,
   Bit_SET,
 }BitAction;
 
+typedef enum{
+  NO_PULL,
+  PULL_UP,
+  PULL_DOWN,
+}PULL_Type;
 
 
 #endif //RH850F1L_PORT_H
