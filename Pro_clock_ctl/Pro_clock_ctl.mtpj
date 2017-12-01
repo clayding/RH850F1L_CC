@@ -131,13 +131,6 @@
       <TreeImageGuid>03cad1e8-2eb3-4cde-a8a3-982423631122</TreeImageGuid>
       <ParentItem>1752980b-443e-4dd6-adf7-c059e38e7312</ParentItem>
     </Instance>
-    <Instance Guid="af8ba4d8-9e46-457e-bc54-e7b6e858c43b">
-      <Name>debug.h</Name>
-      <Type>File</Type>
-      <RelativePath>..\Include\debug.h</RelativePath>
-      <TreeImageGuid>03cad1e8-2eb3-4cde-a8a3-982423631122</TreeImageGuid>
-      <ParentItem>1752980b-443e-4dd6-adf7-c059e38e7312</ParentItem>
-    </Instance>
     <Instance Guid="2b8b0d9d-7dff-41d5-a62e-d11cdcb99baa">
       <Name>io.h</Name>
       <Type>File</Type>
@@ -939,10 +932,6 @@ Driver\Inc
     <Instance Guid="2b8b0d9d-7dff-41d5-a62e-d11cdcb99baa">
       <ItemAddTime>636475562556562037</ItemAddTime>
       <ItemAddTimeCount>5</ItemAddTimeCount>
-    </Instance>
-    <Instance Guid="af8ba4d8-9e46-457e-bc54-e7b6e858c43b">
-      <ItemAddTime>636475562556562037</ItemAddTime>
-      <ItemAddTimeCount>4</ItemAddTimeCount>
     </Instance>
     <Instance Guid="6e13b154-6d5a-4254-82de-36ab4f194404">
       <ItemAddTime>636475562556562037</ItemAddTime>

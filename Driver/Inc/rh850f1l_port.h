@@ -72,16 +72,11 @@
 
 typedef enum{
   PORT_MODE,     // Port mode
+
   SOFT_AF_MODE,  // software I/O control alternative mode
   DIRECT_AF_MODE,//direct I/O control alternative mode
-  Non_PORT_MODE,//not Port mode
   Non_AF_MODE = PORT_MODE,
 }PortOptMode_Type;
-
-typedef struct{
-  uint16_t port_pin;
-  PortOptMode_Type opt_mode;
-}Port_InitTypeDef;
 
 typedef enum{ //14
   PortGroupNum0,
@@ -144,10 +139,29 @@ typedef enum{
 }BitAction;
 
 typedef enum{
-  NO_PULL,
-  PULL_UP,
-  PULL_DOWN,
-}PULL_Type;
+  INPUT_NPU,//No internal pull-up resistor connected to an input pin
+  INPUT_PU, //An internal pull-up resistor connected to an input pin
+  INPUT_NPD,//No internal pull-down resistor connected to an input pin
+  INPUT_PD, //An internal pull-down resistor connected to an input pin
+  OUTPUT_PP,//Push-pull
+  OUPUT_OD, //Open-drain
+  OUTPUT_LDS,//Lower drive strength
+  OUTPUT_HDS,//High drive strength
+}Elect_Char_Type;
 
+typedef struct{
+  uint16_t pin_mask;//from 0x0001 to 0xFFFF
+  PortOptMode_Type opt_mode;//PORT_MODE,SOFT_AF_MODE,DIRECT_AF_MODE,Non_PORT_MODE,Non_AF_MODE,
+  uint8_t io_mode;//PORT_OUTPUT_MODE,PORT_INPUT_MODE
+  InputBuf_Ctl_Type ibc_t;//INPUT_BUF_ENABLED, INPUT_BUF_DISABLED,
+  Bidirect_Mode_Ctl_Type bmc_t;//BIDIRECTION_MODE_ENABLED, BIDIRECTION_MODE_DISABLED
+  Elect_Char_Type echar_t;//INPUT_NPU,INPUT_PU,INPUT_NPD,INPUT_PD,OUTPUT_PP,OUPUT_OD,OUTPUT_LDS,OUTPUT_HDS
+}Port_InitTypeDef;
+
+typedef enum{
+  PMC,PMCSR,PIPC,PM,PMSR,PIBC,PFC,PFCE,PFCA,
+};
+
+void Port_Mode_Ctl_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask_bit);
 
 #endif //RH850F1L_PORT_H
