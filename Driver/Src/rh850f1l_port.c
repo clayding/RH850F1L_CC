@@ -71,9 +71,9 @@ volatile uintptr_t* reg_arr_32[][10] ={
 #define __GET_TARGET_REG(tar_reg,reg_name,index)  do{ \
                                                     uint8_t arr_index = reg_group_arr[index]; \
                                                     if(reg_name >= PMCSR_TYPE) \
-                                                      tar_reg = *(reg_arr_32[reg_name - PMCSR_TYPE][arr_index]); \
+                                                      tar_reg = reg_arr_32[reg_name - PMCSR_TYPE][arr_index]; \
                                                     else \
-                                                      tar_reg = *(reg_arr_16[reg_name][arr_index]); \
+                                                      tar_reg = reg_arr_16[reg_name][arr_index]; \
                                                   }while(0)
 
 
@@ -81,20 +81,17 @@ volatile uintptr_t* reg_arr_32[][10] ={
 void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
 {
   volatile uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = 0x00;
-  volatile uint16_t target_reg = 0,arr_index = 0;
 
   last_bit = Port_InitStruct->pin_mask;
-  for(pinpos = 0x00;pinpos < 0x0F && last_bit;pinpos++){//find which bits of the pin to be set,max 15
+  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
    /*Get the pin mask bit position,make sure make_bit  is valid*/
-    mask_bit = READ_BIT(Port_InitStruct->pin_mask, bitpos);
-    last_bit = last_bit >> 1;
+    mask_bit = READ_BIT(&Port_InitStruct->pin_mask, bitpos);
+
     if(mask_bit == 0) //Invalid ,next loop
       continue;
-    
-    arr_index = reg_group_arr[portx]; 
-    target_reg = *((volatile uint16_t*)reg_arr_16[7][5]);
+
     /*Port initialization:Set the initial port values.(The port is set to input mode
      *and the input buffer is disabled.)*/
     Port_Bidirection_Ctl_Bit_Config(portx,BIDIRECTION_MODE_ENABLED,mask_bit);
@@ -139,7 +136,7 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
 void Port_Mode_Ctl_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask_bit)
 {
   uint16_t bitpos = mask_bit,current_bit = 0x00;
-  uintptr_t target_reg = 0;
+  uint16_t* target_reg = NULL;//address of target register
 
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
@@ -163,13 +160,13 @@ void Port_Mode_Ctl_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_m
  */
 void Port_Mode_Ctl_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask)
 {
-  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00;
+  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F;pinpos++){//find which bits of the pin to be set,max 15
+  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
-    mask_bit = READ_BIT(mask, bitpos);
+    mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
       if(opt_mode == PORT_MODE){
@@ -213,7 +210,7 @@ void Port_Mode_Ctl_Reset()
 void Port_IP_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask_bit)
 {
   uint16_t bitpos = mask_bit,current_bit = 0x00;
-  uintptr_t target_reg  = 0;
+  uint16_t *target_reg  = NULL;
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
   //assset_param(IS_Port_Group(portx));
@@ -236,13 +233,13 @@ void Port_IP_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,ui
  */
 void Port_IP_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask)
 {
-  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00;
+  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F;pinpos++){//find which bits of the pin to be set,max 15
+  for (pinpos = 0x00; pinpos < 0x0F && (last_bit >> pinpos); pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
-    mask_bit = READ_BIT(mask, bitpos);
+    mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
       if(opt_mode == SOFT_AF_MODE){
@@ -257,7 +254,7 @@ void Port_IP_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16
 void Port_IO_Mode_Bit_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t mask_bit)
 {
   uint16_t bitpos = mask_bit,current_bit = 0x00;
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
@@ -276,13 +273,13 @@ void Port_IO_Mode_Bit_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16
 
 void Port_IO_Mode_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t mask)
 {
-  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00;
+  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F;pinpos++){//find which bits of the pin to be set,max 15
+  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
-    mask_bit = READ_BIT(mask, bitpos);
+    mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
       Port_IP_Bit_Config(portx,io_mode,mask_bit);
@@ -293,7 +290,7 @@ void Port_IO_Mode_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t m
 void Port_InputBuf_Ctl_Bit_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_t,uint16_t mask_bit)
 {
   uint16_t bitpos = mask_bit,current_bit = 0x00;
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
   uint8_t addr_index = 0;
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
@@ -311,13 +308,13 @@ void Port_InputBuf_Ctl_Bit_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type 
 
 void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_t,uint16_t mask)
 {
-  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00;
+  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F;pinpos++){//find which bits of the pin to be set,max 15
+  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
-    mask_bit = READ_BIT(mask, bitpos);
+    mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
         Port_IP_Bit_Config(portx,ibc_t,mask_bit);
@@ -330,19 +327,15 @@ void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_
 void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_Type bmc_t,uint16_t mask_bit)
 {
   volatile uint16_t bitpos = mask_bit,current_bit = 0x00;
-  volatile uint16_t* target_reg = 0;
+  volatile uint16_t *target_reg = NULL;
   volatile uint8_t arr_index;
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
 #endif
 
-  //__GET_TARGET_REG(target_reg,PBDC_TYPE,portx);
+  __GET_TARGET_REG(target_reg,PBDC_TYPE,portx);
 
-  arr_index = reg_group_arr[portx]; 
-  target_reg = ((volatile uint16_t*)reg_arr_16[PBDC_TYPE][arr_index]);
-  //SET_BIT(*target_reg,0x01 << 3);
-  *target_reg = 0x01 <<3;
-#if 0
+
   /*获取当前bitpos的置位信息*/
   current_bit = READ_BIT(target_reg,bitpos);
 
@@ -350,18 +343,17 @@ void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx,Bidirect_Mode_C
     SET_BIT(target_reg,bitpos);
   if(current_bit != 0x00 && bmc_t == BIDIRECTION_MODE_DISABLED)//PBDCCn_m需要被清零
     CLEAR_BIT(target_reg,bitpos);
-#endif
 }
 
 void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_Type bmc_t,uint16_t mask)
 {
-  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00;
+  uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F;pinpos++){//find which bits of the pin to be set,max 15
+  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
-    mask_bit = READ_BIT(mask, bitpos);
+    mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
       Port_IP_Bit_Config(portx,bmc_t,mask_bit);
@@ -379,7 +371,7 @@ void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_T
 uint8_t Port_Read_Data_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
 {
   uint8_t bitstatus = 0x00;
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 #if ASSERT_EN
   //assert_param(IS_Port_Group(portx));
   assert_param(IS_Port_Pin(mask_bit));
@@ -387,7 +379,7 @@ uint8_t Port_Read_Data_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
 
   __GET_TARGET_REG(target_reg,PPR_TYPE,portx);
 
-  if ((target_reg & mask_bit) != (uint32_t)Bit_RESET){
+  if (READ_BIT(target_reg, mask_bit) != (uint32_t)Bit_RESET){
     bitstatus = (uint8_t)Bit_SET;
   }else{
     bitstatus = (uint8_t)Bit_RESET;
@@ -402,14 +394,14 @@ uint8_t Port_Read_Data_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
   */
 uint16_t Port_Read_Data(Port_Group_Index_Type portx)
 {
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 #if ASSERT_EN
   /* Check the parameters */
   //assert_param(IS_Port_Group(portx));
 #endif
   __GET_TARGET_REG(target_reg,PPR_TYPE,portx);
 
-  return (uint16_t)target_reg;
+  return READ_REG(target_reg);
 }
 
 
@@ -423,7 +415,7 @@ uint16_t Port_Read_Data(Port_Group_Index_Type portx)
 uint8_t Port_Read_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
 {
   uint8_t bitstatus = 0x00;
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 #if ASSERT_EN
   //assert_param(IS_Port_Group(portx));
   assert_param(IS_Port_Pin(mask_bit));
@@ -431,7 +423,7 @@ uint8_t Port_Read_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
 
   __GET_TARGET_REG(target_reg,P_TYPE,portx);
 
-  if ((target_reg & mask_bit) != (uint32_t)Bit_RESET){
+  if (READ_BIT(target_reg,mask_bit) != (uint32_t)Bit_RESET){
     bitstatus = (uint8_t)Bit_SET;//Outputs low level
   }else{
     bitstatus = (uint8_t)Bit_RESET;//Outputs low level
@@ -446,14 +438,14 @@ uint8_t Port_Read_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
   */
 uint16_t Port_Read_OutputData(Port_Group_Index_Type portx)
 {
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 #if ASSERT_EN
   /* Check the parameters */
   assert_param(IS_Port_Group(portx));
 #endif
   __GET_TARGET_REG(target_reg,P_TYPE,portx);
 
-  return (uint16_t)target_reg;
+  return READ_REG(target_reg);
 }
 
 /**
@@ -465,7 +457,7 @@ uint16_t Port_Read_OutputData(Port_Group_Index_Type portx)
   */
 void Port_Write_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit,BitAction bit_val)
 {
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 
 #if ASSERT_EN
   assert_param(IS_Port_Group(portx));
@@ -488,7 +480,7 @@ void Port_Write_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit,Bi
   */
 void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data)
 {
-  uintptr_t target_reg = 0;
+  uint16_t *target_reg = NULL;
 #if ASSERT_EN
   /* Check the parameters */
   assert_param(IS_Port_Group(portx));
@@ -508,8 +500,8 @@ void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data)
 void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,uint16_t mask_bit)
 {
   uint16_t bitpos = mask_bit,current_bit = 0x00;
-  uint16_t target_reg = 0;
-  uintptr_t target_reg_32 = 0;
+  uint16_t *target_reg = NULL;
+  uintptr_t *target_reg_32 = NULL;
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
 #endif
