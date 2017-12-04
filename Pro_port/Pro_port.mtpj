@@ -1336,20 +1336,21 @@
       <DebuggerProperty-EssentialProperty-Flash-IdCode-Code14>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code14>
       <DebuggerProperty-EssentialProperty-Flash-IdCode-Code15>255</DebuggerProperty-EssentialProperty-Flash-IdCode-Code15>
       <DebuggerProperty-EssentialProperty-Clock-MountMainClock>True</DebuggerProperty-EssentialProperty-Clock-MountMainClock>
-      <DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>10000</DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>
+      <DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>16000</DebuggerProperty-EssentialProperty-Clock-MainClockGeneration>
       <DebuggerProperty-EssentialProperty-Clock-CpuClock-CpuClockInformation1-CpuClockGeneration>80000</DebuggerProperty-EssentialProperty-Clock-CpuClock-CpuClockInformation1-CpuClockGeneration>
       <DebuggerProperty-EssentialProperty-TargetConnect-LpdMode>Four</DebuggerProperty-EssentialProperty-TargetConnect-LpdMode>
       <DebuggerProperty-EssentialProperty-TargetConnect-Baudrate>500</DebuggerProperty-EssentialProperty-TargetConnect-Baudrate>
       <DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>4294967295</DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>
-      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>No</DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>
-      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>Use3_3V</DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>
-      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
+      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>Yes</DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>
+      <DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>Use5_0V</DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>
       <DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>Yes</DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>
       <DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>No</DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>
       <DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>True</DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>
       <DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>False</DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>
       <DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>No</DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>
       <DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>Yes</DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>4276083200</DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>9728</DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>
       <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>1</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>
       <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DebuggerGuid />
       <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>
@@ -1375,9 +1376,9 @@
       <DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>No</DebuggerProperty-OptionalProperty-Register-UpdateDisplayInExecutionForPC>
       <DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>500</DebuggerProperty-OptionalProperty-Register-UpdateIntervalForPC>
       <DebuggerProperty-OptionalProperty-Memory-VerifyCheck>Yes</DebuggerProperty-OptionalProperty-Memory-VerifyCheck>
-      <DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>No</DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>
+      <DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-AccessDuringExecution>
       <DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>Yes</DebuggerProperty-OptionalProperty-AccessMemory-UpdateDisplayInExecution>
-      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>500</DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>
+      <DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>100</DebuggerProperty-OptionalProperty-AccessMemory-UpdateInterval>
       <DebuggerProperty-OptionalProperty-EventSetting-PermitToStopAndSetEvent>No</DebuggerProperty-OptionalProperty-EventSetting-PermitToStopAndSetEvent>
       <DebuggerProperty-OptionalProperty-ResetSetting-UseForceReset>False</DebuggerProperty-OptionalProperty-ResetSetting-UseForceReset>
       <DebuggerProperty-OptionalProperty-Break-UseSoftwareBreak>No</DebuggerProperty-OptionalProperty-Break-UseSoftwareBreak>
@@ -1396,7 +1397,7 @@
       <DebuggerProperty-OptionalProperty-Trace-TracePCOfDBTAG>True</DebuggerProperty-OptionalProperty-Trace-TracePCOfDBTAG>
       <DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TraceDBPUSH>
       <DebuggerProperty-OptionalProperty-Trace-TracePCOfDBPUSH>True</DebuggerProperty-OptionalProperty-Trace-TracePCOfDBPUSH>
-      <DebuggerProperty-OptionalProperty-Trace-TracePriority>SpeedPriority</DebuggerProperty-OptionalProperty-Trace-TracePriority>
+      <DebuggerProperty-OptionalProperty-Trace-TracePriority>TracePriority</DebuggerProperty-OptionalProperty-Trace-TracePriority>
       <DebuggerProperty-OptionalProperty-Trace-TraceRange>RangeIn</DebuggerProperty-OptionalProperty-Trace-TraceRange>
       <DebuggerProperty-OptionalProperty-PinMask-WaitMask>No</DebuggerProperty-OptionalProperty-PinMask-WaitMask>
       <DebuggerProperty-OptionalProperty-PinMask-ResetMask>No</DebuggerProperty-OptionalProperty-PinMask-ResetMask>
@@ -1431,6 +1432,7 @@
       <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
       <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
       <Debugger-DebugTarget-ProcessorElementNumber>1</Debugger-DebugTarget-ProcessorElementNumber>
+      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
     </Instance>
   </Class>
   <Class Guid="100f3761-3d7e-4559-b1d8-375a0c7bf682">
@@ -1568,6 +1570,12 @@
       <ChannelColor14>c0317f0c</ChannelColor14>
       <ChannelColor15>c060493e</ChannelColor15>
       <ChannelColor16>c072808e</ChannelColor16>
+    </Instance>
+  </Class>
+  <Class Guid="08dbcb1a-af14-4bd0-9bd6-b8e875384f4f">
+    <Instance Guid="bd16e4b5-bf8f-47ba-813b-c8ddd962bded">
+      <UseApplyAddress>False</UseApplyAddress>
+      <ApplyAddress />
     </Instance>
   </Class>
   <Class Guid="2a2c2a43-ecdb-4e88-80bd-e75f3e33db90">

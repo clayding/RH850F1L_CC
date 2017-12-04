@@ -24,7 +24,7 @@
 #define __ASSERT_H
 
 #include <compiler.h>
-#include <debug.h>
+//#include <debug.h>
 #include <stdint.h>
 
 #define ASSERT(x) \
@@ -38,7 +38,7 @@
 	do { } while(0)
 #endif
 
-#define ASSERT_EN 1
+#define ASSERT_EN 0
 
 #if ASSERT_EN
 //#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t*)__FILE__, __LINE__))

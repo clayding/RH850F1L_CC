@@ -92,20 +92,20 @@ typedef enum{ //14
   JPortGroupNum0,APortGroupNum0,APortGroupNum1,IPortGroupNum0,
 }Port_Group_Index_Type;
 
-#define  PortGroup0 = ((uint32_t)0x01 << PortGroupNum0 )
-#define  PortGroup1 = ((uint32_t)0x01 << PortGroupNum1 )
-#define  PortGroup2 = ((uint32_t)0x01 << PortGroupNum2 )
-#define  PortGroup8 = ((uint32_t)0x01 << PortGroupNum8 )
-#define  PortGroup9 = ((uint32_t)0x01 << PortGroupNum9 )
-#define  PortGroup10= ((uint32_t)0x01 << PortGroupNum10 )
-#define  PortGroup11= ((uint32_t)0x01 << PortGroupNum11 )
-#define  PortGroup12= ((uint32_t)0x01 << PortGroupNum12 )
-#define  PortGroup18= ((uint32_t)0x01 << PortGroupNum18 )
-#define  PortGroup20= ((uint32_t)0x01 << PortGroupNum20 )
-#define  JPortGroup0= ((uint32_t)0x01 << JPortGroupNum0 )
-#define  APortGroup0= ((uint32_t)0x01 << APortGroupNum0 )
-#define  APortGroup1= ((uint32_t)0x01 << APortGroupNum1 )
-#define  IPortGroup0= ((uint32_t)0x01 << IPortGroupNum0 )
+#define  PortGroup0   ((uint32_t)0x01 << PortGroupNum0 )
+#define  PortGroup1   ((uint32_t)0x01 << PortGroupNum1 )
+#define  PortGroup2   ((uint32_t)0x01 << PortGroupNum2 )
+#define  PortGroup8   ((uint32_t)0x01 << PortGroupNum8 )
+#define  PortGroup9   ((uint32_t)0x01 << PortGroupNum9 )
+#define  PortGroup10  ((uint32_t)0x01 << PortGroupNum10 )
+#define  PortGroup11  ((uint32_t)0x01 << PortGroupNum11 )
+#define  PortGroup12  ((uint32_t)0x01 << PortGroupNum12 )
+#define  PortGroup18  ((uint32_t)0x01 << PortGroupNum18 )
+#define  PortGroup20  ((uint32_t)0x01 << PortGroupNum20 )
+#define  JPortGroup0  ((uint32_t)0x01 << JPortGroupNum0 )
+#define  APortGroup0  ((uint32_t)0x01 << APortGroupNum0 )
+#define  APortGroup1  ((uint32_t)0x01 << APortGroupNum1 )
+#define  IPortGroup0  ((uint32_t)0x01 << IPortGroupNum0 )
 
 #define IS_Port_Group(index)  ((((uint32_t)(0x01 << index)) == PortGroup0) || \
                                (((uint32_t)(0x01 << index)) == PortGroup1) || \
@@ -152,16 +152,118 @@ typedef enum{
 typedef struct{
   uint16_t pin_mask;//from 0x0001 to 0xFFFF
   PortOptMode_Type opt_mode;//PORT_MODE,SOFT_AF_MODE,DIRECT_AF_MODE,Non_PORT_MODE,Non_AF_MODE,
-  uint8_t io_mode;//PORT_OUTPUT_MODE,PORT_INPUT_MODE
+  uint16_t io_mode;//PORT_OUTPUT_MODE,PORT_INPUT_MODE
   InputBuf_Ctl_Type ibc_t;//INPUT_BUF_ENABLED, INPUT_BUF_DISABLED,
   Bidirect_Mode_Ctl_Type bmc_t;//BIDIRECTION_MODE_ENABLED, BIDIRECTION_MODE_DISABLED
   Elect_Char_Type echar_t;//INPUT_NPU,INPUT_PU,INPUT_NPD,INPUT_PD,OUTPUT_PP,OUPUT_OD,OUTPUT_LDS,OUTPUT_HDS
 }Port_InitTypeDef;
 
-typedef enum{
-  PMC,PMCSR,PIPC,PM,PMSR,PIBC,PFC,PFCE,PFCA,
-};
 
+
+/*********************************Pin Function Configuration****************************/
+
+/* @brief -直接设定 Pn的port mode（单个bit操作）
+ * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
+ * @param mask_bit -需要操作的单个bit
+ */
 void Port_Mode_Ctl_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask_bit);
+/* @brief -直接设定 Pn的port mode（多个bit操作）
+ * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
+ * @param mask -需要操作的bits
+ */
+void Port_Mode_Ctl_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask);
+
+/* @brief -间接设定 Pn的port mode（多个bit操作）Optional
+ * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
+ * @param mask -需要操作的bits
+ */
+void Port_Mode_Ctl_Set(Port_Group_Index_Type portx,uint16_t mask);
+
+/* @brief -间接设定 Pn的port mode（多个bit操作）Optional
+ * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
+ * @param mask -需要操作的bits
+ */
+void Port_Mode_Ctl_Reset();
+
+/* @brief -设定或者清除PIPCx寄存器的某个bit（单个位操作）
+ * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
+ * @param opt_mode - PORT_MODE, Non_PORT_MODE,SOFT_AF_MODE,DIRECT_AF_MODE,Non_AF_MODE
+ * @param mask_bit -需要操作的单个bit
+ */
+void Port_IP_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask_bit);
+
+/* @brief -设定或者清除PIPCx寄存器的某个bit（单个位操作）
+ * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
+ * @param opt_mode - PORT_MODE, Non_PORT_MODE,SOFT_AF_MODE,DIRECT_AF_MODE,Non_AF_MODE
+ * @param mask_bit -需要操作的单个bit
+ */
+void Port_IP_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask);
+
+void Port_IO_Mode_Bit_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t mask_bit);
+
+void Port_IO_Mode_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t mask);
+
+void Port_InputBuf_Ctl_Bit_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_t,uint16_t mask_bit);
+
+void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_t,uint16_t mask);
+
+/******************************Pin Data Input/Output***********************************/
+
+void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_Type bmc_t,uint16_t mask_bit);
+
+void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_Type bmc_t,uint16_t mask);
+
+/**
+  * @brief  Reads the specified data port bit.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @param  mask_bit:  specifies the port bit to read.
+  *   This parameter can be PORT_PIN_x where x can be (0..15).
+  * @retval The output port pin value.
+  */
+uint8_t Port_Read_Data_Bit(Port_Group_Index_Type portx, uint16_t mask_bit);
+/**
+  * @brief  Reads the specified Port data port.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @retval Port output data port value.
+  */
+uint16_t Port_Read_Data(Port_Group_Index_Type portx);
+
+
+/**
+  * @brief  Reads the specified output data port bit.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @param  mask_bit:  specifies the port bit to read.
+  *   This parameter can be PORT_PIN_x where x can be (0..15).
+  * @retval The output port pin value.
+  */
+uint8_t Port_Read_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit);
+
+/**
+  * @brief  Reads the specified Port output data port.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @retval Port output data port value.
+  */
+uint16_t Port_Read_OutputData(Port_Group_Index_Type portx);
+
+/**
+  * @brief  Write the specified data to output  port bit.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @param  mask_bit:  specifies the port bit to write.
+  *   This parameter can be PORT_PIN_x where x can be (0..15).
+  * 
+  */
+void Port_Write_OutputData_Bit(Port_Group_Index_Type portx,  uint16_t mask_bit,BitAction bit_val);
+
+/**
+  * @brief  Write the specified data to output port..
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * 
+  */
+void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data);
+
+
+/*Configuration of Electrical Characteristics*/
+
+void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,uint16_t mask_bit);
 
 #endif //RH850F1L_PORT_H

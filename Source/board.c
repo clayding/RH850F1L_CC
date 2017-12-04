@@ -12,11 +12,14 @@
 
 #include "board.h"
 #include "rh850f1l_clk.h"
+#include "rh850f1l_port.h"
 
 /*!
  * Flag to indicate if the MCU is Initialized
  */
 static bool mcu_initialized = false;
+
+static void Board_Port_Config(void);
 
 void Board_MCU_Init(void)
 {
@@ -24,6 +27,8 @@ void Board_MCU_Init(void)
         System_Clock_Config();
     }
     mcu_initialized = true;
+
+    Board_Port_Config();
 
 }
 
@@ -41,4 +46,15 @@ void System_Clock_Config(void)
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
       
+}
+
+void Board_Port_Config(void)
+{
+    Port_InitTypeDef port;
+    port.pin_mask = PORT_PIN_3;
+    port.opt_mode = PORT_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+
+    Port_Init(PortGroupNum10,&port);
 }
