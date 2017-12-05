@@ -69,7 +69,7 @@ typedef enum
 /** @addtogroup Exported_macros
   * @{
   */
-#define SET_BIT(REG, BIT)     ((*REG) |= (BIT))
+#define SET_BIT(REG, BIT)     ((*REG) |= (BIT)) //param: REG-->the pointer to register
 
 #define CLEAR_BIT(REG, BIT)   ((*REG) &= ~(BIT))
 

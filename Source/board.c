@@ -29,7 +29,6 @@ void Board_MCU_Init(void)
     mcu_initialized = true;
 
     Board_Port_Config();
-
 }
 
 void System_Clock_Config(void)
@@ -57,4 +56,11 @@ void Board_Port_Config(void)
     port.bmc_t = BIDIRECTION_MODE_ENABLED;
 
     Port_Init(PortGroupNum10,&port);
+
+    port.pin_mask = PORT_PIN_5;
+    port.opt_mode = PORT_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+
+    Port_Init(PortGroupNum8,&port);
 }
