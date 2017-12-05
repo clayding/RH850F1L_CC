@@ -22,7 +22,7 @@ static void LED_Blink(LED_CTL_Struct *lcs_t,uint8_t arr_size);
 
 void main(void)
 {
-    LED_CTL_Struct lcs[2];;
+    LED_CTL_Struct lcs[3];;
     LED_Struct_Init(&lcs,ARRAY_SIZE(lcs));
     Board_MCU_Init();
 
@@ -39,23 +39,50 @@ void LED_Struct_Init(LED_CTL_Struct *lcs_t,uint8_t arr_size)
     lcs_t->led_name = "LED1";
     lcs_t->led_pgrp = PortGroupNum10;
     lcs_t->led_pin = PORT_PIN_3;
+
     lcs_t++;
     lcs_t->led_name = "LED2";
     lcs_t->led_pgrp = PortGroupNum8;
     lcs_t->led_pin = PORT_PIN_5;
+
+    lcs_t++;
+    lcs_t->led_name = "P8_6";
+    lcs_t->led_pgrp = PortGroupNum8;
+    lcs_t->led_pin = PORT_PIN_6;
 }
 
 void LED_Blink(LED_CTL_Struct lcs_t[],uint8_t arr_size)
 {
     volatile uint8_t j = 0;
     while(1){
-        int32_t x = 0xfffff;
-        Port_Write_OutputData_Bit(lcs_t[0].led_pgrp,lcs_t[0].led_pin,j);
-        Port_Write_OutputData_Bit(lcs_t[1].led_pgrp,lcs_t[1].led_pin,!j);
-        j = !j;
-        while(x--);
-        x = 0xfffff;
-        while(x--);
+        int32_t x = 0x2fffff;
+        /*Method 1  use Pn reg*/
+        // Port_Write_OutputData_Bit(lcs_t[0].led_pgrp,lcs_t[0].led_pin,j);
+        // Port_Write_OutputData_Bit(lcs_t[1].led_pgrp,lcs_t[1].led_pin,!j);
+        // j = !j;
+
+        /*Method 2 use PNOTn reg*/
+        //Port_Invert_OutputData_Bit(lcs_t[0].led_pgrp, lcs_t[0].led_pin);
+        //Port_Invert_OutputData_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin);
+
+        /*Method 3 use PPRn reg*/
+        // j = Port_Read_Data_Bit(lcs_t[0].led_pgrp, lcs_t[0].led_pin);
+        // Port_Write_OutputData_Bit(lcs_t[0].led_pgrp, lcs_t[0].led_pin, !j);
+        // j = Port_Read_Data_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin);
+        // Port_Write_OutputData_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin, !j);
+
+        /*Method 4 use Pn reg*/
+        // j = Port_Read_OutputData_Bit(lcs_t[0].led_pgrp, lcs_t[0].led_pin);
+        // Port_Write_OutputData_Bit(lcs_t[0].led_pgrp, lcs_t[0].led_pin, !j);
+        // j = Port_Read_OutputData_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin);
+        // Port_Write_OutputData_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin, !j);
+
+        if(Port_Read_Data_Bit(lcs_t[2].led_pgrp, lcs_t[2].led_pin) == Bit_SET)
+            Port_Write_OutputData_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin, 0);
+        if (Port_Read_Data_Bit(lcs_t[2].led_pgrp, lcs_t[2].led_pin) == Bit_RESET)
+            Port_Write_OutputData_Bit(lcs_t[1].led_pgrp, lcs_t[1].led_pin, 1);
+
+        //while (x--); //delay
     }
 }
 

@@ -147,6 +147,8 @@ typedef enum{
   OUPUT_OD, //Open-drain
   OUTPUT_LDS,//Lower drive strength
   OUTPUT_HDS,//High drive strength
+  INPUT_SHMT1,//input buffer characteristics SHMT1
+  INPUT_SHMT4,//input buffer characteristics SHMT4
 }Elect_Char_Type;
 
 typedef struct{
@@ -264,6 +266,6 @@ void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data);
 
 /*Configuration of Electrical Characteristics*/
 
-void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,uint16_t mask_bit);
+void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,uint32_t mask_bit);
 
 #endif //RH850F1L_PORT_H

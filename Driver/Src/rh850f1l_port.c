@@ -28,6 +28,7 @@ typedef enum{
   PMCSR_TYPE ,PMSR_TYPE,
   PSR_TYPE,
   PDSC_TYPE,PODC_TYPE,
+  PPCMD_TYPE,PPROTS_TYPE,//Protection Control Register
 }REG_ADDR_INDEX_Type;
 //map[group num, real position in reg_addr]
 uint8_t reg_group_arr[] = {
@@ -65,6 +66,8 @@ volatile uintptr_t* reg_arr_32[][10] ={
   &PSR0,  &PSR1,  &PSR2,  &PSR8,  &PSR9,  &PSR10,  &PSR11,  &PSR12,  &PSR18,  &PSR20,//PSR_TYPE
   &PDSC0, &unused,&unused,&unused,&unused,&PDSC10, &PDSC11, &PDSC12, &unused, &unused,//PDSC_TYPE
   &PODC0, &PODC1, &PODC2, &PODC8, &PODC9, &PODC10, &PODC11, &PODC12, &PODC18, &PODC20,//PODC_TYPE
+  &PPCMD0,&PPCMD1,&PPCMD2,&PPCMD8,&PPCMD9,&PPCMD10,&PPCMD11,&PPCMD12,&PPCMD18,&PPCMD20,//Protection Command Register
+  &PPROTS0,&PPROTS1,&PPROTS2,&PPROTS8,&PPROTS9,&PPROTS10,&PPROTS11,&PPROTS12,&PPROTS18,&PPROTS20,//Protection Status Register
 };
 
 
@@ -113,6 +116,10 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
       Port_Write_OutputData_Bit(portx,mask_bit,1);
       Port_IO_Mode_Bit_Config(portx,PORT_OUTPUT_MODE,mask_bit);
     }else if(Port_InitStruct->io_mode == PORT_INPUT_MODE){
+      Port_Char_Bit_Config(portx, INPUT_PU, mask_bit); //pull up
+      Port_Char_Bit_Config(portx, INPUT_NPD, mask_bit);//no pull down
+      Port_Char_Bit_Config(portx, INPUT_SHMT1,mask_bit);
+      Port_InputBuf_Ctl_Bit_Config(portx,INPUT_BUF_ENABLED,mask_bit);
     } 
 
   }
@@ -121,9 +128,9 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
 
 /*********************************Pin Function Configuration****************************/
 
-/* @brief -直接设定 Pn的port mode（单个bit操作）
+/* @brief -Set Pn port mode(single bit) directly
  * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
- * @param mask_bit -需要操作的单个bit
+ * @param mask_bit -single bit to set
  */
 void Port_Mode_Ctl_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask_bit)
 {
@@ -146,9 +153,9 @@ void Port_Mode_Ctl_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_m
     CLEAR_BIT(target_reg,bitpos);
 
 }
-/* @brief -直接设定 Pn的port mode（多个bit操作）
+/* @brief -Set Pn port mode(multiple bits) directly
  * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
- * @param mask -需要操作的bits
+ * @param mask -multiple bits to set
  */
 void Port_Mode_Ctl_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask)
 {
@@ -170,9 +177,9 @@ void Port_Mode_Ctl_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,
   }
 }
 
-/* @brief -间接设定 Pn的port mode（多个bit操作）Optional
+/* @brief -Set Pn port mode(multiple bits) indirectly (Optional)
  * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
- * @param mask -需要操作的bits
+ * @param mask -bits need to set
  */
 void Port_Mode_Ctl_Set(Port_Group_Index_Type portx,uint16_t mask)
 {
@@ -182,9 +189,9 @@ void Port_Mode_Ctl_Set(Port_Group_Index_Type portx,uint16_t mask)
   /* Configure the 16 Low pin bits */
 
 }
-/* @brief -间接设定 Pn的port mode（多个bit操作）Optional
+/* @brief -Reset Pn port mode(multiple bits) indirectly (Optional)
  * @param portx - the index “n” (n = 0 to 2, 8 to 12, 18,and 20)
- * @param mask -需要操作的bits
+ * @param mask - bits need to reset
  */
 void Port_Mode_Ctl_Reset()
 {
@@ -365,7 +372,7 @@ uint8_t Port_Read_Data_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
   __IO uint8_t bitstatus = 0x00;
   __IO uint16_t *target_reg = NULL;
 #if ASSERT_EN
-  //assert_param(IS_Port_Group(portx));
+  assert_param(IS_Port_Group(portx));
   assert_param(IS_Port_Pin(mask_bit));
 #endif
 
@@ -389,7 +396,7 @@ uint16_t Port_Read_Data(Port_Group_Index_Type portx)
   __IO uint16_t *target_reg = NULL;
 #if ASSERT_EN
   /* Check the parameters */
-  //assert_param(IS_Port_Group(portx));
+  assert_param(IS_Port_Group(portx));
 #endif
   __GET_TARGET_REG(target_reg,PPR_TYPE,portx);
 
@@ -441,7 +448,7 @@ uint16_t Port_Read_OutputData(Port_Group_Index_Type portx)
 }
 
 /**
-  * @brief  Write the specified data to output  port bit.
+  * @brief  Write the specified data to output port bit.
   * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
   * @param  mask_bit:  specifies the port bit to write.
   *   This parameter can be PORT_PIN_x where x can be (0..15).
@@ -486,14 +493,33 @@ void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data)
   
   }
 }
+/**
+  * @brief  Invert the specified data to output port bit.
+  * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
+  * @param  mask_bit:  specifies the port bit to write.
+  *   This parameter can be PORT_PIN_x where x can be (0..15).
+  */
+void Port_Invert_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
+{
+  __IO uint16_t *target_reg = NULL;
+
+#if ASSERT_EN
+  assert_param(IS_Port_Group(portx));
+  assert_param(IS_Port_Pin(mask_bit));
+#endif
+
+  __GET_TARGET_REG(target_reg, PNOT_TYPE, portx);
+  
+  SET_BIT(target_reg, mask_bit);
+  
+}
 
 /*Configuration of Electrical Characteristics*/
 
-void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,uint16_t mask_bit)
+void Port_Char_Bit_Config(Port_Group_Index_Type portx, Elect_Char_Type echar_t, uint32_t mask_bit)
 {
-  __IO uint16_t bitpos = mask_bit,current_bit = 0x00;
-  __IO uint16_t *target_reg = NULL;
-  __IO uintptr_t *target_reg_32 = NULL;
+  __IO uint16_t bitpos = mask_bit,current_bit = 0x00,*target_reg = NULL;
+  __IO uintptr_t bitpos_32 = mask_bit,current_bit_32 = 0x00,*target_reg_32 = NULL;
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
 #endif
@@ -524,25 +550,63 @@ void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,ui
       break;
     case OUTPUT_PP:
     case OUPUT_OD:
-      __GET_TARGET_REG(target_reg_32,PODC_TYPE,portx);
-      /*获取当前bitpos的置位信息*/
-      current_bit = READ_BIT(target_reg,bitpos);
+    { 
+      WP_Opt_Reg  dst_reg;
+      __IO uintptr_t *val_32 = NULL;
 
-      if(current_bit == 0x00 && echar_t == OUPUT_OD)//PODCn_m需要被置位
-        SET_BIT(target_reg_32,bitpos);
-      if(current_bit != 0x00 && echar_t == OUTPUT_PP)//PODCn_m需要被清零
-        CLEAR_BIT(target_reg_32,bitpos);
+      __GET_TARGET_REG(dst_reg.dst_protect_cmd_reg_addr,PPCMD_TYPE,portx);
+      __GET_TARGET_REG(dst_reg.dst_protect_stat_reg_addr,PPROTS_TYPE,portx);
+      __GET_TARGET_REG(target_reg_32,PODC_TYPE,portx);
+      dst_reg.dst_protect_reg_addr = target_reg_32;
+
+      /*获取当前bitpos的置位信息*/
+      current_bit_32 = READ_BIT(target_reg_32,bitpos_32);
+      *val_32 = READ_BIT(target_reg_32,~bitpos_32);
+
+      if(current_bit_32 == 0x0000 && echar_t == OUPUT_OD){//PODCn_m需要被置位
+        SET_BIT(val_32,bitpos_32);
+        Write_Protected_Process(dst_reg,*val_32);
+      }
+      if(current_bit_32 != 0x0000 && echar_t == OUTPUT_PP){//PODCn_m需要被清零
+        CLEAR_BIT(val_32,bitpos_32);
+        Write_Protected_Process(dst_reg,*val_32);
+      }
+    }
       break;
     case OUTPUT_LDS:
     case OUTPUT_HDS:
-      __GET_TARGET_REG(target_reg_32,PDSC_TYPE,portx);
-      /*获取当前bitpos的置位信息*/
-      current_bit = READ_BIT(target_reg_32,bitpos);
+    {
+      WP_Opt_Reg  dst_reg;
+      __IO uintptr_t *val_32 = NULL;
 
-      if(current_bit == 0x00 && echar_t == OUTPUT_HDS)//PDSCn_m需要被置位
-        SET_BIT(target_reg_32,bitpos);
-      if(current_bit != 0x00 && echar_t == OUTPUT_LDS)//PDSCn_m需要被清零
-        CLEAR_BIT(target_reg_32,bitpos);
+      __GET_TARGET_REG(dst_reg.dst_protect_cmd_reg_addr,PPCMD_TYPE,portx);
+      __GET_TARGET_REG(dst_reg.dst_protect_stat_reg_addr,PPROTS_TYPE,portx);
+      __GET_TARGET_REG(target_reg_32,PDSC_TYPE,portx);
+       dst_reg.dst_protect_reg_addr = target_reg_32;
+      /*获取当前bitpos的置位信息*/
+      current_bit_32 = READ_BIT(target_reg_32,bitpos_32);
+      *val_32 = READ_BIT(target_reg_32,~bitpos_32);
+
+      if(current_bit_32 ==((uint32_t)0x00) && echar_t == OUTPUT_HDS){//PDSCn_m需要被置位
+        SET_BIT(val_32,bitpos_32);
+        Write_Protected_Process(dst_reg,*val_32);
+      }
+      if(current_bit_32 != ((uint32_t)0x00) && echar_t == OUTPUT_LDS){//PDSCn_m需要被清零
+        CLEAR_BIT(val_32,bitpos_32);
+        Write_Protected_Process(dst_reg,*val_32);
+      }
+      break;
+    }
+    case INPUT_SHMT1:
+    case INPUT_SHMT4:
+      __GET_TARGET_REG(target_reg,PIS_TYPE,portx);
+      /*get current bitpos*/
+      current_bit = READ_BIT(target_reg,bitpos);
+
+      if(current_bit == 0x00 && echar_t == INPUT_SHMT4)//set PISn_m bit 
+        SET_BIT(target_reg,bitpos);
+      if(current_bit != 0x00 && echar_t == INPUT_SHMT1)//reset PISn_m bit
+        CLEAR_BIT(target_reg,bitpos);
       break;
     default:
       break;
