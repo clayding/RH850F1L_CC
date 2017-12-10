@@ -41,10 +41,10 @@
 #define ASSERT_EN 0
 
 #if ASSERT_EN
-//#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t*)__FILE__, __LINE__))
+#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t*)__FILE__, __LINE__))
 #else
-//#define assert_param(expr) \
-	//do {} while(0)
+#define assert_param(expr) \
+	do {} while(0)
 #endif
 
 void assert_failed(uint8_t* file, uint32_t line);
