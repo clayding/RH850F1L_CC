@@ -133,10 +133,6 @@ typedef enum{
   BIDIRECTION_MODE_ENABLED = !BIDIRECTION_MODE_DISABLED,
 }Bidirect_Mode_Ctl_Type;
 
-typedef enum{ 
-  Bit_RESET = 0,
-  Bit_SET,
-}BitAction;
 
 typedef enum{
   INPUT_NPU,//No internal pull-up resistor connected to an input pin

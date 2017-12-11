@@ -86,7 +86,7 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
   __IO uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = 0x00;
 
   last_bit = Port_InitStruct->pin_mask;
-  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
+  for(;pinpos < 0x10 && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
    /*Get the pin mask bit position,make sure make_bit  is valid*/
@@ -161,7 +161,7 @@ void Port_Mode_Ctl_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,
 {
   __IO uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
+  for(;pinpos < 0x10 && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
@@ -234,7 +234,7 @@ void Port_IP_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16
 {
   __IO uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for (pinpos = 0x00; pinpos < 0x0F && (last_bit >> pinpos); pinpos++){//find which bits of the pin to be set,max 15
+  for (;pinpos < 0x10 && (last_bit >> pinpos); pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
@@ -274,7 +274,7 @@ void Port_IO_Mode_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t m
 {
   __IO uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
+  for(;pinpos < 0x10 && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
@@ -309,7 +309,7 @@ void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_
 {
   __IO uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
+  for(;pinpos < 0x10 && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*
@@ -348,7 +348,7 @@ void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_T
 {
   __IO uint16_t pinpos = 0x00,bitpos = 0x00,mask_bit = 0x00,last_bit = mask;
 
-  for(pinpos = 0x00;pinpos < 0x0F && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
+  for(;pinpos < 0x10 && (last_bit >> pinpos);pinpos++){//find which bits of the pin to be set,max 15
     bitpos = ((uint16_t)0x01) << pinpos; //set the pinpos bit ,example pinpos = 15,the bitpos is 0x0F
 
     //Get the pin mask bit position/*

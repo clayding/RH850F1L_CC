@@ -178,14 +178,31 @@
 #define RF_P15  RFP15
 #define CT_P15  CTP15
 
+
+#define EDGE_DETECTION      ((uint8_t)0x01)
+#define LEVEL_DETECTION     ((uint8_t)(0x01 << 1))
+#define FALL_EDGE_ENABLE    ((uint8_t)(0x01 << 2))
+#define FALL_EDGE_DISABLE   ((uint8_t)(0x01 << 3))
+#define RISE_EDGE_ENABLE    ((uint8_t)(0x01 << 4))
+#define RISE_EDGE_DISABLE   ((uint8_t)(0x01 << 5))
+#define LOW_LEVEL_DETECT    ((uint8_t)(0x01 << 6))
+#define HIGH_LEVEL_DETECT   ((uint8_t)(0x01 << 7))
+
 enum{
     _P0,_P1,_P2,_P3,_P4,_P5,_P6,_P7,_P8,_P9,_P10,
     _P11,_P12,_p13,_P14,_P15,
 };
 
-typedef enum {
+typedef enum{
     SELB_INTC1_REG,
     SELB_INTC2_REG,
 } EIINT_SEL_Type;
+
+typedef enum {
+    EXT_NMI,
+    EXT_INTP0,EXT_INTP1,EXT_INTP2,EXT_INTP3,EXT_INTP4,EXT_INTP5,
+    EXT_INTP6,EXT_INTP7,EXT_INTP8,EXT_INTP9,EXT_INTP10,EXT_INTP11,
+    EXT_INTP12,EXT_INTP13,EXT_INTP14,EXT_INTP15,
+}INPUT_SIGNAL_Type;
 
 #endif //RH850F1L_EXT_H

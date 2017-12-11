@@ -61,6 +61,11 @@ typedef enum
     OPT_WRITE = 0,          //write operation
     OPT_READ = !OPT_WRITE,  //read operation
 }OperateDirection;
+
+typedef enum {
+  Bit_RESET = 0,
+  Bit_SET,
+} BitAction;
 /**
   * @}
   */
