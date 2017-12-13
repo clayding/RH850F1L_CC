@@ -72,10 +72,10 @@
 
 typedef enum{
   PORT_MODE,     // Port mode
-
   SOFT_AF_MODE,  // software I/O control alternative mode
   DIRECT_AF_MODE,//direct I/O control alternative mode
   Non_AF_MODE = PORT_MODE,
+  AF_MODE,
 }PortOptMode_Type;
 
 typedef enum{ //14
@@ -122,6 +122,18 @@ typedef enum{ //14
                                (((uint32_t)(0x01 << index)) == APortGroup1) || \
                                (((uint32_t)(0x01 << index)) == IPortGroup0))
 
+#define ALT_PFC_MASK    0x01
+#define ALT_PFCE_MASK   (0x01 << 1)    
+#define ALT_PFCAE_MASK  (0x01 << 2)    
+
+typedef enum {
+  ALT_FUNC_1,//0x00  Alternative function 1
+  ALT_FUNC_2,// 0x01 Alternative function 2
+  ALT_FUNC_3,// 0x02 Alternative function 3
+  ALT_FUNC_4,// 0x03 Alternative function 4
+  ALT_FUNC_5,// 0x04 Alternative function 5
+} ALTERNATIVE_REG_Type;
+
 typedef enum{
   INPUT_BUF_DISABLED,
   INPUT_BUF_ENABLED = !INPUT_BUF_DISABLED,
@@ -133,29 +145,37 @@ typedef enum{
   BIDIRECTION_MODE_ENABLED = !BIDIRECTION_MODE_DISABLED,
 }Bidirect_Mode_Ctl_Type;
 
+#define INPUT_NPU         ((uint16_t)0x00 << 0)//No internal pull-up resistor connected to an input pin
+#define INPUT_PU          ((uint16_t)0x01 << 0) //An internal pull-up resistor connected to an input pin
+#define INPUT_NPD         ((uint16_t)0x00 << 1) //No internal pull-down resistor connected to an input pin
+#define INPUT_PD          ((uint16_t)0x01 << 1)  //An internal pull-down resistor connected to an input pin
+#define OUTPUT_PP         ((uint16_t)0x00 << 2) //Push-pull
+#define OUPUT_OD          ((uint16_t)0x01 << 2)  //Open-drain
+#define OUTPUT_LDS        ((uint16_t)0x00 << 3) //Lower drive strength
+#define OUTPUT_HDS        ((uint16_t)0x01 << 3) //High drive strength
+#define INPUT_SHMT1       ((uint16_t)0x00 << 4) //input buffer characteristics SHMT1
+#define INPUT_SHMT4       ((uint16_t)0x01 << 4) //input buffer characteristics SHMT4
 
-typedef enum{
-  INPUT_NPU,//No internal pull-up resistor connected to an input pin
-  INPUT_PU, //An internal pull-up resistor connected to an input pin
-  INPUT_NPD,//No internal pull-down resistor connected to an input pin
-  INPUT_PD, //An internal pull-down resistor connected to an input pin
-  OUTPUT_PP,//Push-pull
-  OUPUT_OD, //Open-drain
-  OUTPUT_LDS,//Lower drive strength
-  OUTPUT_HDS,//High drive strength
-  INPUT_SHMT1,//input buffer characteristics SHMT1
-  INPUT_SHMT4,//input buffer characteristics SHMT4
-}Elect_Char_Type;
+#define INPUT_PU_MASK     INPUT_PU          //An internal pull-up resistor connected to an input pin
+#define INPUT_PD_MASK     INPUT_PD     //An internal pull-down resistor connected to an input pin
+#define OUPUT_OD_MASK     OUPUT_OD     //Open-drain
+#define OUTPUT_HDS_MASK   OUTPUT_HDS //High drive strength
+#define INPUT_SHMT4_MASK  INPUT_SHMT4 //input buffer characteristics SHMT4
 
-typedef struct{
-  uint16_t pin_mask;//from 0x0001 to 0xFFFF
-  PortOptMode_Type opt_mode;//PORT_MODE,SOFT_AF_MODE,DIRECT_AF_MODE,Non_PORT_MODE,Non_AF_MODE,
-  uint16_t io_mode;//PORT_OUTPUT_MODE,PORT_INPUT_MODE
-  InputBuf_Ctl_Type ibc_t;//INPUT_BUF_ENABLED, INPUT_BUF_DISABLED,
+typedef uint8_t Elect_Char_TypeDef;
+typedef uint8_t IO_TypeDef;
+
+typedef struct
+{
+  uint16_t pin_mask;        //from 0x0001 to 0xFFFF
+  PortOptMode_Type opt_mode;//PORT_MODE,SOFT_AF_MODE,DIRECT_AF_MODE,Non_PORT_MODE,Non_AF_MODE,AF_MODE
+  IO_TypeDef io_mode;       //PORT_OUTPUT_MODE,PORT_INPUT_MODE
+  InputBuf_Ctl_Type ibc_t;  //INPUT_BUF_ENABLED, INPUT_BUF_DISABLED,
   Bidirect_Mode_Ctl_Type bmc_t;//BIDIRECTION_MODE_ENABLED, BIDIRECTION_MODE_DISABLED
-  Elect_Char_Type echar_t;//INPUT_NPU,INPUT_PU,INPUT_NPD,INPUT_PD,OUTPUT_PP,OUPUT_OD,OUTPUT_LDS,OUTPUT_HDS
+  Elect_Char_TypeDef echar_t;  //INPUT_NPU
+  ALTERNATIVE_REG_Type alter_t;
+  BitAction ba;
 }Port_InitTypeDef;
-
 
 
 /*********************************Pin Function Configuration****************************/
@@ -197,17 +217,23 @@ void Port_IP_Bit_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,ui
  */
 void Port_IP_Config(Port_Group_Index_Type portx,PortOptMode_Type opt_mode,uint16_t mask);
 
-void Port_IO_Mode_Bit_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t mask_bit);
+void Port_IO_Mode_Bit_Config(Port_Group_Index_Type portx, IO_TypeDef io_mode, uint16_t mask_bit);
 
-void Port_IO_Mode_Config(Port_Group_Index_Type portx,uint16_t io_mode,uint16_t mask);
+void Port_IO_Mode_Config(Port_Group_Index_Type portx, IO_TypeDef io_mode, uint16_t mask);
 
 void Port_InputBuf_Ctl_Bit_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_t,uint16_t mask_bit);
 
 void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_t,uint16_t mask);
 
+void Port_Func_Ctl_Bit_Config(Port_Group_Index_Type portx, BitAction ba, uint16_t mask_bit);
+void Port_Func_Ctl_Exp_Bit_Config(Port_Group_Index_Type portx, BitAction ba, uint16_t mask_bit);
+void Port_Func_Ctl_Add_Exp_Bit_Config(Port_Group_Index_Type portx, BitAction ba, uint16_t mask_bit);
+
+void Port_Alt_Func_Ctl_Config(Port_Group_Index_Type portx, ALTERNATIVE_REG_Type ar_t, uint16_t mask);
+
 /******************************Pin Data Input/Output***********************************/
 
-void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_Type bmc_t,uint16_t mask_bit);
+void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx, Bidirect_Mode_Ctl_Type bmc_t, uint16_t mask_bit);
 
 void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_Type bmc_t,uint16_t mask);
 
@@ -262,6 +288,6 @@ void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data);
 
 /*Configuration of Electrical Characteristics*/
 
-void Port_Char_Bit_Config(Port_Group_Index_Type portx,Elect_Char_Type echar_t,uint32_t mask_bit);
+void Port_Char_Bit_Config(Port_Group_Index_Type portx, IO_TypeDef io_mode, Elect_Char_TypeDef echar_t, uint32_t mask_bit);
 
 #endif //RH850F1L_PORT_H

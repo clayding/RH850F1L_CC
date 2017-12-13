@@ -23,7 +23,7 @@ static void LED_Blink(LED_CTL_Struct *lcs_t,uint8_t arr_size);
 void main(void)
 {
     LED_CTL_Struct lcs[3];;
-    LED_Struct_Init(&lcs,ARRAY_SIZE(lcs));
+    LED_Struct_Init(lcs,ARRAY_SIZE(lcs));
     Board_MCU_Init();
 
     LED_Blink(lcs,ARRAY_SIZE(lcs));

@@ -273,6 +273,12 @@
       <IsStructuredNaming>True</IsStructuredNaming>
     </Instance>
   </Class>
+  <Class Guid="873c9a58-9bc5-439a-b476-78629a4553ed">
+    <Instance Guid="873c9a58-9bc5-439a-b476-78629a4553ed">
+      <ProjectDeviceChangedCounter>0</ProjectDeviceChangedCounter>
+      <ProjectInitialDeviceName>R7F701056xxFP</ProjectInitialDeviceName>
+    </Instance>
+  </Class>
   <Class Guid="c3835e31-dea3-4c93-b02b-d2db997f7630">
     <Instance Guid="c3835e31-dea3-4c93-b02b-d2db997f7630">
       <BuildToolManager>eb3b4b69-af1a-4dc1-b2bc-4b81a50fb2a4</BuildToolManager>
@@ -297,9 +303,9 @@
       <SourceItemType4>CSource</SourceItemType4>
       <SourceItemGuid5>3ca34933-227e-4c06-8aba-9cada997397e</SourceItemGuid5>
       <SourceItemType5>CSource</SourceItemType5>
-      <SourceItemGuid6>bf858205-7783-4eda-9cf1-062f22a68c85</SourceItemGuid6>
+      <SourceItemGuid6>58f752c6-fe06-40ae-af5f-5e2aebfbd701</SourceItemGuid6>
       <SourceItemType6>CSource</SourceItemType6>
-      <SourceItemGuid7>58f752c6-fe06-40ae-af5f-5e2aebfbd701</SourceItemGuid7>
+      <SourceItemGuid7>bf858205-7783-4eda-9cf1-062f22a68c85</SourceItemGuid7>
       <SourceItemType7>CSource</SourceItemType7>
       <SourceItemCount>8</SourceItemCount>
       <LastDeviceChangedCounter>0</LastDeviceChangedCounter>
@@ -499,11 +505,12 @@
       <COptionInsertDbtagWithLabelParameters-DefaultValue />
       <COptionXmultiLevel-DefaultValue>Level0</COptionXmultiLevel-DefaultValue>
       <IsLockedByUser>False</IsLockedByUser>
-      <TimeTagModified--0>-8586887337327486469</TimeTagModified--0>
+      <TimeTagModified--0>-8586886216493399208</TimeTagModified--0>
       <COptionG-0>True</COptionG-0>
       <COptionI-0>..\Include\sys
 ..\Include
 ..\Driver\Inc
+.
 </COptionI-0>
       <COptionOsize-0>Default</COptionOsize-0>
       <COptionPreCompileCommands-0 />
@@ -1045,11 +1052,11 @@
       <SourceItem5-IsLockedByUser>False</SourceItem5-IsLockedByUser>
       <SourceItem5-IndividualCompileOption-0>False</SourceItem5-IndividualCompileOption-0>
       <SourceItem5-BuildingTarget-0>True</SourceItem5-BuildingTarget-0>
-      <TimeTagModified-SourceItem6--0>-8586887337022297599</TimeTagModified-SourceItem6--0>
+      <TimeTagModified-SourceItem6--0>-8586887147701244600</TimeTagModified-SourceItem6--0>
       <SourceItem6-IsLockedByUser>False</SourceItem6-IsLockedByUser>
       <SourceItem6-IndividualCompileOption-0>False</SourceItem6-IndividualCompileOption-0>
       <SourceItem6-BuildingTarget-0>True</SourceItem6-BuildingTarget-0>
-      <TimeTagModified-SourceItem7--0>-8586887147701244600</TimeTagModified-SourceItem7--0>
+      <TimeTagModified-SourceItem7--0>-8586887337022297599</TimeTagModified-SourceItem7--0>
       <SourceItem7-IsLockedByUser>False</SourceItem7-IsLockedByUser>
       <SourceItem7-IndividualCompileOption-0>False</SourceItem7-IndividualCompileOption-0>
       <SourceItem7-BuildingTarget-0>True</SourceItem7-BuildingTarget-0>
@@ -1374,13 +1381,14 @@
       <DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>4294967295</DebuggerProperty-EssentialProperty-TargetConnect-LpdClock>
       <DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>Yes</DebuggerProperty-EssentialProperty-TargetConnect-TargetSupplyPower>
       <DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>Use3_3V</DebuggerProperty-EssentialProperty-TargetConnect-TargetSuppliedVoltage>
-      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
       <DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>Yes</DebuggerProperty-EssentialProperty-TargetConnect-ChangeLpdWhenConnect>
       <DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>No</DebuggerProperty-EssentialProperty-TargetConnect-ChangeJtagWhenDisconnect>
       <DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>True</DebuggerProperty-EssentialProperty-TargetConnect-InitRamWhenConnecting>
       <DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>False</DebuggerProperty-EssentialProperty-TargetConnect-UsePiggyBackBoard>
       <DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>No</DebuggerProperty-EssentialProperty-Flash-FlashSelfProgramming>
       <DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>Yes</DebuggerProperty-EssentialProperty-Flash-ChangeClockFlashWrite>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>4276083200</DebuggerProperty-EssentialProperty-Memory-WorkRAMStartAddress>
+      <DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>9728</DebuggerProperty-EssentialProperty-Memory-WorkRAMSize>
       <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>1</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-Length>
       <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-DebuggerGuid />
       <DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>True</DebuggerProperty-DownloadProperty-DebugInformation-DownloadFiles-DownloadItem0-IsDefaultItem>
@@ -1462,6 +1470,7 @@
       <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
       <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
       <Debugger-DebugTarget-ProcessorElementNumber>1</Debugger-DebugTarget-ProcessorElementNumber>
+      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
     </Instance>
   </Class>
   <Class Guid="100f3761-3d7e-4559-b1d8-375a0c7bf682">
@@ -1599,6 +1608,17 @@
       <ChannelColor14>c0317f0c</ChannelColor14>
       <ChannelColor15>c060493e</ChannelColor15>
       <ChannelColor16>c072808e</ChannelColor16>
+    </Instance>
+  </Class>
+  <Class Guid="08dbcb1a-af14-4bd0-9bd6-b8e875384f4f">
+    <Instance Guid="bd16e4b5-bf8f-47ba-813b-c8ddd962bded">
+      <UseApplyAddress>False</UseApplyAddress>
+      <ApplyAddress />
+    </Instance>
+  </Class>
+  <Class Guid="2a2c2a43-ecdb-4e88-80bd-e75f3e33db90">
+    <Instance Guid="2a2c2a43-ecdb-4e88-80bd-e75f3e33db90">
+      <ProductVersion>8.00.00.00</ProductVersion>
     </Instance>
   </Class>
 </CubeSuiteProject>

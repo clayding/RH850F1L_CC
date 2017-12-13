@@ -16,7 +16,6 @@
 #include "rh850f1l_ext.h"
 #include "rh850f1l_wp.h"
 
-
 #define EIINT_ICXX_MASK ((uint16_t)(0x01 << 15))
 #define EIINT_RFXX_MASK ((uint16_t)(0x01 << 12))
 #define EIINT_MKXX_MASK ((uint16_t)(0x01 << 7))
@@ -48,57 +47,52 @@
 /*Get the type of interrupt detection. Read only.
   retval ret - return the bits*/
 #define __GET_EIINT_ICXX_CTL(ret,target_reg)  do{ \
-                                                ret = (IC_##target_reg) & EIINT_ICXX_MASK; \
+                                                ret = (IC##target_reg) & EIINT_ICXX_MASK; \
                                               }while(0)
 /*Get an interrupt request flag.0: No interrupt request is made.1: Interrupt request is made. */
 #define __GET_EIINT_RFXX_CTL(ret, target_reg) do{ \
-                                                ret = (IC_##target_reg) & EIINT_RFXX_MASK; \
+                                                ret = (IC##target_reg) & EIINT_RFXX_MASK; \
                                               } while (0)
-/*Set an interrupt request flag,Setting the RFxxx bit to 1 generates an EI level maskable interrupt n 
+/*Set an interrupt request flag,Setting the RFxxx bit to 1 generates an EI level maskable interrupt n
 (EIINTn), just as when an interrupt request is acknowledged*/
-#define __SET_EIINT_RFXX_CTL(target_reg,st)   do{ \
-                                                uint16_t tmp  = set & EIINT_RFXX_MASK; \
-                                                if(tmp != (uint16_t)0x00) \
-                                                  IC_##target_reg |=  EIINT_RFXX_MASK; \
+#define __SET_EIINT_RFXX_CTL(target_reg,val)   do{ \
+                                                if(val != 0) \
+                                                  IC##target_reg |=  EIINT_RFXX_MASK; \
                                                 else \
-                                                  IC_##target_reg &= ~EIINT_RFXX_MASK; \
+                                                  IC##target_reg &= ~EIINT_RFXX_MASK; \
                                               }while(0)
 /*Get the interrupt request mask bit state,0-enable ,1-disable*/
 #define __GET_EIINT_MKXX_CTL(ret, target_reg) do{ \
-                                                ret = (IC_##target_reg) & EIINT_MKXX_MASK; \
+                                                ret = (IC##target_reg) & EIINT_MKXX_MASK; \
                                               }while (0)
 /*Set the interrupt request mask bit state,0-enable ,1-disable*/
-#define __SET_EIINT_MKXX_CTL(target_reg, st)  do{                                          \
-                                                uint16_t tmp = set & EIINT_MKXX_MASK; \
-                                                if (tmp != (uint16_t)0x00) \
-                                                  IC_##target_reg |= EIINT_MKXX_MASK; \
+#define __SET_EIINT_MKXX_CTL(target_reg, val)  do{                                          \
+                                                if (val != 0) \
+                                                  IC##target_reg |= EIINT_MKXX_MASK; \
                                                 else \
-                                                  IC_##target_reg &= ~EIINT_MKXX_MASK; \
+                                                  IC##target_reg &= ~EIINT_MKXX_MASK; \
                                               } while (0)
 /*Get the way to determine the interrupt vector.0-Direct Vector Method,1-Table Reference Method*/
 #define __GET_EIINT_TBXX_CTL(ret, target_reg) do{ \
-                                                ret = (IC_##target_reg) & EIINT_TBXX_MASK; \
+                                                ret = (IC##target_reg) & EIINT_TBXX_MASK; \
                                               } while (0)
 /*Select the way to determine the interrupt vector. 0-Direct Vector Method,1-Table Reference Method*/
-#define __SET_EIINT_TBXX_CTL(target_reg, st)  do{                                          \
-                                                uint16_t tmp = set & EIINT_TBXX_MASK; \
-                                                if (tmp != (uint16_t)0x00) \
-                                                  IC_##target_reg |= EIINT_TBXX_MASK; \
+#define __SET_EIINT_TBXX_CTL(target_reg, val)  do{                                          \
+                                                if (val != 0) \
+                                                  IC##target_reg |= EIINT_TBXX_MASK; \
                                                 else \
-                                                  IC_##target_reg &= ~EIINT_TBXX_MASK; \
+                                                  IC##target_reg &= ~EIINT_TBXX_MASK; \
                                               } while (0)
 
 /*Get the interrupt priority,with 0 as the highest and 7 as the lowest.*/
 #define __GET_EIINT_PXXX_CTL(ret, target_reg) do{ \
-                                                ret = (IC_##target_reg) & EIINT_PXXX_MASK; \
+                                                ret = (IC##target_reg) & EIINT_PXXX_MASK; \
                                               } while (0)
-/*specify the interrupt priority as one of 8 levels, with 0 as the highest and 7 as the lowest.*/
-#define __SET_EIINT_PXXX_CTL(target_reg, st)  do{                                          \
-                                                uint16_t tmp = set & EIINT_TBXX_MASK; \
-                                                if (tmp != (uint16_t)0x00) \
-                                                  IC_##target_reg |= EIINT_TBXX_MASK; \
-                                                else \
-                                                  IC_##target_reg &= ~EIINT_TBXX_MASK; \
+/*specify the interrupt priority as one of 8 levels, with 0 as the highest and 7 as the lowest(default).*/
+#define __SET_EIINT_PXXX_CTL(target_reg, val)  do{ \
+                                                uint16_t tmp = 0xFFF8; \
+                                                tmp += val & EIINT_PXXX_MASK; \
+                                                IC##target_reg &= tmp;  ; \
                                               } while (0)
 
 /*ch_group : 0-8,offset : 0-31.Example IMR5EIMK163, ch_group -> 5,offset = (163 - 5*32)*/
@@ -107,33 +101,47 @@
                                                 }while(0)
 
 //the mapping of filter control register and input signal (INPUT_SIGNAL_Type)
- __IO uint8_t *filter_ctl_reg[] = {
+__IO uint8_t *filter_ctl_reg[] = {
   &FCLA0CTL0_NMI,
   &FCLA0CTL0_INTPL,&FCLA0CTL1_INTPL,&FCLA0CTL2_INTPL,&FCLA0CTL3_INTPL,&FCLA0CTL4_INTPL,&FCLA0CTL5_INTPL,
   &FCLA0CTL6_INTPL,&FCLA0CTL7_INTPL,&FCLA0CTL0_INTPH,&FCLA0CTL1_INTPH,&FCLA0CTL2_INTPH,&FCLA0CTL3_INTPH,
   &FCLA0CTL4_INTPH,&FCLA0CTL5_INTPH,&FCLA0CTL6_INTPH,&FCLA0CTL7_INTPH,
 };
 
-/* @brief this function is used to select an EI level maskable interrupt.When two interrupt sources 
+void Inp12Handler(unsigned long eiic);
+void (*Eiit_Handler_Ptr)(void);
+
+void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
+{
+  __SET_EIINT_MKXX_CTL(P_12,Eiint_InitStruct->eiint_process);
+  __SET_EIINT_TBXX_CTL(P_12,Eiint_InitStruct->eiint_refer_method);
+  __SET_EIINT_PXXX_CTL(P_12,Eiint_InitStruct->eiint_priority);
+  Eiit_Filter_Ctl_Operate(EXT_INTP12, OPT_WRITE,&Eiint_InitStruct->eiint_detect);
+
+  __EI();
+}
+
+ /* @brief this function is used to select an EI level maskable interrupt.When two interrupt sources
  * are assigned to one interrupt channel, SELB_INTC1_REG selects which interrupt sources is enabled;
- * When two interrupt sources are assigned to one interrupt channel, SELB_INTC2_REG 
+ * When two interrupt sources are assigned to one interrupt channel, SELB_INTC2_REG
  * selects which interrupt sources is enabled.
  * @param bita - SET to 1 or RESET to zero
  * @mask_bit -single bit to set
  */
-void Eiit_Sel_Bit_Set(EIINT_SEL_Type sel_t, BitAction bita, uint16_t mask_bit)
-{
-  __IO uint16_t bitpos = mask_bit, current_bit = 0x00;
-  __IO uint16_t *target_reg = NULL; //address of target register
+ void Eiit_Sel_Bit_Set(EIINT_SEL_Type sel_t, BitAction bita, uint16_t mask_bit)
+ {
+   __IO uint16_t bitpos = mask_bit, current_bit = 0x00;
+   __IO uint16_t *target_reg = NULL; //address of target register
 
-  if(bitpos == 0x00) return;
+   if (bitpos == 0x00)
+     return;
 
-  if (sel_t == SELB_INTC1_REG){
-    if(bitpos >> 12) return;//highest bit is 11,so above 11 bit invalid
-    target_reg = &SELB_INTC1;
-  }else if (sel_t == SELB_INTC2_REG){
+   if (sel_t == SELB_INTC1_REG){
+     if (bitpos >> 12) return; //highest bit is 11,so above 11 bit invalid
+     target_reg = &SELB_INTC1;
+   }else if (sel_t == SELB_INTC2_REG){
     if (bitpos >> 11) return; //highest bit is 10,so above 10 bit invalid
-    target_reg == &SELB_INTC2;
+    target_reg = &SELB_INTC2;
   }
 
   /*获取当前bitpos的置位信息*/
@@ -145,9 +153,9 @@ void Eiit_Sel_Bit_Set(EIINT_SEL_Type sel_t, BitAction bita, uint16_t mask_bit)
     CLEAR_BIT(target_reg, bitpos);
 }
 
-/* @brief this function is used to select an EI level maskable interrupt.When two interrupt sources 
+/* @brief this function is used to select an EI level maskable interrupt.When two interrupt sources
  * are assigned to one interrupt channel, SELB_INTC1_REG selects which interrupt sources is enabled;
- * When two interrupt sources are assigned to one interrupt channel, SELB_INTC2_REG 
+ * When two interrupt sources are assigned to one interrupt channel, SELB_INTC2_REG
  * selects which interrupt sources is enabled.
  * @param bita - SET to 1 or RESET to zero
  * @mask -multiple bits to set
@@ -163,13 +171,13 @@ void Eiint_Sel_Set(EIINT_SEL_Type sel_t, BitAction bita, uint16_t mask)
 
     if(mask_bit == 0x00)
       continue;
-    
+
     Eiit_Sel_Bit_Set(sel_t,bita,mask_bit);
   }
 }
-/* @brief Get an EI level maskable interrupt.When two interrupt sources 
+/* @brief Get an EI level maskable interrupt.When two interrupt sources
  * are assigned to one interrupt channel, SELB_INTC1_REG selects which interrupt sources is enabled;
- * When two interrupt sources are assigned to one interrupt channel, SELB_INTC2_REG 
+ * When two interrupt sources are assigned to one interrupt channel, SELB_INTC2_REG
  * selects which interrupt sources is enabled.
  * @mask -multiple bits to set
  * @retval return the bits .
@@ -183,7 +191,7 @@ uint16_t Eiint_Sel_Get(EIINT_SEL_Type sel_t,uint16_t mask)
   if (sel_t == SELB_INTC1_REG){
     target_reg = &SELB_INTC1;
   }else if (sel_t == SELB_INTC2_REG){
-    target_reg == &SELB_INTC2;
+    target_reg = &SELB_INTC2;
   }
 
   ret = READ_BIT(target_reg,mask);
@@ -224,4 +232,10 @@ void Eiit_Filter_Ctl_Operate(INPUT_SIGNAL_Type in_sig, OperateDirection opt_dir,
         CLEAR_BIT(target_reg, FCLA0INTFm_MASK);
     }
   }
+}
+
+#pragma interrupt Inp12Handler(channel = 123, enable = false, callt = false, fpu = false)
+void Inp12Handler(unsigned long eiic)
+{
+  Eiit_Handler_Ptr();
 }

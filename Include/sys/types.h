@@ -24,8 +24,8 @@
 #define __SYS_TYPES_H
 
 #ifndef __cplusplus
-#define false 0
-#define true 1
+#define FALSE 0
+#define TRUE 1
 typedef int bool;
 #endif
 

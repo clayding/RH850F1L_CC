@@ -139,7 +139,17 @@
 	.dw	#_Dummy_EI ; INT0
 	.dw	#_Dummy_EI ; INT1
 	.dw	#_Dummy_EI ; INT2
-	.rept	512 - 3
+	.dw	#_Dummy_EI ; INT3
+	.dw	#_Dummy_EI ; INT4
+	.dw	#_Dummy_EI ; INT5
+	.dw	#_Dummy_EI ; INT6
+	.dw	#_Dummy_EI ; INT7
+	.dw	#_Dummy_EI ; INT8
+	.dw	#_Dummy_EI ; INT9
+	.dw	#_Dummy_EI ; INT10
+	.dw	#_Dummy_EI ; INT11
+	.dw	#_Dummy_EI ; INT12
+	.rept	512 - 13
 	.dw	#_Dummy_EI ; INTn
 	.endm
 
