@@ -11,9 +11,6 @@
   */
 
 #include "board.h"
-#include "rh850f1l_clk.h"
-#include "rh850f1l_port.h"
-#include "rh850f1l_ext.h"
 
 /*!
  * Flag to indicate if the MCU is Initialized
@@ -80,6 +77,7 @@ void Board_Port_Config(void)
         eiint.eiint_priority = INT_PRIORITY_7;
         eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
         Eiit_Init(&eiint);
+        OSTM_Init();
     }
 
 }

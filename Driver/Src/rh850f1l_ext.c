@@ -118,6 +118,10 @@ void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
   __SET_EIINT_PXXX_CTL(P_12,Eiint_InitStruct->eiint_priority);
   Eiit_Filter_Ctl_Operate(EXT_INTP12, OPT_WRITE,&Eiint_InitStruct->eiint_detect);
 
+  __SET_EIINT_MKXX_CTL(OSTM0,Eiint_InitStruct->eiint_process);
+  __SET_EIINT_TBXX_CTL(OSTM0,Eiint_InitStruct->eiint_refer_method);
+  __SET_EIINT_PXXX_CTL(OSTM0,Eiint_InitStruct->eiint_priority);
+
   __EI();
 }
 
@@ -238,4 +242,12 @@ void Eiit_Filter_Ctl_Operate(INPUT_SIGNAL_Type in_sig, OperateDirection opt_dir,
 void Inp12Handler(unsigned long eiic)
 {
   Eiit_Handler_Ptr();
+}
+
+extern __IO uint32_t uw_tick;
+#pragma interrupt OSTMIntHandler(channel = 76, enable = false, callt = false, fpu = false)
+void OSTMIntHandler(unsigned long eiic)
+{
+  uw_tick++;
+  OSTM_Cmp_Reload(CPUCLK2);
 }

@@ -17,7 +17,6 @@
 #include "rh850f1l_wp.h"
 
 
-
 #define __OSCE_CLK_ENABLE(wp_reg,mask) do{ \
                                             /*MOSCE &= MOSCENTRG_MASK;*/ \
                                             while(Write_Protected_Process(wp_reg,mask) != ERROR); \
@@ -28,7 +27,7 @@
                                         }while(0)
 #define __OSCC_CLK_READ(reg,mask)   (reg & mask)
 
-/*specify amplification gain of the MainOSC,or 
+/*specify amplification gain of the MainOSC,or
 set the PLL output clock frequencies fPPLLCLK and fCPLLCLK*/
 #define __OSCC_CLK_WRITE(reg,mask,value)    do { \
                                                 uint32_t tmp_val; \
@@ -75,7 +74,7 @@ DOMAIN_SET_Ref dsf[] = {
 static MOSC_AMP_GAIN_Type Clock_MOSC_Control(OperateDirection optd, MOSC_AMP_GAIN_Type val);
 
 void Clock_MOSC_Config(OSC_OPT_Type opt)
-{   
+{
     if(Clock_OSC_Get_Status(M_OSC_TYPE) == OSC_INACTIVE) {
         __MOSCST_CLK_CONFIG(STABLIZATION_TIME);//set this register when MOSC stopped
         //__OSCC_CLK_WRITE(MOSCC,MOSCAMPSEL_MASK,MOSC_AMP_MID_LOW);//the external resonator is 16MHz
@@ -114,7 +113,7 @@ OSC_STATUS_Type Clock_OSC_Get_Status(X_OSC_Type otp)
     }
     if(bit_mask == act_mask)//Vertify active status
         return OSC_ACTIVED;
-    
+
     return OSC_INACTIVE;
 }
 
@@ -134,14 +133,14 @@ void Clock_PLL_Config(OSC_OPT_Type opt)
 {
     //Before starting PLL using PLLENTRG, confirm that MainOSC is operating
     if(Clock_OSC_Get_Status(PLL_TYPE) == OSC_INACTIVE) {
-        uint32_t pllc_val = (PLLC_OUTBSEL_MASK &(PLLC_OUTBSEL << PLLC_OUTBSEL_OFFSET)) | 
+        uint32_t pllc_val = (PLLC_OUTBSEL_MASK &(PLLC_OUTBSEL << PLLC_OUTBSEL_OFFSET)) |
                     (PLLC_M_MASK & ((PLLC_MR - 1) << PLLC_M_BITOFFSET)) |
-                    (PLLC_PA_MASK & (PLLC_PAR << PLLC_PA_BITOFFSET)) |
+                    (PLLC_PA_MASK & ((PLLC_PAR/2) << PLLC_PA_BITOFFSET)) |
                     (PLLC_N_MASK & ((PLLC_NR - 1) << PLLC_N_BITOFFSET));
 
         __OSCC_CLK_WRITE(PLLC,PLLC_MASK,pllc_val);
         if(Clock_OSC_Get_Status(M_OSC_TYPE) == OSC_ACTIVED &&
-            opt == OSC_ENABLE) { 
+            opt == OSC_ENABLE) {
             WP_Opt_Reg clk_wp_reg;
             clk_wp_reg.dst_protect_stat_reg_addr = &PROTS1;
             clk_wp_reg.dst_protect_cmd_reg_addr  = &PROTCMD1;
@@ -182,7 +181,7 @@ SET_CLK_DOMAIN_RET_Type Clock_Domain_Set(DOMAIN_CLK_Type index)
 
 SET_CLK_DOMAIN_RET_Type C_ISO_CPUCLK_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 {
-    WP_Opt_Reg *ptr = wp_reg_ptr; 
+    WP_Opt_Reg *ptr = wp_reg_ptr;
     SET_CLK_DOMAIN_Struct val_;
     /*Step 1 Set up a source clock*/
     val_.src_clk_ctl_val = CPUCLK_SRC_CPLLCLK;//Source Clock Setting for C_ISO_CPUCLK

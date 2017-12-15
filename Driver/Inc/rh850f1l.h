@@ -14,21 +14,8 @@
 #include <types.h>
 #include <assert.h>
 #include <iodefine.h>
-
-
-#ifdef __cplusplus
-#define   __I     volatile             /*!< Defines 'read only' permissions */
-#else
-#define   __I     volatile const       /*!< Defines 'read only' permissions */
-#endif
-#define     __O     volatile             /*!< Defines 'write only' permissions */
-#define     __IO    volatile             /*!< Defines 'read / write' permissions */
-
-/* following defines should be used for structure members */
-#define     __IM     volatile const      /*! Defines 'read only' structure member permissions */
-#define     __OM     volatile            /*! Defines 'write only' structure member permissions */
-#define     __IOM    volatile            /*! Defines 'read / write' structure member permissions */
-
+#include <io.h>
+#include <reg.h>
 /**
 * @}
 */
@@ -69,26 +56,6 @@ typedef enum {
 /**
   * @}
   */
-
-
-/** @addtogroup Exported_macros
-  * @{
-  */
-#define SET_BIT(REG, BIT)     ((*REG) |= (BIT)) //param: REG-->the pointer to register
-
-#define CLEAR_BIT(REG, BIT)   ((*REG) &= ~(BIT))
-
-#define READ_BIT(REG, BIT)    ((*REG) & (BIT))
-
-#define CLEAR_REG(REG)        ((*REG) = (0x0))
-
-#define WRITE_REG(REG, VAL)   ((*REG) = (VAL))
-
-#define READ_REG(REG)         ((*REG))
-
-#define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
-
-#define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
 
 #define STR_CONCAT2(s1,s2)    (s1##s2)
 

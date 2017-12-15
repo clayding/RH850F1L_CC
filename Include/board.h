@@ -9,6 +9,12 @@
   */
 #ifndef BOARD_H_
 #define BOARD_H_
+#include "rh850f1l_clk.h"
+#include "rh850f1l_port.h"
+#include "rh850f1l_ext.h"
+#include "rh850f1l_timer.h"
+
+
 
 void Board_MCU_Init();
 

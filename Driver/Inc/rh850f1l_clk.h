@@ -12,6 +12,8 @@
 
 #include "rh850f1l.h"
 
+#define CPUCLK2 40000000//40MHz max
+
 /*Clock Oscillator registers mask or value*/
 #define ROSCCLKACT_MASK     ((uint32_t)(0x01 << 2))
 #define ROSCCLK_FREQUENCY   (8*1024*1024) //Hi IntOSC frequency8MHz
@@ -36,7 +38,7 @@
 #define PLLC_N_BITOFFSET    0
 #define PLLC_N_MASK         ((uint32_t)0x3F << PLLC_N_BITOFFSET)  //bit 5,4,3,2,1,0
 #define PLLC_MASK           (PLLC_OUTBSEL_MASK | PLLC_M_MASK| PLLC_PA_MASK | PLLC_N_MASK)
-/*MainOSC 16MHz outsel =0 ,Mr = 2 -- > M Bit[12:11] = 01,pa = 4,Nr = 40 --> N Bit[5:0] = 10 0111*/ 
+/*MainOSC 16MHz outsel =0 ,Mr = 2 -- > M Bit[12:11] = 01,pa = 4,Nr = 40 --> N Bit[5:0] = 10 0111*/
 #define PLLC_OUTBSEL        0
 #define PLLC_MR             2 //16 MHz ≤ fX ≤ 24 MHz
 #define PLLC_PAR            4 //60 MHz to 80 MHz
@@ -103,7 +105,7 @@ typedef enum { //Domain Clock
     DOMAIN_CLK_TYPE_MAX,
 }DOMAIN_CLK_Type;
 
-typedef enum { //return after Setting CLock Domain 
+typedef enum { //return after Setting CLock Domain
     SET_SRC_CLK_FAIL,
     SET_CLK_DIVIDER_FAIL = SET_SRC_CLK_FAIL,
     SET_CLK_DOMAIN_SUCCESS,
