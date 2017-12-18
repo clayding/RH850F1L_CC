@@ -1,0 +1,27 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+OSTM_CLK	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define OSTM_CLK /;"	macro	line:22	file:
+US_DIV	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define US_DIV /;"	macro	line:23	file:
+MS_DIV	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define MS_DIV /;"	macro	line:24	file:
+S_DIV	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define S_DIV /;"	macro	line:25	file:
+OSTM_DIV	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define OSTM_DIV /;"	macro	line:26	file:
+OSTM_OPERATE_MODE_MASK	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define OSTM_OPERATE_MODE_MASK /;"	macro	line:27	file:
+OSTM_START_INT_MASK	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define OSTM_START_INT_MASK /;"	macro	line:28	file:
+__SET_OSTM_CMP_VAL	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define __SET_OSTM_CMP_VAL(/;"	macro	line:32	file:
+__GET_OSTM_CMP_VAL	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define __GET_OSTM_CMP_VAL(/;"	macro	line:37	file:
+__GET_OSTM_CURRENT_COUNT	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define __GET_OSTM_CURRENT_COUNT(/;"	macro	line:41	file:
+__ENABLE_OSTM_START_TRIG	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define __ENABLE_OSTM_START_TRIG(/;"	macro	line:45	file:
+__ENABLE_OSTM_STOP_TRIG	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define __ENABLE_OSTM_STOP_TRIG(/;"	macro	line:49	file:
+__SET_OSTM_EMU_VAL	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^#define __SET_OSTM_EMU_VAL(/;"	macro	line:53	file:
+uw_tick	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^__IO uint32_t uw_tick;$/;"	variable	line:55
+OSTM_Init	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^void OSTM_Init()$/;"	function	line:62
+OSTM_IncTick	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^void OSTM_IncTick(void)$/;"	function	line:77	signature:(void)
+OSTM_GetTick	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^uint32_t OSTM_GetTick(void)$/;"	function	line:82	signature:(void)
+OSTM_Delay	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^void OSTM_Delay(__IO uint32_t delay_us)$/;"	function	line:87	signature:(__IO uint32_t delay_us)
+OSTM_Start_Ctl_Set	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^void OSTM_Start_Ctl_Set(void* unit,OSTM_OPERATE_MODE_Type opt_mode,$/;"	function	line:104	signature:(void* unit,OSTM_OPERATE_MODE_Type opt_mode, OSTM_START_INT_STAT_Type int_stat)
+OSTM_Count_State_Get	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^uint8_t OSTM_Count_State_Get(void* unit)$/;"	function	line:125	signature:(void* unit)
+OSTM_Cmp_Reload	D:\Workspace\Project\RH850_Cube_CC\Driver\Src\rh850f1l_timer.c	/^void OSTM_Cmp_Reload(const uint32_t new_value)$/;"	function	line:138	signature:(const uint32_t new_value)

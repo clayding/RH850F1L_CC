@@ -15,6 +15,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "rh850f1l_ext.h"
 #include "rh850f1l_wp.h"
+#include "rh850f1l_clk.h"
 
 #define EIINT_ICXX_MASK ((uint16_t)(0x01 << 15))
 #define EIINT_RFXX_MASK ((uint16_t)(0x01 << 12))
