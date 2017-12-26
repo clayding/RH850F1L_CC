@@ -57,168 +57,8 @@ __IO uint32_t uw_tick;
 
 /*************************************OS Timer declaration End*****************/
 
-/*************************************TAUB declaration Start*******************/
-
-#define TAUB0_ADDR          (volatile struct __tag39 *)&TAUB0
-#define TAUB_PRS0_OFFSET    (0)
-#define TAUB_PRS1_OFFSET    (4)
-#define TAUB_PRS2_OFFSET    (8)
-#define TAUB_PRS3_OFFSET    (12)
-
-#define TAUB_PRS0_MASK      ((uint16_t)0x0F))
-#define TAUB_PRS1_OFFSET    ((uint16_t)(0x0F << TAUB_PRS1_OFFSET))
-#define TAUB_PRS2_OFFSET    ((uint16_t)(0x0F << TAUB_PRS2_OFFSET))
-#define TAUB_PRS3_OFFSET    ((uint16_t)(0x0F << TAUB_PRS3_OFFSET))
-
-
-#define TAUB_CMOR_CKS_OFFSET    (14)
-#define TAUB_CMOR_CCS0_OFFSET   (12)
-#define TAUB_CMOR_MAS_OFFSET    (11)
-#define TAUB_CMOR_STS_OFFSET    (8)
-#define TAUB_CMOR_COS_OFFSET    (6)
-#define TAUB_CMOR_MD_OFFSET     (0)
-
-#define TAUB_CMOR_CKS_MASK  ((uint16_t)(0x03 << 14)) //Selects the operation clock
-#define TAUB_CMOR_CCS0_MASK ((uint16_t)(0x01 << 12)) //Selects the count clock for the TAUBnCNTm counter
-
-/*Master or slave channel during synchronous channel operation.This bit is only
-valid for even channels (CHm_even). For odd channels (CHm_odd), it is fixed to 0.*/
-#define TAUB_CMOR_MAS_MASK  ((uint16_t)(0x01 << 11))
-#define TAUB_CMOR_STS_MASK  ((uint16_t)(0x07 << 8))//Selects the external start trigger
-
-/*Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF
-of channel m are updated.These bits are only valid if channel m is in capture function
-(capture mode and capture & one-count mode).*/
-#define TAUB_CMOR_COS_MASK  ((uint16_t)(0x03 << 6))
-
-#define TAUB_CMOR_MD_MASK   ((uint16_t)0x1F) //Specifies the operation mode,14 modes
-
-#define TAUB_CSR_CSF_MASK   ((uint16_t)0x02)
-#define TAUB_CSR_OVF_MASK   ((uint16_t)0x01)
-
-/*These bits can only be rewritten when all counters using CKx are stopped*/
-#define __SET_TAUB_PRESCALER(_PRS_OFFSET_,_DIV_)    do { \
-                                                        MODIFY_REG(&(TAUB0_ADDR->TPS), \
-                                                            (uint16_t)(0x0F <<_PRS_OFFSET_), \
-                                                            _DIV_ << _PRS_OFFSET_); \
-                                                    }while(0)
-
-#define __GET_TAUB_PRESCALER(_RET_,_PRS_OFFSET_)    do{ \
-                                                        _RET_ = TAUB0_ADDR->TPS; \
-                                                    }while(0)
-
-
-#define __SET_TAUB_CDR(_CH_,_VALUE_)                do{ \
-                                                        TAUB0_ADDR->CDR##_CH_ = _VALUE_ & 0xFFFF; \
-                                                    }while(0)
-#define __GET_TAUB_CDR(_RET_,_CH_)                  do{ \
-                                                        _RET_ = TAUB0_ADDR->CDR##_CH_; \
-                                                    }while(0)
-
-#define __GET_TAUB_CNT(_RET,_CH_)                   do{ \
-                                                        _RET_ = TAUB0_ADDR->CNT##_CH_; \
-                                                    }while(0)
-
-#define __SET_TAUB_CMOR_CKS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(&(TAUB0_ADDR->CMOR##_CH_),\
-                                                                TAUB_CMOR_CKS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_CKS_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_CCS0(_CH_,_VALUE_)          do{ \
-                                                        MODIFY_REG(&(TAUB0_ADDR->CMOR##_CH_),\
-                                                                TAUB_CMOR_CCS0_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_CCS0_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_MAS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(&(TAUB0_ADDR->CMOR##_CH_),\
-                                                                TAUB_CMOR_MAS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_MAS_OFFSET); \
-                                                    }while(0)
-
-#define __SET_TAUB_CMOR_STS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(&(TAUB0_ADDR->CMOR##_CH_),\
-                                                                TAUB_CMOR_STS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_STS_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_COS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(&(TAUB0_ADDR->CMOR##_CH_),\
-                                                                TAUB_CMOR_COS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_COS_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_MD(_CH_,_VALUE_)            do{ \
-                                                        MODIFY_REG(&(TAUB0_ADDR->CMOR##_CH_),\
-                                                                TAUB_CMOR_MD_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_MD_OFFSET); \
-                                                    }while(0)
-
-#define __GET_TAUB_CMOR(_RET_,_CH_)                 do{ \
-                                                        _RET_ = TAUB0_ADDR->CMOR##_CH_;\
-                                                    }while(0)
-
-#define __SET_TAUB_CMUR(_CH_,_VALUE_)               do{ \
-                                                        TAUB0_ADDR->CMUR##_CH_ = _VALUE_ & 0x03; \
-                                                    }while(0)
-
-#define __GET_TAUB_CMUR(_RET_,_CH_)                 do{ \
-                                                        _RET_ = (TAUB0_ADDR->CMUR##_CH_ & 0x03); \
-                                                    }while(0)
-
-#define __GET_TAUB_CSR(_RET_,_CH_)                  do{ \
-                                                        _RET_ = (TAUB0_ADDR->CSR##_CH_ & 0x03); \
-                                                    }while(0)
-
-#define __CLEAR_OVERPLOW_FLAG(_CH_)                 do{ \
-                                                        if(!(TAUB0_ADDR->CSC##_CH_ & 0x01)) \
-                                                            TAUB0_ADDR->CSC##_CH_ |= 0x01; \
-                                                    }while(0)
-
-#define __START_COUNTER(_CH_)                       do{ \
-                                                        if(!(TAUB0_ADDR->TE & (0x01 << _CH_))) \
-                                                            MODIFY_REG(&(TAUB0_ADDR->TS), \
-                                                                (0x01 << _CH_),(0x01 << _CH_)); \
-                                                    }while(0)
-#define __STOP_COUNTER(_CH_)                        do{ \
-                                                        if(TAUB0_ADDR->TE & (0x01 << _CH_)) \
-                                                            MODIFY_REG(&(TAUB0_ADDR->TT), \
-                                                                (0x01 << _CH_),(0x01 << _CH_)); \
-                                                    }while(0)
-#define __GET_COUNTER_TE(_RET_,_CH_)                do{ \
-                                                        _RET_ = TAUB0_ADDR->TE & (0x01 << _CH_); \
-                                                    }while(0)
-
-/*return _RET_ 0 -- write successfully ,otherwise failed*/
-#define __ENABLE_RELOAD_DATA(_CH_,_BOOL_,RET_)      do{ \
-                                                        __GET_COUNTER_TE(_RET_,_CH_); \
-                                                        /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                        if(_RET_) break; \
-                                                        if(_BOOL_ == TRUE) \ //Enable
-                                                            TAUB0_ADDR->RDE |= (0x01 << _CH_); \
-                                                        else \ //Disable
-                                                            TAUB0_ADDR->RDE &= ~(0x01 << _CH_); \
-                                                    }while(0)
-
-#define __GET_RELOAD_DATA_STAT(_RET_,_CH_)          do{ \
-                                                        _RET_ = TAUB0_ADDR->RDE & (0x01 << _CH_); \
-                                                    }while(0)
-
-/*selects the control channel for simultaneous rewrite.0 -- Master channel 1-- Another upper channel
- return _RET_ 0 -- write successfully ,otherwise failed*/
-#define __SET_RELOAD_DATA_CTL_CH(_CH_,_VALUE_,_RET_)    do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->RDS |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->RDS &= ~(0x01 << _CH_); \
-                                                        }while(0)
-
-#define __GET_RELOAD_DATA_STAT(_RET_,_CH_)          do{ \
-                                                        _RET_ = TAUB0_ADDR->RDS & (0x01 << _CH_); \
-                                                    }while(0)
-/*selects when the signal that controls simultaneous rewrite is generated*/
-#define __SET_RELAOD_DATA_MODE()
-/*************************************TAUB declaration End*********************/
+static __IO uint8_t taub_channel = 0;
+static ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode );
 
 /*************************************OS Timer defination start****************/
 static void OSTM_Start_Ctl_Set(void* unit,OSTM_OPERATE_MODE_Type opt_mode,
@@ -313,4 +153,42 @@ void OSTM_Cmp_Reload(const uint32_t new_value)
         __SET_OSTM_CMP_VAL(OSTM0,current_count + OSTM_CLK/OSTM_DIV - 1 );
 }
 
-/*************************************OS Timer defination end******************/
+/**************************OS Timer defination end*****************************/
+
+void TAUB_Init(uint8_t channel,TAUB_ChMode_TypeDef *mode)
+{
+    __IO uint8_t i = 0;
+    //Set the TAUBnTPS register to specify the clock frequency of CK0 to CK3.
+    for(;i <= (uint8_t)TAUB_CK3;i++)
+        __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),0);// 2^0 = 1 ==> PLCLK/1
+
+    TAUB_Set_Channel_Mode(mode);
+
+    __START_COUNTER(channel);
+}
+
+
+ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
+{
+    __IO uint16_t ret_mode = 0;
+
+    if(taub_channel >> 0xF) return ERROR;
+
+    __SET_TAUB_CMOR_CKS(taub_channel,mode->clk_sel);
+    __SET_TAUB_CMOR_CCS0(taub_channel,mode->cnt_clk4cnt_counter);
+
+    __SET_TAUB_CMOR_MAS(taub_channel,mode->mas);
+
+    if(mode->sts != TAUB_STS_PROHIBITED)
+        __SET_TAUB_CMOR_STS(taub_channel,mode->sts);
+
+    __SET_TAUB_CMOR_COS(taub_channel,mode->cos);
+
+    if(mode->md_un.md_bits.high7bit != TAUB_MD_PROHIBITED1 &&
+         mode->md_un.md_bits.high7bit != TAUB_MD_PROHIBITED2 )
+         __SET_TAUB_CMOR_MD(taub_channel,mode->md_un.md);
+
+    __GET_TAUB_CMOR(ret_mode,taub_channel);// for test
+
+    return SUCCESS;
+}

@@ -53,7 +53,7 @@ volatile uint16_t* reg_arr_16[][10] = {
   &PPR0,  &PPR1, &PPR2, &PPR8, &PPR9, &PPR10,  &PPR11,  &PPR12, &PPR18, &PPR20,//PPR_TYPE
   &P0,    &P1,   &P2,   &P8,   &P9,   &P10,    &P11,    &P12,   &P18,   &P20,//P_TYPE
   &PNOT0, &PNOT1,&PNOT2,&PNOT8,&PNOT9,&PNOT10, &PNOT11, &PNOT12,&PNOT18,&PNOT20,//PNOT_TYPE
-  
+
 
   &PU0,   &PU1,  &PU2,  &PU8,  &PU9,  &PU10,   &PU11,   &PU12,  &PU18,  &PU20,//PU_TYPE
   &PD0,   &unuse,&unuse,&PD8,  &PD9,  &PD10,   &PD11,   &unuse, &unuse, &unuse,//PD_TYPE
@@ -108,7 +108,7 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
     Port_Mode_Ctl_Bit_Config(portx,PORT_MODE,mask_bit);
     //Step 5 Specify PIPCn.PIPCn_m bit = 0    I/O mode is selected by PMn.PMn_m(Software I/O control)
     Port_IP_Bit_Config(portx,SOFT_AF_MODE,mask_bit);
-    
+
     if(Port_InitStruct->io_mode == PORT_OUTPUT_MODE){
       Port_Char_Bit_Config(portx, PORT_OUTPUT_MODE, Port_InitStruct->echar_t, mask_bit); //Set electronic char
       Port_Bidirection_Ctl_Bit_Config(portx,Port_InitStruct->bmc_t,mask_bit);
@@ -122,8 +122,8 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
         Port_Alt_Func_Ctl_Config(portx, Port_InitStruct->alter_t, mask_bit);//Set Alternative Function
         Port_Mode_Ctl_Bit_Config(portx, Port_InitStruct->opt_mode, mask_bit);//Set Alternative Mode
       }
-      
-    } 
+
+    }
 
   }
 
@@ -330,10 +330,10 @@ void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_
  *  0             0           1             Alternative function 2
  *  0             1           0             Alternative function 3
  *  0             1           1             Alternative function 4
- *  1             0           0             Alternative function 5     
+ *  1             0           0             Alternative function 5
  *
  * #define ALT_PFC_MASK    0x01
- * #define ALT_PFCE_MASK   (0x01 << 1)    
+ * #define ALT_PFCE_MASK   (0x01 << 1)
  * #define ALT_PFCAE_MASK  (0x01 << 2)
  * Above defined in port.h
  **************************************************************************************/
@@ -423,9 +423,9 @@ void Port_Alt_Func_Ctl_Config(Port_Group_Index_Type portx, ALTERNATIVE_REG_Type 
   }
 }
 
-    /******************************Pin Data Input/Output***********************************/
+/******************************Pin Data Input/Output***********************************/
 
-    void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx, Bidirect_Mode_Ctl_Type bmc_t, uint16_t mask_bit)
+void Port_Bidirection_Ctl_Bit_Config(Port_Group_Index_Type portx, Bidirect_Mode_Ctl_Type bmc_t, uint16_t mask_bit)
 {
   __IO uint16_t bitpos = mask_bit,current_bit = 0x00;
   __IO uint16_t *target_reg = NULL;
@@ -592,7 +592,7 @@ void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data)
     CLEAR_REG(target_reg);
   }else{
     WRITE_REG(target_reg,data);
-  
+
   }
 }
 /**
@@ -611,9 +611,9 @@ void Port_Invert_OutputData_Bit(Port_Group_Index_Type portx, uint16_t mask_bit)
 #endif
 
   __GET_TARGET_REG(target_reg, PNOT_TYPE, portx);
-  
+
   SET_BIT(target_reg, mask_bit);
-  
+
 }
 
 /*Configuration of Electrical Characteristics*/
@@ -625,7 +625,7 @@ void Port_Char_Bit_Config(Port_Group_Index_Type portx, IO_TypeDef io_mode,Elect_
 #if ASSERT_EN
   assert_param(IS_Port_Pin(bitpos));
 #endif
-    if(io_mode == PORT_INPUT_MODE){  
+    if(io_mode == PORT_INPUT_MODE){
       __GET_TARGET_REG(target_reg,PU_TYPE,portx);
 
       /*获取当前bitpos的置位信息*/
@@ -658,7 +658,7 @@ void Port_Char_Bit_Config(Port_Group_Index_Type portx, IO_TypeDef io_mode,Elect_
         CLEAR_BIT(target_reg, bitpos);
     }
 
-    if(io_mode == PORT_OUTPUT_MODE){ 
+    if(io_mode == PORT_OUTPUT_MODE){
       WP_Opt_Reg  dst_reg;
       __IO uintptr_t *val_32 = NULL;
 
