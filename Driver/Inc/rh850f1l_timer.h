@@ -421,6 +421,7 @@ typedef struct{
 void OSTM_Init();
 void OSTM_Delay(__IO uint32_t delay_us);
 void OSTM_Cmp_Reload(const uint32_t new_value);
+uint8_t OSTM_Count_State_Get(void* unit);
 
 void TAUB_Init(uint8_t channel,TAUB_ChMode_TypeDef *mode);
 

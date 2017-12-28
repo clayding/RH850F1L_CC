@@ -270,9 +270,9 @@
 	.dw #_Dummy_EI ; INT131
 	.dw #_Dummy_EI ; INT132
 	.dw #_Dummy_EI ; INT133
-	.dw #_Dummy_EI ; INT134
-	.dw #_Dummy_EI ; INT135
-	.dw #_Dummy_EI ; INT136
+	.dw #_TAUB0CH0IntHandler ; INT134
+	.dw #_TAUB0CH1IntHandler ; INT135
+	.dw #_TAUB0CH2IntHandler ; INT136
 	.dw #_Dummy_EI ; INT137
 	.dw #_Dummy_EI ; INT138
 	.dw #_Dummy_EI ; INT139

@@ -72,12 +72,35 @@ void Board_Port_Config(void)
     {
         Eiint_InitTypeDef eiint;
         eiint.eiint_ch = P_12;
+        eiint.eiint_ext_int = 1;
         eiint.eiint_process = INT_PROCESS_ENABLE;
         eiint.eiint_refer_method = TABLE_REFER_METHOD;
         eiint.eiint_priority = INT_PRIORITY_7;
         eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
         Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 76;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 134;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
         OSTM_Init();
+        {
+            TAUB_ChMode_TypeDef ch_mode;
+            ch_mode.clk_sel = TAUB_CK0;
+            ch_mode.cnt_clk4cnt_counter = 0;
+            ch_mode.mas = 0;
+            ch_mode.sts = 0;
+            ch_mode.cos = 0;
+            ch_mode.md_un.md_bits.high7bit = 0;
+            ch_mode.md_un.md_bits.low1bit = 0;
+            TAUB_Init(0,&ch_mode);
+        }
     }
 
 }

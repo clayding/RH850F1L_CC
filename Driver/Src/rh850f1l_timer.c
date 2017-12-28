@@ -64,7 +64,7 @@ static ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode );
 static void OSTM_Start_Ctl_Set(void* unit,OSTM_OPERATE_MODE_Type opt_mode,
     OSTM_START_INT_STAT_Type int_stat);
 
-static uint8_t OSTM_Count_State_Get(void* unit);
+uint8_t OSTM_Count_State_Get(void* unit);
 
 void OSTM_Init()
 {
@@ -93,9 +93,9 @@ uint32_t OSTM_GetTick(void)
 
 void OSTM_Delay(__IO uint32_t delay_us)
 {
-  uint32_t tick_start = 0;
+  __IO uint32_t tick_start = 0,current_tick = 0;
   tick_start = OSTM_GetTick();
-  while((OSTM_GetTick() - tick_start) < delay_us);
+  while(((current_tick = OSTM_GetTick()) - tick_start) < delay_us);
 }
 
 
@@ -158,13 +158,20 @@ void OSTM_Cmp_Reload(const uint32_t new_value)
 void TAUB_Init(uint8_t channel,TAUB_ChMode_TypeDef *mode)
 {
     __IO uint8_t i = 0;
+
+    taub_channel = channel;
     //Set the TAUBnTPS register to specify the clock frequency of CK0 to CK3.
     for(;i <= (uint8_t)TAUB_CK3;i++)
-        __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),0);// 2^0 = 1 ==> PLCLK/1
+        __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),10);// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
 
-    TAUB_Set_Channel_Mode(mode);
 
-    __START_COUNTER(channel);
+    if(TAUB_Set_Channel_Mode(mode) == ERROR){
+        while(1){};
+    }
+
+    __SET_TAUB_CDR(taub_channel,0x9896); //0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
+
+    __START_COUNTER(taub_channel);
 }
 
 
@@ -172,7 +179,7 @@ ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 {
     __IO uint16_t ret_mode = 0;
 
-    if(taub_channel >> 0xF) return ERROR;
+    if(taub_channel / 0x10) return ERROR;//guarantee that taub_channel is [0,15]
 
     __SET_TAUB_CMOR_CKS(taub_channel,mode->clk_sel);
     __SET_TAUB_CMOR_CCS0(taub_channel,mode->cnt_clk4cnt_counter);
@@ -184,9 +191,10 @@ ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 
     __SET_TAUB_CMOR_COS(taub_channel,mode->cos);
 
-    if(mode->md_un.md_bits.high7bit != TAUB_MD_PROHIBITED1 &&
-         mode->md_un.md_bits.high7bit != TAUB_MD_PROHIBITED2 )
-         __SET_TAUB_CMOR_MD(taub_channel,mode->md_un.md);
+    if(mode->md_un.md_bits.high7bit == TAUB_MD_PROHIBITED1 ||
+         mode->md_un.md_bits.high7bit == TAUB_MD_PROHIBITED2 )
+         return ERROR;
+    __SET_TAUB_CMOR_MD(taub_channel,mode->md_un.md);
 
     __GET_TAUB_CMOR(ret_mode,taub_channel);// for test
 

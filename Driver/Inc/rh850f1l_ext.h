@@ -190,8 +190,8 @@
 
 typedef enum{
     P_0,P_1,P_2,P_3,P_4,P_5,P_6,P_7,P_8,P_9,P_10,
-    P_11,P_12,P_13,P_14,P_15,
-}Eiint_REQType;
+    P_11,P_12=123,P_13,P_14,P_15,
+}Eiint_CH_NO_Type;
 
 typedef enum{
     SELB_INTC1_REG,
@@ -231,6 +231,7 @@ typedef uint8_t Eiint_DetectionTypeDef;
 
 typedef struct{
     uint16_t eiint_ch;
+    uint8_t  eiint_ext_int;//if it's external interruption,please set this bit
     EIINT_PROCESS_Type eiint_process;
     EIINT_REFER_METHOD_Type eiint_refer_method;
     EIINT_PRIORITY_Type eiint_priority;
