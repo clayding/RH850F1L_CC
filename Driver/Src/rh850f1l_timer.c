@@ -155,11 +155,14 @@ void OSTM_Cmp_Reload(const uint32_t new_value)
 
 /**************************OS Timer defination end*****************************/
 
-void TAUB_Init(uint8_t channel,TAUB_ChMode_TypeDef *mode)
+void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode)
 {
     __IO uint8_t i = 0;
+    uint16_t channel_mask = 0x00;
 
-    taub_channel = channel;
+    if(mode->ch_no / 16) return; //guarantee that taub_channel is [0,15]
+    taub_channel = mode->ch_no;
+
     //Set the TAUBnTPS register to specify the clock frequency of CK0 to CK3.
     for(;i <= (uint8_t)TAUB_CK3;i++)
         __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),10);// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
@@ -171,15 +174,61 @@ void TAUB_Init(uint8_t channel,TAUB_ChMode_TypeDef *mode)
 
     __SET_TAUB_CDR(taub_channel,0x9896); //0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
 
-    __START_COUNTER(taub_channel);
+    channel_mask |= 0x01 << taub_channel;
+    __START_COUNTER(channel_mask);
+}
+
+void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
+{
+    uint8_t i = 0;
+    uint16_t channel_mask = 0x00;
+
+    for(;i <= (uint8_t)TAUB_CK3;i++)
+        __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),10);// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
+
+    for(i = 0;i< size;i++){
+        if(mode_arr[i]->ch_no / 16) continue;
+
+        if(TAUB_Set_Channel_Mode(&mode[i]) == ERROR){
+            while(1){};
+        }
+        __SET_TAUB_CDR(taub_channel,0x9896); //0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
+
+        if(mode_arr[i].enable_sim_cfg){
+            TAUB_Simultaneous_Rewrite_Init(taub_channel,mode_arr[i].sim_cfg);
+        }
+
+        chanel_mask |= (0x01 << taub_channel);
+    }
+
+    __START_COUNTER(chanel_mask);
+
+}
+
+ErrorStatus TAUB_Simultaneous_Rewrite_Init(uint8_t channel_num,TAUB_SIMULREWR_CFG_TypeDef sim_cfg)
+{
+    uint16_t ret = 0;
+
+    __ENABLE_RELOAD_DATA(channel_num,TRUE,ret);
+    if(ret) return ERROR;
+
+    __SET_RELOAD_DATA_CTL_CH(channel_num,sim_cfg.ch_ctl,ret);
+    if(ret) return ERROR;
+
+    __SET_RELAOD_DATA_MODE(channel_num,sim_cfg.sig_gen,ret);
+    if(ret) return ERROR;
+
+    __SET_RELAOD_DATA_CTL(channel_num,sim_cfg.is_trig_ch,ret);
+    if(ret) return ERROR;
+
+    __ENABLE_RELOAD_DATA_TRIGGER(channel_num);
+
 }
 
 
 ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 {
     __IO uint16_t ret_mode = 0;
-
-    if(taub_channel / 0x10) return ERROR;//guarantee that taub_channel is [0,15]
 
     __SET_TAUB_CMOR_CKS(taub_channel,mode->clk_sel);
     __SET_TAUB_CMOR_CCS0(taub_channel,mode->cnt_clk4cnt_counter);

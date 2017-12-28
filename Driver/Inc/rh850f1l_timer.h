@@ -238,23 +238,23 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
                                                             SET_BIT(TAUB_CSCn_ADDR(_CH_),0x01); \
                                                     }while(0)
 
-#define __START_COUNTER(_CH_)                       do{ \
-                                                        if(!(TAUB0_ADDR->TE & (0x01 << _CH_))) \
-                                                            MODIFY_REG(&(TAUB0_ADDR->TS), \
-                                                                (0x01 << _CH_),(0x01 << _CH_)); \
+#define __START_COUNTER(_CH_MASK_)                  do{ \
+                                                        if((TAUB0_ADDR->TE & _CH_MASK_) != _CH_MASK_) \
+                                                            SET_BIT(&(TAUB0_ADDR->TS), \
+                                                                _CH_MASK_); \
                                                     }while(0)
 #define __STOP_COUNTER(_CH_)                        do{ \
-                                                        if(TAUB0_ADDR->TE & (0x01 << _CH_)) \
-                                                            MODIFY_REG(&(TAUB0_ADDR->TT), \
-                                                                (0x01 << _CH_),(0x01 << _CH_)); \
+                                                        if(TAUB0_ADDR->TE & _CH_MASK_ != 0x00 ) \
+                                                            CLEAR_BIT(&(TAUB0_ADDR->TT), \
+                                                                _CH_MASK_); \
                                                     }while(0)
-#define __GET_COUNTER_TE(_RET_,_CH_)                do{ \
-                                                        _RET_ = TAUB0_ADDR->TE & (0x01 << _CH_); \
+#define __GET_COUNTER_TE(_RET_,_CH_MASK_)                do{ \
+                                                        _RET_ = TAUB0_ADDR->TE & _CH_MASK_; \
                                                     }while(0)
 
 /*return _RET_ 0 -- write successfully ,otherwise failed*/
 #define __ENABLE_RELOAD_DATA(_CH_,_BOOL_,RET_)          do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
+                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
                                                             if(_BOOL_ == TRUE)/*enable*/ \
@@ -270,7 +270,7 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
 /*Selects the control channel for simultaneous rewrite.0 -- Master channel 1-- Another upper channel
  return _RET_ 0 -- write successfully ,otherwise failed*/
 #define __SET_RELOAD_DATA_CTL_CH(_CH_,_VALUE_,_RET_)    do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
+                                                            __GET_COUNTER_TE(_RET_,0x01 <<_CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
                                                             if(_VALUE_) \
@@ -279,13 +279,13 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
                                                                 TAUB0_ADDR->RDS &= ~(0x01 << _CH_); \
                                                         }while(0)
 
-#define __GET_RELOAD_DATA_STAT(_RET_,_CH_)              do{ \
+#define __GET_RELOAD_DATA_CTL_CH(_RET_,_CH_)            do{ \
                                                             _RET_ = TAUB0_ADDR->RDS & (0x01 << _CH_); \
                                                         }while(0)
 /*Selects when the signal that controls simultaneous rewrite is generated
   return _RET_ 0 -- write successfully ,otherwise failed*/
 #define __SET_RELAOD_DATA_MODE(_CH_,_VALUE_,_RET_)      do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
+                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
                                                             if(_VALUE_) \
@@ -301,7 +301,7 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
 /*Specifies the channel that generates the INTTAUBnIm signal that triggers simultaneous
 rewrite. return _RET_:0 -- write successfully ,otherwise failed*/
 #define __SET_RELAOD_DATA_CTL(_CH_,_VALUE_,_RET_)       do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
+                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
                                                             if(_VALUE_) \
@@ -356,7 +356,7 @@ rewrite. return _RET_:0 -- write successfully ,otherwise failed*/
 /*Specifies the output mode of each channel,__VALUE_: 0-- Independent channel output mode
   1-- Synchronous channel output mode*/
 #define __SET_OUTPUT_MODE(_CH_,_VALUE_,_RET_)           do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
+                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
                                                             if(_VALUE_) \
@@ -373,7 +373,7 @@ rewrite. return _RET_:0 -- write successfully ,otherwise failed*/
 /*Specifies the output mode of each channel in combination with TAUBnTOMm,
 _VALUE_: 0-- Operation mode 1 1-- Operation mode 2*/
 #define __SET_OUTPUT_CONFIG(_CH_,_VALUE_,_RET_)         do{ \
-                                                            __GET_COUNTER_TE(_RET_,_CH_); \
+                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
                                                             if(_VALUE_) \
@@ -403,6 +403,7 @@ return _RET_: 0-- Operation mode 1  1-- Operation mode 2*/
 typedef uint8_t TAUB_Md_High7Bit_TypeDef;
 
 typedef struct{
+    uint8_t ch_no;
     TAUB_CLK_SEL_Type clk_sel;  //Selects the operation clock
     uint8_t cnt_clk4cnt_counter;//Selects the count clock for the TAUBnCNTm counter
     TAUB_MAS_Type mas;
@@ -415,7 +416,30 @@ typedef struct{
             TAUB_MD_LOW1BIT_Type low1bit:1;
         }md_bits;
     }md_un;
+    uint8_t enable_sim_cfg;//Enables/disables simultaneous rewrite of the data register of channel ch_no
+    TAUB_SIMULREWR_CFG_TypeDef sim_cfg;
 }TAUB_ChMode_TypeDef;
+
+typedef enum{
+    TAUB_MASTER_CH_CTL,//0: Master channel
+    TAUB_UPPER_CH_CTL,//1: Another upper channel
+}TAUB_CH_CTL_Type; //Selects the control channel for simultaneous rewrite
+
+typedef enum{
+    TAUB_MASTER_START_CNT,
+    TAUB_TOPOf_TRIANGLE_WAVE,
+}TAUB_WHEN_SIG_GEN_Type;//Selects when the signal that triggers simultaneous rewrite is generated
+
+typedef enum{
+    TAUB_IS_TRIG_CH,
+    TAUB_NOT_TRIG_CH = !TAUB_IS_TRIG_CH;
+}TAUB_AS_TRIG_CH;
+
+typedef struct{
+    TAUB_CH_CTL_Type ch_ctl;
+    TAUB_WHEN_SIG_GEN_Type sig_gen;
+    TAUB_AS_TRIG_CH is_trig_ch;
+}TAUB_SIMULREWR_CFG_TypeDef;//simultaneous rewrite configration
 /*************************************TAUB declaration End*********************/
 
 void OSTM_Init();
@@ -423,7 +447,7 @@ void OSTM_Delay(__IO uint32_t delay_us);
 void OSTM_Cmp_Reload(const uint32_t new_value);
 uint8_t OSTM_Count_State_Get(void* unit);
 
-void TAUB_Init(uint8_t channel,TAUB_ChMode_TypeDef *mode);
+void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode);
 
 
 #endif//RH850F1L_TIMER_H

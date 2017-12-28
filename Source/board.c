@@ -91,7 +91,8 @@ void Board_Port_Config(void)
 
         OSTM_Init();
         {
-            TAUB_ChMode_TypeDef ch_mode;
+            /*TAUB_ChMode_TypeDef ch_mode;
+            ch_mode.ch_no = 0;
             ch_mode.clk_sel = TAUB_CK0;
             ch_mode.cnt_clk4cnt_counter = 0;
             ch_mode.mas = 0;
@@ -99,7 +100,28 @@ void Board_Port_Config(void)
             ch_mode.cos = 0;
             ch_mode.md_un.md_bits.high7bit = 0;
             ch_mode.md_un.md_bits.low1bit = 0;
-            TAUB_Init(0,&ch_mode);
+            TAUB_Independent_Init(&ch_mode);*/
+
+            TAUB_ChMode_TypeDef chmode[2];
+            ch_mode[0].ch_no = 0;
+            ch_mode[0].clk_sel = TAUB_CK0;
+            ch_mode[0].cnt_clk4cnt_counter = 0;
+            ch_mode[0].mas = 0;
+            ch_mode[0].sts = 0;
+            ch_mode[0].cos = 0;
+            ch_mode.md_un.md_bits.high7bit = 0;
+            ch_mode.md_un.md_bits.low1bit = 0;
+
+            ch_mode[0].enable_sim_cfg = 1;
+            ch_mode[0].sim_cfg.ch_ctl = 1;
+            ch_mode[0].sig_gen = 0;
+            ch_mode[0].is_trig_ch = 1;
+
+            ch_mode[1] = ch_mode[0];
+            ch_mode[1].is_trig_ch = 0;
+
+
+
         }
     }
 
