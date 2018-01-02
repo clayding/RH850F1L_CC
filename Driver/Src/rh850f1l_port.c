@@ -116,14 +116,15 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
       Port_IO_Mode_Bit_Config(portx,PORT_OUTPUT_MODE,mask_bit);
     }else if(Port_InitStruct->io_mode == PORT_INPUT_MODE){
       Port_Char_Bit_Config(portx, PORT_INPUT_MODE,Port_InitStruct->echar_t, mask_bit);  //Set electronic char
-      if(Port_InitStruct->opt_mode == PORT_MODE){
-        Port_InputBuf_Ctl_Bit_Config(portx,INPUT_BUF_ENABLED,mask_bit);
-      }else{
-        Port_Alt_Func_Ctl_Config(portx, Port_InitStruct->alter_t, mask_bit);//Set Alternative Function
-        Port_Mode_Ctl_Bit_Config(portx, Port_InitStruct->opt_mode, mask_bit);//Set Alternative Mode
-      }
-
     }
+
+    if(Port_InitStruct->opt_mode == PORT_MODE){
+      Port_InputBuf_Ctl_Bit_Config(portx,INPUT_BUF_ENABLED,mask_bit);
+    }else{
+      Port_Alt_Func_Ctl_Config(portx, Port_InitStruct->alter_t, mask_bit);//Set Alternative Function
+      Port_Mode_Ctl_Bit_Config(portx, Port_InitStruct->opt_mode, mask_bit);//Set Alternative Mode
+    }
+
 
   }
 

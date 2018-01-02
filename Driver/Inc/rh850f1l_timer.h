@@ -253,7 +253,7 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
                                                     }while(0)
 
 /*return _RET_ 0 -- write successfully ,otherwise failed*/
-#define __ENABLE_RELOAD_DATA(_CH_,_BOOL_,RET_)          do{ \
+#define __ENABLE_RELOAD_DATA(_CH_,_BOOL_,_RET_)          do{ \
                                                             __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
                                                             /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
                                                             if(_RET_) break; \
@@ -402,23 +402,6 @@ return _RET_: 0-- Operation mode 1  1-- Operation mode 2*/
                                                         }while(0)
 typedef uint8_t TAUB_Md_High7Bit_TypeDef;
 
-typedef struct{
-    uint8_t ch_no;
-    TAUB_CLK_SEL_Type clk_sel;  //Selects the operation clock
-    uint8_t cnt_clk4cnt_counter;//Selects the count clock for the TAUBnCNTm counter
-    TAUB_MAS_Type mas;
-    TAUB_STS_Type sts;
-    uint8_t cos;//Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF of channel m are updated
-    union{
-        uint8_t md;
-        struct{
-            TAUB_Md_High7Bit_TypeDef high7bit:7;
-            TAUB_MD_LOW1BIT_Type low1bit:1;
-        }md_bits;
-    }md_un;
-    uint8_t enable_sim_cfg;//Enables/disables simultaneous rewrite of the data register of channel ch_no
-    TAUB_SIMULREWR_CFG_TypeDef sim_cfg;
-}TAUB_ChMode_TypeDef;
 
 typedef enum{
     TAUB_MASTER_CH_CTL,//0: Master channel
@@ -432,14 +415,43 @@ typedef enum{
 
 typedef enum{
     TAUB_IS_TRIG_CH,
-    TAUB_NOT_TRIG_CH = !TAUB_IS_TRIG_CH;
+    TAUB_NOT_TRIG_CH = !TAUB_IS_TRIG_CH,
 }TAUB_AS_TRIG_CH;
 
 typedef struct{
-    TAUB_CH_CTL_Type ch_ctl;
-    TAUB_WHEN_SIG_GEN_Type sig_gen;
-    TAUB_AS_TRIG_CH is_trig_ch;
+    TAUB_CH_CTL_Type ch_ctl;//
+    TAUB_WHEN_SIG_GEN_Type sig_gen;//
+    TAUB_AS_TRIG_CH is_trig_ch;//
 }TAUB_SIMULREWR_CFG_TypeDef;//simultaneous rewrite configration
+
+typedef struct{
+    uint8_t ch_no;
+    TAUB_CLK_SEL_Type clk_sel;  //Selects the operation clock
+    uint8_t cnt_clk4cnt_counter;//Selects the count clock for the TAUBnCNTm counter
+    uint8_t clk_div;
+    uint16_t cdr;
+    TAUB_MAS_Type mas;
+    TAUB_STS_Type sts;
+    uint8_t cos;//Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF of channel m are updated
+    union{
+        uint8_t md;
+        struct{
+            TAUB_MD_LOW1BIT_Type low1bit:1;
+            TAUB_Md_High7Bit_TypeDef high7bit:7;
+        }md_bits;
+    }md_un;
+    uint8_t enable_sim_cfg;//Enables/disables simultaneous rewrite of the data register of channel ch_no
+    TAUB_SIMULREWR_CFG_TypeDef sim_cfg;
+}TAUB_ChMode_TypeDef;
+
+/*channel output modes*/
+typedef enum{
+    TAUB_BY_SOFTWARE_MODE,
+    TAUB_INDEPENDENT_OUTPUT_MODE_1,
+    TAUB_INDEPENDENT_OUTPUT_MODE_2,
+    TAUB_SYNCHRONOUS_OUTPUT_MODE_1,
+    TAUB_SYNCHRONOUS_OUTPUT_MODE_2,
+}TAUB_CH_OUTPUT_MODE_Type;
 /*************************************TAUB declaration End*********************/
 
 void OSTM_Init();
@@ -448,6 +460,8 @@ void OSTM_Cmp_Reload(const uint32_t new_value);
 uint8_t OSTM_Count_State_Get(void* unit);
 
 void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode);
+
+void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode);
 
 
 #endif//RH850F1L_TIMER_H

@@ -30,6 +30,7 @@ static void led_blink2(void);
 LED_CTL_Struct lcs[3];
 
 extern void (*Eiit_Handler_Ptr)(void);
+extern void (*Eiit_Handler_Ptr_2)(void);
 
 void main(void)
 {
@@ -39,10 +40,10 @@ void main(void)
 
     while (1)
     {
-        led_blink1();
-        mdelay(1000);
-        if(OSTM_Count_State_Get(&OSTM0) == 0x00)
-            while(1){}
+        // led_blink1();
+        // mdelay(1000);
+        // if(OSTM_Count_State_Get(&OSTM0) == 0x00)
+        //     while(1){}
 
     }
 }
@@ -65,6 +66,7 @@ void LED_Struct_Init(LED_CTL_Struct *lcs_t, uint8_t arr_size)
     lcs_t->led_pin = PORT_PIN_6;
 
     Eiit_Handler_Ptr = led_blink2;
+    Eiit_Handler_Ptr_2 = led_blink1;
 }
 
 void LED_Blink(LED_CTL_Struct lcs_t[], uint8_t arr_size,uint8_t ledn)

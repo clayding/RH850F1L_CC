@@ -111,6 +111,7 @@ __IO uint8_t *filter_ctl_reg[] = {
 
 void Inp12Handler(unsigned long eiic);
 void (*Eiit_Handler_Ptr)(void);
+void (*Eiit_Handler_Ptr_2)(void);
 static uintptr_t Eiit_Get_Address_By_Channel(uint8_t channel_no);
 
 void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
@@ -301,13 +302,13 @@ void OSTMIntHandler(unsigned long eiic)
 #pragma interrupt TAUB0CH0IntHandler(channel = 134, enable = false, callt = false, fpu = false)
 void TAUB0CH0IntHandler(unsigned long eiic)
 {
-    Eiit_Handler_Ptr();
+    //Eiit_Handler_Ptr();
 }
 
 #pragma interrupt TAUB0CH1IntHandler(channel = 135, enable = false, callt = false, fpu = false)
 void TAUB0CH1IntHandler(unsigned long eiic)
 {
-
+    //Eiit_Handler_Ptr_2();
 }
 
 #pragma interrupt TAUB0CH02ntHandler(channel = 136, enable = false, callt = false, fpu = false)

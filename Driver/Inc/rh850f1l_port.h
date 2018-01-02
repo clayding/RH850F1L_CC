@@ -28,7 +28,7 @@
 #define PIN_Index_13  ((uint8_t)0x0D)
 #define PIN_Index_14  ((uint8_t)0x0E)
 #define PIN_Index_15  ((uint8_t)0x0F)
- 
+
 
 #define PORT_PIN_0     ((uint16_t)0x01 << PIN_Index_0 )
 #define PORT_PIN_1     ((uint16_t)0x01 << PIN_Index_1 )
@@ -123,8 +123,8 @@ typedef enum{ //14
                                (((uint32_t)(0x01 << index)) == IPortGroup0))
 
 #define ALT_PFC_MASK    0x01
-#define ALT_PFCE_MASK   (0x01 << 1)    
-#define ALT_PFCAE_MASK  (0x01 << 2)    
+#define ALT_PFCE_MASK   (0x01 << 1)
+#define ALT_PFCAE_MASK  (0x01 << 2)
 
 typedef enum {
   ALT_FUNC_1,//0x00  Alternative function 1
@@ -274,14 +274,14 @@ uint16_t Port_Read_OutputData(Port_Group_Index_Type portx);
   * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
   * @param  mask_bit:  specifies the port bit to write.
   *   This parameter can be PORT_PIN_x where x can be (0..15).
-  * 
+  *
   */
 void Port_Write_OutputData_Bit(Port_Group_Index_Type portx,  uint16_t mask_bit,BitAction bit_val);
 
 /**
   * @brief  Write the specified data to output port..
   * @param  portx: where x can be (0 to 2, 8 to 12, 18,and 20).
-  * 
+  *
   */
 void Port_Write_OutputData(Port_Group_Index_Type portx,uint16_t data);
 
