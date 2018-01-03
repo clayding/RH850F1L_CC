@@ -34,6 +34,8 @@
       <EventFunction-SaveTraceNumber>0</EventFunction-SaveTraceNumber>
       <EventFunction-SaveNumberOfProcessorElement>1</EventFunction-SaveNumberOfProcessorElement>
       <EventFunction-SaveNumberOfTimerChannel>3</EventFunction-SaveNumberOfTimerChannel>
+      <DeviceChangedCounter>0</DeviceChangedCounter>
+      <DeviceName>R7F701056xxFP</DeviceName>
     </Instance>
   </Class>
   <Class Guid="2c267d36-9968-416b-8f39-cfcf1e069830">
