@@ -164,18 +164,18 @@ void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode)
     taub_channel = mode->ch_no;
 
     //Set the TAUBnTPS register to specify the clock frequency of CK0 to CK3.
-    for(;i <= (uint8_t)TAUB_CK3;i++)
-        __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),mode->clk_div);
+    for(;i <= (uint8_t)TAU_CK3;i++)
+        __SET_TAU_PRESCALER(_TAUB0,_TAUB0_PRSn_OFFSET(i),mode->clk_div);
 
 
     if(TAUB_Set_Channel_Mode(mode) == ERROR){
         while(1){};
     }
 
-    __SET_TAUB_CDR(taub_channel,mode->cdr);
+    __SET_TAU_CDR(_TAUB0,taub_channel,mode->cdr);
 
     channel_mask |= 0x01 << taub_channel;
-    __START_COUNTER(channel_mask);
+    __START_COUNTER(_TAUB0,channel_mask);
 }
 
 void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
@@ -183,8 +183,8 @@ void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
     uint8_t i = 0;
     uint16_t channel_mask = 0x00;
 
-    for(;i <= (uint8_t)TAUB_CK3;i++)
-        __SET_TAUB_PRESCALER(TAUB_PRSn_OFFSET(i),mode_arr[i].clk_div);// 40M/16 = 2500 --- 1ms
+    for(;i <= (uint8_t)TAU_CK3;i++)
+        __SET_TAU_PRESCALER(_TAUB0,_TAUB0_PRSn_OFFSET(i),mode_arr[i].clk_div);// 40M/16 = 2500 --- 1ms
 
     for(i = 0;i< size;i++){
         if(mode_arr[i].ch_no / 16) continue;
@@ -193,7 +193,7 @@ void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
         if(TAUB_Set_Channel_Mode(&mode_arr[i]) == ERROR){
             while(1){};
         }
-        __SET_TAUB_CDR(taub_channel,mode_arr[i].cdr);
+        __SET_TAU_CDR(_TAUB0,taub_channel,mode_arr[i].cdr);
 
         if(mode_arr[i].enable_sim_cfg){
             TAUB_Simultaneous_Rewrite_Init(taub_channel,mode_arr[i].sim_cfg);
@@ -204,7 +204,7 @@ void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
         channel_mask |= (0x01 << taub_channel);
     }
 
-    __START_COUNTER(channel_mask);
+    __START_COUNTER(_TAUB0,channel_mask);
 
 }
 
@@ -212,19 +212,19 @@ ErrorStatus TAUB_Simultaneous_Rewrite_Init(uint8_t channel_num,TAUB_SIMULREWR_CF
 {
     uint16_t ret = 0;
 
-    __ENABLE_RELOAD_DATA(channel_num,TRUE,ret);
+    __ENABLE_RELOAD_DATA(_TAUB0,channel_num,TRUE,ret);
     if(ret) return ERROR;
 
-    __SET_RELOAD_DATA_CTL_CH(channel_num,sim_cfg.ch_ctl,ret);
+    __SET_RELOAD_DATA_CTL_CH(_TAUB0,channel_num,sim_cfg.ch_ctl,ret);
     if(ret) return ERROR;
 
-    __SET_RELAOD_DATA_MODE(channel_num,sim_cfg.sig_gen,ret);
+    __SET_RELAOD_DATA_MODE(_TAUB0,channel_num,sim_cfg.sig_gen,ret);
     if(ret) return ERROR;
 
-    __SET_RELAOD_DATA_CTL(channel_num,sim_cfg.is_trig_ch,ret);
+    __SET_RELAOD_DATA_CTL(_TAUB0,channel_num,sim_cfg.is_trig_ch,ret);
     if(ret) return ERROR;
 
-    __ENABLE_RELOAD_DATA_TRIGGER(channel_num);
+    __ENABLE_RELOAD_DATA_TRIGGER(_TAUB0,channel_num);
 
 }
 
@@ -237,22 +237,22 @@ ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 {
     __IO uint16_t ret_mode = 0;
 
-    __SET_TAUB_CMOR_CKS(taub_channel,mode->clk_sel);
-    __SET_TAUB_CMOR_CCS0(taub_channel,mode->cnt_clk4cnt_counter);
+    __SET_TAU_CMOR_CKS(_TAUB0,taub_channel,mode->clk_sel);
+    __SET_TAU_CMOR_CCS0(_TAUB0,taub_channel,mode->cnt_clk4cnt_counter);
 
-    __SET_TAUB_CMOR_MAS(taub_channel,mode->mas);
+    __SET_TAU_CMOR_MAS(_TAUB0,taub_channel,mode->mas);
 
-    if(mode->sts != TAUB_STS_PROHIBITED)
-        __SET_TAUB_CMOR_STS(taub_channel,mode->sts);
+    if(mode->sts != TAU_STS_PROHIBITED)
+        __SET_TAU_CMOR_STS(_TAUB0,taub_channel,mode->sts);
 
-    __SET_TAUB_CMOR_COS(taub_channel,mode->cos);
+    __SET_TAU_CMOR_COS(_TAUB0,taub_channel,mode->cos);
 
     if(mode->md_un.md_bits.high7bit == TAUB_MD_PROHIBITED1 ||
          mode->md_un.md_bits.high7bit == TAUB_MD_PROHIBITED2 )
          return ERROR;
-    __SET_TAUB_CMOR_MD(taub_channel,mode->md_un.md);
+    __SET_TAU_CMOR_MD(_TAUB0,taub_channel,mode->md_un.md);
 
-    __GET_TAUB_CMOR(ret_mode,taub_channel);// for test
+    __GET_TAU_CMOR(_TAUB0,ret_mode,taub_channel);// for test
 
     return SUCCESS;
 }
@@ -269,31 +269,31 @@ ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 
 void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode)
 {
-    uint16_t ret = 0;
+    __IO uint16_t ret = 0;
+    __IO uint8_t tom = 0,toc = 0;
 
     if(out_mode   == TAUB_BY_SOFTWARE_MODE){
-        __ENABLE_INDEPENDENT_OUTPUT(channel_num,FALSE);
+        __ENABLE_INDEPENDENT_OUTPUT(_TAUB0,channel_num,FALSE);
     }else{
-        __ENABLE_INDEPENDENT_OUTPUT(channel_num,TRUE);
+        __ENABLE_INDEPENDENT_OUTPUT(_TAUB0,channel_num,TRUE);
         if(out_mode ==  TAUB_INDEPENDENT_OUTPUT_MODE_1){
-            __SET_OUTPUT_MODE(channel_num,0,ret);//TOE
-            __SET_OUTPUT_CONFIG(channel_num,0,ret);//TOC
-        }
-
-        if(out_mode ==  TAUB_INDEPENDENT_OUTPUT_MODE_2){
-            __SET_OUTPUT_MODE(channel_num,0,ret);//TOE
-            __SET_OUTPUT_CONFIG(channel_num,1,ret);//TOC
+            toc = 0;
+        }else if(out_mode ==  TAUB_INDEPENDENT_OUTPUT_MODE_2){
+            toc = 1;
+        }else{ // TAUB_SYNCHRONOUS_OUTPUT_MODE_1 or TAUB_SYNCHRONOUS_OUTPUT_MODE_2
+            tom = 1;
         }
 
         if(out_mode ==  TAUB_SYNCHRONOUS_OUTPUT_MODE_1){
-            __SET_OUTPUT_MODE(channel_num,1,ret);//TOE
-            __SET_OUTPUT_CONFIG(channel_num,0,ret);//TOC
+            toc = 0;
         }
 
         if(out_mode ==  TAUB_SYNCHRONOUS_OUTPUT_MODE_2){
-            __SET_OUTPUT_MODE(channel_num,1,ret);//TOE
-            __SET_OUTPUT_CONFIG(channel_num,1,ret);//TOC
+            toc = 1;
         }
+
+        __SET_OUTPUT_MODE(_TAUB0,channel_num,tom,ret);//TOM
+        __SET_OUTPUT_CONFIG(_TAUB0,channel_num,toc,ret);//TOC
     }
-    __SET_OUTPUT_LEVEL(channel_num,0,ret);
+    __SET_OUTPUT_LEVEL(_TAUB0,channel_num,0,ret);
 }

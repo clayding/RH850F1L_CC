@@ -119,26 +119,26 @@ void Board_Port_Config(void)
 
             TAUB_ChMode_TypeDef ch_mode[2];
             ch_mode[0].ch_no = 0;
-            ch_mode[0].clk_sel = TAUB_CK0;
+            ch_mode[0].clk_sel = TAU_CK0;
             ch_mode[0].cnt_clk4cnt_counter = 0;
-            ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
-            ch_mode[0].cdr = 2500 -1;//1ms
+            ch_mode[0].clk_div = 10;//4/// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
+            ch_mode[0].cdr = 39062 -1;//2500 -1;//1ms
             ch_mode[0].mas = 1;
-            ch_mode[0].sts = TAUB_STS_SW_TRIG;
+            ch_mode[0].sts = TAU_STS_SW_TRIG;
             ch_mode[0].cos = 0;
             ch_mode[0].md_un.md_bits.high7bit = TAUB_INTERVAL_MODE;
             ch_mode[0].md_un.md_bits.low1bit = 1;
 
             ch_mode[0].enable_sim_cfg = 1;//Enables simultaneous rewrite
-            ch_mode[0].sim_cfg.ch_ctl = 0;//
+            ch_mode[0].sim_cfg.ch_ctl = 0;
             ch_mode[0].sim_cfg.sig_gen = 0;
             ch_mode[0].sim_cfg.is_trig_ch = 0;
 
             ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
             ch_mode[1].ch_no = 1;
-            ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
+            ch_mode[1].cdr = 39062/2;//1250/2500 = 50% duty cycle
             ch_mode[1].mas = 0;
-            ch_mode[1].sts = TAUB_STS_INT_TRIG_MASTER;
+            ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
             ch_mode[1].md_un.md_bits.high7bit = TAUB_ONE_CNT_MODE;
 
             TAUB_Synchronous_Init(ch_mode,2);

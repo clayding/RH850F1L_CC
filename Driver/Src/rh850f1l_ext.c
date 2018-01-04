@@ -302,13 +302,13 @@ void OSTMIntHandler(unsigned long eiic)
 #pragma interrupt TAUB0CH0IntHandler(channel = 134, enable = false, callt = false, fpu = false)
 void TAUB0CH0IntHandler(unsigned long eiic)
 {
-    //Eiit_Handler_Ptr();
+    Eiit_Handler_Ptr();
 }
 
 #pragma interrupt TAUB0CH1IntHandler(channel = 135, enable = false, callt = false, fpu = false)
 void TAUB0CH1IntHandler(unsigned long eiic)
 {
-    //Eiit_Handler_Ptr_2();
+    Eiit_Handler_Ptr_2();
 }
 
 #pragma interrupt TAUB0CH02ntHandler(channel = 136, enable = false, callt = false, fpu = false)

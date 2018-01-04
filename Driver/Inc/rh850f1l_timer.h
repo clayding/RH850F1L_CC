@@ -22,37 +22,345 @@
      OSTM_START_INT_ENABLE = !OSTM_START_INT_DISABLE,
  }OSTM_START_INT_STAT_Type;
 
-/*************************************TAUB declaration Start*******************/
- typedef enum{
-     TAUB_CK0,TAUB_CK1,TAUB_CK2,TAUB_CK3,
- }TAUB_CLK_SEL_Type;
+/****************************TAUB and TAUD declaration Start*******************/
+#define _TAUB0                      (0)
+#define _TAUB0_ADDR                 ((volatile struct __tag39 *)&TAUB0)
 
- typedef enum{
-     TAUB_MAS_MASTER,
-     TAUB_MAS_SLAVE,
- }TAUB_MAS_Type;
+#define _TAUB0_CDRn_ADDR(_CH_)      (((uint16_t*)&_TAUB0_ADDR->CDR0) + 2*_CH_)
+#define _TAUB0_CNTn_ADDR(_CH_)      (((uint16_t*)&_TAUB0_ADDR->CNT0) + 2*_CH_)
+#define _TAUB0_CMURn_ADDR(_CH_)     (((uint8_t*) &_TAUB0_ADDR->CMUR0) + 3*_CH_)
+#define _TAUB0_CSRn_ADDR(_CH_)      (((uint8_t*) &_TAUB0_ADDR->CSR0)  + 3*_CH_)
+#define _TAUB0_CSCn_ADDR(_CH_)      (((uint8_t*) &_TAUB0_ADDR->CSC0)  + 3*_CH_)
+#define _TAUB0_CMORn_ADDR(_CH_)     (((uint16_t*)&_TAUB0_ADDR->CMOR0) + 2*_CH_)
 
- typedef enum{
-     TAUB_STS_SW_TRIG,//Software trigger
-     TAUB_STS_EDGE_TIN_TRIG,//Valid edge of the TAUBTTINm input signal
 
-     /*Valid edge of the TAUBTTINm input signal is used as the start trigger and
-     the reverse edge is used as the stop trigger.*/
-     TAUB_STS_EDGE_TIN_TRIG2,
+#define _TAUB0_PRS0_OFFSET          (0)
+#define _TAUB0_PRS1_OFFSET          (4)
+#define _TAUB0_PRS2_OFFSET          (8)
+#define _TAUB0_PRS3_OFFSET          (12)
+#define _TAUB0_PRSn_OFFSET(n)       (4*n) //n: [0,3]
+#define _TAUB0_PRS0_MASK            ((uint16_t)0x0F))
+#define _TAUB0_PRS1_MASK            ((uint16_t)(0x0F << _TAUB0_PRS1_OFFSET))
+#define _TAUB0_PRS2_MASK            ((uint16_t)(0x0F << _TAUB0_PRS2_OFFSET))
+#define _TAUB0_PRS3_MASK            ((uint16_t)(0x0F << _TAUB0_PRS3_OFFSET))
 
-     TAUB_STS_PROHIBITED, //Setting prohibited
 
-     TAUB_STS_INT_TRIG_MASTER,//INTTAUBnIm is the start trigger of the master channel
+#define _TAUB0_CMOR_CKS_OFFSET      (14)
+#define _TAUB0_CMOR_CCS0_OFFSET     (12)
+#define _TAUB0_CMOR_MAS_OFFSET      (11)
+#define _TAUB0_CMOR_STS_OFFSET      (8)
+#define _TAUB0_CMOR_COS_OFFSET      (6)
+#define _TAUB0_CMOR_MD_OFFSET       (0)
 
-     /*INTTAUBnIm of upper channel (m – 1) is the start trigger regardless of master setting*/
-     TAUB_STS_UPPER_INT_TRIG_MASTER,
+#define _TAUB0_CMOR_CKS_MASK        ((uint16_t)(0x03 << 14)) //Selects the operation clock
+#define _TAUB0_CMOR_CCS0_MASK       ((uint16_t)(0x01 << 12)) //Selects the count clock for the TAUBnCNTm counter
 
-     /*Dead-time output signal of the TAUBTTOUTm generation unit*/
-     TAUB_STS_DEAD_TIME_SIG,
+/*Master or slave channel during synchronous channel operation.This bit is only
+valid for even channels (CHm_even). For odd channels (CHm_odd), it is fixed to 0.*/
+#define _TAUB0_CMOR_MAS_MASK        ((uint16_t)(0x01 << 11))
+#define _TAUB0_CMOR_STS_MASK        ((uint16_t)(0x07 << 8))//Selects the external start trigger
 
-     /*Up/down output trigger signal of the master channel.*/
-     TAUB_UP_DOWN_TRIG,
- }TAUB_STS_Type;
+/*Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF
+of channel m are updated.These bits are only valid if channel m is in capture function
+(capture mode and capture & one-count mode).*/
+#define _TAUB0_CMOR_COS_MASK        ((uint16_t)(0x03 << 6))
+
+#define _TAUB0_CMOR_MD_MASK         ((uint16_t)0x1F) //Specifies the operation mode,14 modes
+
+#define _TAUB0_CSR_CSF_MASK         ((uint16_t)0x02)
+#define _TAUB0_CSR_OVF_MASK         ((uint16_t)0x01)
+
+/******************************************************************************/
+#define _TAUD0                      (0)
+#define _TAUD0_ADDR                 ((volatile struct __tag39 *)&TAUD0)
+
+#define _TAUD0_CDRn_ADDR(_CH_)      (((uint16_t*)&_TAUD0_ADDR->CDR0) + 2*_CH_)
+#define _TAUD0_CNTn_ADDR(_CH_)      (((uint16_t*)&_TAUD0_ADDR->CNT0) + 2*_CH_)
+#define _TAUD0_CMURn_ADDR(_CH_)     (((uint8_t*) &_TAUD0_ADDR->CMUR0) + 3*_CH_)
+#define _TAUD0_CSRn_ADDR(_CH_)      (((uint8_t*) &_TAUD0_ADDR->CSR0)  + 3*_CH_)
+#define _TAUD0_CSCn_ADDR(_CH_)      (((uint8_t*) &_TAUD0_ADDR->CSC0)  + 3*_CH_)
+#define _TAUD0_CMORn_ADDR(_CH_)     (((uint16_t*)&_TAUD0_ADDR->CMOR0) + 2*_CH_)
+
+
+#define _TAUD0_PRS0_OFFSET          (0)
+#define _TAUD0_PRS1_OFFSET          (4)
+#define _TAUD0_PRS2_OFFSET          (8)
+#define _TAUD0_PRS3_OFFSET          (12)
+#define _TAUD0_PRSn_OFFSET(n)       (4*n) //n: [0,3]
+#define _TAUD0_PRS0_MASK            ((uint16_t)0x0F))
+#define _TAUD0_PRS1_MASK            ((uint16_t)(0x0F << _TAUD0_PRS1_OFFSET))
+#define _TAUD0_PRS2_MASK            ((uint16_t)(0x0F << _TAUD0_PRS2_OFFSET))
+#define _TAUD0_PRS3_MASK            ((uint16_t)(0x0F << _TAUD0_PRS3_OFFSET))
+
+
+#define _TAUD0_CMOR_CKS_OFFSET       (14)
+#define _TAUD0_CMOR_CCS0_OFFSET      (12)
+#define _TAUD0_CMOR_MAS_OFFSET       (11)
+#define _TAUD0_CMOR_STS_OFFSET       (8)
+#define _TAUD0_CMOR_COS_OFFSET       (6)
+#define _TAUD0_CMOR_MD_OFFSET        (0)
+
+#define _TAUD0_CMOR_CKS_MASK         ((uint16_t)(0x03 << 14)) //Selects the operation clock
+#define _TAUD0_CMOR_CCS0_MASK        ((uint16_t)(0x01 << 12)) //Selects the count clock for the TAUBnCNTm counter
+
+/*Master or slave channel during synchronous channel operation.This bit is only
+valid for even channels (CHm_even). For odd channels (CHm_odd), it is fixed to 0.*/
+#define _TAUD0_CMOR_MAS_MASK         ((uint16_t)(0x01 << 11))
+#define _TAUD0_CMOR_STS_MASK         ((uint16_t)(0x07 << 8))//Selects the external start trigger
+
+/*Specifies when the capture register TAUDnCDRm and the overflow flag TAUDnCSRm.TAUDnOVF
+of channel m are updated.These bits are only valid if channel m is in capture function
+(capture mode and capture & one-count mode).*/
+#define _TAUD0_CMOR_COS_MASK         ((uint16_t)(0x03 << 6))
+
+#define _TAUD0_CMOR_MD_MASK          ((uint16_t)0x1F) //Specifies the operation mode,14 modes
+
+#define _TAUD0_CSR_CSF_MASK          ((uint16_t)0x02)
+#define _TAUD0_CSR_OVF_MASK          ((uint16_t)0x01)
+
+
+/*These bits can only be rewritten when all counters using CKx are stopped
+ _DIV_: 0~15, then CKn clock = PCLK/ 2^_DIV */
+#define __SET_TAU_PRESCALER(_UNIT_,_PRS_OFFSET_,_DIV_)  do { \
+                                                            MODIFY_REG(&(_UNIT_##_ADDR->TPS), \
+                                                                (uint16_t)(0x0F <<_PRS_OFFSET_), \
+                                                                _DIV_ << _PRS_OFFSET_); \
+                                                        }while(0)
+
+/*return _RET_: 0~15*/
+#define __GET_TAU_PRESCALER(_UNIT_,_RET_,_PRS_OFFSET_)  do{ \
+                                                            _RET_ = (_UNIT_##_ADDR->TPS >> _PRS_OFFSET_ & 0xF); \
+                                                        }while(0)
+
+
+#define __SET_TAU_CDR(_UNIT_,_CH_,_VALUE_)              do{ \
+                                                            WRITE_REG(_UNIT_##_CDRn_ADDR(_CH_),_VALUE_ & 0xFFFF); \
+                                                        }while(0)
+
+#define __GET_TAU_CDR(_UNIT_,_RET_,_CH_)                do{ \
+                                                        _RET_ = READ_REG(_UNIT_##_CDRn_ADDR(_CH_)); \
+                                                        }while(0)
+/*Get data from the channel m counter register.Read-only*/
+#define __GET_TAU_CNT(_UNIT_,_RET,_CH_)                 do{ \
+                                                            _RET_ = READ_REG(_UNIT_##_CNTn_ADDR(_CH_)); \
+                                                        }while(0)
+
+#define __SET_TAU_CMOR_CKS(_UNIT_,_CH_,_VALUE_)         do{ \
+                                                            MODIFY_REG(_UNIT_##_CMORn_ADDR(_CH_),\
+                                                                    _UNIT_##_CMOR_CKS_MASK, \
+                                                                    _VALUE_ << _UNIT_##_CMOR_CKS_OFFSET); \
+                                                        }while(0)
+#define __SET_TAU_CMOR_CCS0(_UNIT_,_CH_,_VALUE_)        do{ \
+                                                            MODIFY_REG(_UNIT_##_CMORn_ADDR(_CH_),\
+                                                                    _UNIT_##_CMOR_CCS0_MASK, \
+                                                                    _VALUE_ << _UNIT_##_CMOR_CCS0_OFFSET); \
+                                                        }while(0)
+#define __SET_TAU_CMOR_MAS(_UNIT_,_CH_,_VALUE_)         do{ \
+                                                            MODIFY_REG(_UNIT_##_CMORn_ADDR(_CH_),\
+                                                                    _UNIT_##_CMOR_MAS_MASK, \
+                                                                    _VALUE_ << _UNIT_##_CMOR_MAS_OFFSET); \
+                                                        }while(0)
+
+#define __SET_TAU_CMOR_STS(_UNIT_,_CH_,_VALUE_)         do{ \
+                                                            MODIFY_REG(_UNIT_##_CMORn_ADDR(_CH_),\
+                                                                    _UNIT_##_CMOR_STS_MASK, \
+                                                                    _VALUE_ << _UNIT_##_CMOR_STS_OFFSET); \
+                                                        }while(0)
+#define __SET_TAU_CMOR_COS(_UNIT_,_CH_,_VALUE_)         do{ \
+                                                            MODIFY_REG(_UNIT_##_CMORn_ADDR(_CH_),\
+                                                                    _UNIT_##_CMOR_COS_MASK, \
+                                                                    _VALUE_ << _UNIT_##_CMOR_COS_OFFSET); \
+                                                        }while(0)
+#define __SET_TAU_CMOR_MD(_UNIT_,_CH_,_VALUE_)          do{ \
+                                                            MODIFY_REG(_UNIT_##_CMORn_ADDR(_CH_),\
+                                                                    _UNIT_##_CMOR_MD_MASK, \
+                                                                    _VALUE_ << _UNIT_##_CMOR_MD_OFFSET); \
+                                                        }while(0)
+
+#define __GET_TAU_CMOR(_UNIT_,_RET_,_CH_)               do{ \
+                                                            _RET_ = READ_REG(_UNIT_##_CMORn_ADDR(_CH_));\
+                                                        }while(0)
+
+#define __SET_TAU_CMUR(_UNIT_,_CH_,_VALUE_)             do{ \
+                                                            WRITE_REG(_UNIT_##_CMURn_ADDR(_CH_),_VALUE_ & 0x03); \
+                                                        }while(0)
+
+#define __GET_TAU_CMUR(_UNIT_,_RET_,_CH_)               do{ \
+                                                            _RET_ = READ_BIT(_UNIT_##_CMURn_ADDR(_CH_),0x03); \
+                                                        }while(0)
+
+/* indicates the count direction and the overflow status of the counter for channel _CH_*/
+#define __GET_TAU_CSR(_UNIT_,_RET_,_CH_)                do{ \
+                                                            _RET_ = READ_BIT(_UNIT_##_CSRn_ADDR(_CH_),0x03); \
+                                                        }while(0)
+
+#define __CLEAR_OVERPLOW_FLAG(_UNIT_,_CH_)              do{ \
+                                                            if(!(READ_BIT(_UNIT_##_CSCn_ADDR(_CH_)0x01))) \
+                                                                SET_BIT(_UNIT_##_CSCn_ADDR(_CH_),0x01); \
+                                                        }while(0)
+
+#define __START_COUNTER(_UNIT_,_CH_MASK_)               do{ \
+                                                            if((_UNIT_##_ADDR->TE & _CH_MASK_) != _CH_MASK_) \
+                                                                SET_BIT(&(_UNIT_##_ADDR->TS),_CH_MASK_); \
+                                                        }while(0)
+
+#define __STOP_COUNTER(_UNIT_,_CH_)                     do{ \
+                                                            if(_UNIT_##_ADDR->TE & _CH_MASK_ != 0x00 ) \
+                                                                CLEAR_BIT(&(_UNIT_##_ADDR->TT),_CH_MASK_); \
+                                                        }while(0)
+
+#define __GET_COUNTER_TE(_UNIT_ADDR_,_RET_,_CH_MASK_)   do{ \
+                                                            _RET_ = _UNIT_ADDR_->TE & _CH_MASK_; \
+                                                        }while(0)
+
+/*return _RET_ 0 -- write successfully ,otherwise failed*/
+#define __ENABLE_RELOAD_DATA(_UNIT_,_CH_,_BOOL_,_RET_)  do{ \
+                                                            __GET_COUNTER_TE(_UNIT_##_ADDR,_RET_,0x01 << _CH_); \
+                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
+                                                            if(_RET_) break; \
+                                                            if(_BOOL_ == TRUE)/*enable*/ \
+                                                                _UNIT_##_ADDR->RDE |= (0x01 << _CH_); \
+                                                            else /*disable*/\
+                                                                _UNIT_##_ADDR->RDE &= ~(0x01 << _CH_); \
+                                                        }while(0)
+/*_RET_ 0 -- Disabled  1 -- Enabled*/
+#define __GET_RELOAD_DATA_STAT(_UNIT_,_RET_,_CH_)       do{ \
+                                                            _RET_ = _UNIT_##_ADDR->RDE & (0x01 << _CH_); \
+                                                        }while(0)
+
+/*Selects the control channel for simultaneous rewrite.0 -- Master channel 1-- Another upper channel
+ return _RET_ 0 -- write successfully ,otherwise failed*/
+#define __SET_RELOAD_DATA_CTL_CH(_UNIT_,_CH_,_VALUE_,_RET_) do{ \
+                                                                __GET_COUNTER_TE(_UNIT_##_ADDR,_RET_,0x01 <<_CH_); \
+                                                                /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
+                                                                if(_RET_) break; \
+                                                                if(_VALUE_) \
+                                                                    _UNIT_##_ADDR->RDS |= (0x01 << _CH_); \
+                                                                else \
+                                                                    _UNIT_##_ADDR->RDS &= ~(0x01 << _CH_); \
+                                                            }while(0)
+
+#define __GET_RELOAD_DATA_CTL_CH(_UNIT_,_RET_,_CH_)         do{ \
+                                                                _RET_ = _UNIT_##_ADDR->RDS & (0x01 << _CH_); \
+                                                            }while(0)
+/*Selects when the signal that controls simultaneous rewrite is generated
+  return _RET_ 0 -- write successfully ,otherwise failed*/
+#define __SET_RELAOD_DATA_MODE(_UNIT_,_CH_,_VALUE_,_RET_)   do{ \
+                                                                __GET_COUNTER_TE(_UNIT_##_ADDR,_RET_,0x01 << _CH_); \
+                                                                /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
+                                                                if(_RET_) break; \
+                                                                if(_VALUE_) \
+                                                                    _UNIT_##_ADDR->RDM |= (0x01 << _CH_); \
+                                                                else \
+                                                                    _UNIT_##_ADDR->RDM &= ~(0x01 << _CH_); \
+                                                            }while(0)
+
+#define __GET_RELOAD_DATA_MODE(_UNIT_,_RET_,_CH_)           do{ \
+                                                                _RET_ = _UNIT_##_ADDR->RDM & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Specifies the channel that generates the INTTAUBnIm signal that triggers simultaneous
+rewrite. return _RET_:0 -- write successfully ,otherwise failed*/
+#define __SET_RELAOD_DATA_CTL(_UNIT_,_CH_,_VALUE_,_RET_)    do{ \
+                                                                __GET_COUNTER_TE(_UNIT_##_ADDR,_RET_,0x01 << _CH_); \
+                                                                /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
+                                                                if(_RET_) break; \
+                                                                if(_VALUE_) \
+                                                                    _UNIT_##_ADDR->RDC |= (0x01 << _CH_); \
+                                                                else \
+                                                                    _UNIT_##_ADDR->RDC &= ~(0x01 << _CH_); \
+                                                            }while(0)
+
+#define __GET_RELOAD_DATA_CTL(_UNIT_,_RET_,_CH_)            do{ \
+                                                                _RET_ = _UNIT_##_ADDR->RDC & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Triggers the simultaneous rewrite enabling state.Write-only*/
+#define __ENABLE_RELOAD_DATA_TRIGGER(_UNIT_,_CH_)           do{ \
+                                                                _UNIT_##_ADDR->RDT |= (0x01 << _CH_); \
+                                                            }while(0)
+
+/*This flag register indicates the simultaneous rewrite status Read-only*/
+#define __GET_RELOAD_STAT(_UNIT_,_RET_,_CH_)                do{ \
+                                                                _RET_ = _UNIT_##_ADDR->RSF & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Enables and disables independent channel output mode*/
+#define __ENABLE_INDEPENDENT_OUTPUT(_UNIT_,_CH_,_BOOL_)     do{ \
+                                                                if(_BOOL_ == TRUE) /*enable*/ \
+                                                                    _UNIT_##_ADDR->TOE |= (0x01 << _CH_); \
+                                                                else /*disable*/ \
+                                                                    _UNIT_##_ADDR->TOE &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*Get independent channel output mode state,_RET_ :0 -- Disabled  1 -- Enabled*/
+#define __GET_INDEPENDENT_OUTPUT_STAT(_UNIT_,_RET_,_CH_)    do{ \
+                                                                _RET_ = _UNIT_##_ADDR->TOE & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Specifies the level of TAUBTTOUTm _VALUE_ :0 -- low level 1-- high level
+   return _RET_:0 -- write successfully ,otherwise failed*/
+#define __SET_TOUT_LEVEL(_UNIT_,_CH_,_VALUE_,_RET_)         do{ \
+                                                                __GET_INDEPENDENT_OUTPUT_STAT(_UNIT_,_RET_,_CH_); \
+                                                                /*Only TAUBnTOm bits for which TOE is disabled
+                                                                (TAUBnTOEm = 0) can be written*/ \
+                                                                if(_RET_) break; \
+                                                                if(_VALUE_) /*Set high level*/ \
+                                                                    _UNIT_##_ADDR->TO |= (0x01 << _CH_); \
+                                                                else /*Set low level*/ \
+                                                                    _UNIT_##_ADDR->TO &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*Reads the level of TAUBTTOUTm _VALUE_,_RET_ :0 -- low level  1 -- high level*/
+#define __GET_TOUT_LEVEL(_UNIT_,_RET_,_CH_)                 do{ \
+                                                                _RET_ = _UNIT_##_ADDR->TO & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Specifies the output mode of each channel,__VALUE_: 0-- Independent channel output mode
+  1-- Synchronous channel output mode*/
+#define __SET_OUTPUT_MODE(_UNIT_,_CH_,_VALUE_,_RET_)        do{ \
+                                                                __GET_COUNTER_TE(_UNIT_##_ADDR,_RET_,0x01 << _CH_); \
+                                                                /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
+                                                                if(_RET_) break; \
+                                                                if(_VALUE_) \
+                                                                    _UNIT_##_ADDR->TOM |= (0x01 << _CH_); \
+                                                                else \
+                                                                    _UNIT_##_ADDR->TOM &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*Read the output mode of each channel,return _RET_: 0-- Independent channel output mode
+ 1-- Synchronous channel output mode*/
+ #define __GET_OUTPUT_MODE(_UNIT_,_RET_,_CH_)               do{ \
+                                                                _RET_ = _UNIT_##_ADDR->TOM & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Specifies the output mode of each channel in combination with TAUBnTOMm,
+_VALUE_: 0-- Operation mode 1 1-- Operation mode 2*/
+#define __SET_OUTPUT_CONFIG(_UNIT_,_CH_,_VALUE_,_RET_)      do{ \
+                                                                __GET_COUNTER_TE(_UNIT_##_ADDR,_RET_,0x01 << _CH_); \
+                                                                /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
+                                                                if(_RET_) break; \
+                                                                if(_VALUE_) \
+                                                                    _UNIT_##_ADDR->TOC |= (0x01 << _CH_); \
+                                                                else \
+                                                                    _UNIT_##_ADDR->TOC &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*Reads the output mode of each channel in combination with TAUBnTOMm,
+return _RET_: 0-- Operation mode 1  1-- Operation mode 2*/
+#define __GET_OUTPUT_CONFIG(_UNIT_,_RET_,_CH_)              do{ \
+                                                                _RET_ = _UNIT_##_ADDR->TOC & (0x01 << _CH_); \
+                                                            }while(0)
+
+/*Specifies the output logic of the channel output bit (TAUBnTO.TAUBnTOm),
+  _VALUE_: 0-- Positive logic 1-- Negative logic*/
+#define __SET_OUTPUT_LEVEL(_UNIT_,_CH_,_VALUE_,_RET_)       do{ \
+                                                                if(_VALUE_) \
+                                                                    _UNIT_##_ADDR->TOL |= (0x01 << _CH_); \
+                                                                else \
+                                                                    _UNIT_##_ADDR->TOL &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*Reads the output logic of the channel output bit (TAUBnTO.TAUBnTOm),
+  _VALUE_: 0-- Positive logic 1-- Negative logic*/
+#define __GET_OUTPUT_LEVEL(_UNIT_,_RET_,_CH_)               do{ \
+                                                                _RET_ = _UNIT_##_ADDR->TOL & (0x01 << _CH_); \
+                                                            }while(0)
 
 //the operation mode TAUBnMD[4:1]
 #define TAUB_INTERVAL_MODE      (0) //Interval timer mode
@@ -82,367 +390,140 @@
                                      (_MODE_ == TAUB_CNT_CAP_MODE) ||   \
                                      (_MODE_ == TAUB_GATE_CNT_MODE) ||  \
                                      (_MODE_ == TAUB_CAP_GATECNT_MODE))
+
+ //the operation mode TAUBnMD[4:1]
+#define TAUD_INTERVAL_MODE      (0) //Interval timer mode
+#define TAUD_JUD_MODE           (1) //Judge mode
+#define TAUD_CAP_MODE           (2) //Capture mode
+#define TAUD_EVET_CNT_MODE      (3) //Event count mode
+#define TAUD_ONE_CNT_MODE       (4) //One-count mode
+#define TAUD_MD_PROHIBITED1     (5) //Setting prohibited
+#define TAUD_CAP_ONECNT_MODE    (6) //Capture and one-count mode
+#define TAUD_JUD_ONECNT_MODE    (7) //Judge and one-count mode
+#define TAUD_MD_PROHIBITED2     (8) //Setting prohibited
+#define TAUD_CNT_UPDOWN_MODE    (9) //Count-up/-down mode
+#define TAUD_PUL_ONECNT_MODE    (10)//Pulse one-count mode
+#define TAUD_CNT_CAP_MODE       (11)//Count capture mode
+#define TAUD_GATE_CNT_MODE      (12)//Gate count mode
+#define TAUD_CAP_GATECNT_MODE   (13)//Capture and gate count mode
+
+#define IS_TAUD_OPT_MODE(_MODE_)    ((_MODE_ == TAUD_INTERVAL_MODE) ||  \
+                                      (_MODE_ == TAUD_JUD_MODE) ||   \
+                                      (_MODE_ == TAUD_CAP_MODE) ||   \
+                                      (_MODE_ == TAUD_EVET_CNT_MODE) ||  \
+                                      (_MODE_ == TAUD_ONE_CNT_MODE) ||   \
+                                      (_MODE_ == TAUD_CAP_ONECNT_MODE) ||    \
+                                      (_MODE_ == TAUD_JUD_ONECNT_MODE) ||    \
+                                      (_MODE_ == TAUD_CNT_UPDOWN_MODE) ||    \
+                                      (_MODE_ == TAUD_PUL_ONECNT_MODE) ||    \
+                                      (_MODE_ == TAUD_CNT_CAP_MODE) ||   \
+                                      (_MODE_ == TAUD_GATE_CNT_MODE) ||  \
+                                      (_MODE_ == TAUD_CAP_GATECNT_MODE))
 typedef enum{
     //Interval timer mode ,Capture mode,Count capture mode
-    INTTAUBnIm_NOT_OUTPUT,
-    INTTAUBnIm_OUTPUT = 1,
+    INTTAUnIm_NOT_OUTPUT,
+    INTTAUnIm_OUTPUT = 1,
     //One-count mode,Pulse one-count mode
-    DISABLE_DETECTION = INTTAUBnIm_NOT_OUTPUT,
+    DISABLE_DETECTION = INTTAUnIm_NOT_OUTPUT,
     ENABLE_DETECTION =  1,
     //Judge mode,Judge and one-count mode
-    TAUBnCNTm_LE_TAUBnCDRm = INTTAUBnIm_NOT_OUTPUT, //LE less than or equal-- <=
-    TAUBnCNTm_GT_TAUBnCDRm = 1,//GT greater than -- >
-}TAUB_MD_LOW1BIT_Type;
+    TAUnCNTm_LE_TAUBnCDRm = INTTAUnIm_NOT_OUTPUT, //LE less than or equal-- <=
+    TAUnCNTm_GT_TAUBnCDRm = 1,//GT greater than -- >
+}TAU_MD_LOW1BIT_Type,TAUB_MD_LOW1BIT_Type,TAUD_MD_LOW1BIT_Type;
 
 enum{
-    TAUB_TIS_FALL_EDGE,
-    TAUB_TIS_RISE_EDGE,
-
+    TAU_TIS_FALL_EDGE,
+    TAU_TIS_RISE_EDGE,
     //low-width measurement selection
-    TAUB_TIS_FALL_RISE,//Start trigger: falling edge,Stop trigger (capture): rising edge
-
+    TAU_TIS_FALL_RISE,//Start trigger: falling edge,Stop trigger (capture): rising edge
     //high-width measurement selection
-    TAUB_TIS_RISE_FALL,//Start trigger: rising edge,Stop trigger (capture): falling edge
+    TAU_TIS_RISE_FALL,//Start trigger: rising edge,Stop trigger (capture): falling edge
 };
 
 enum{
-    TAUB_CSF_CNT_UP,
-    TAUB_CSF_CNT_DOWN,
+    TAU_CSF_CNT_UP,
+    TAU_CSF_CNT_DOWN,
 
-    TAUB_OVF_NO_OCCUR = 0,
-    TAUB_OVF_OCCURED = 1,
+    TAU_OVF_NO_OCCUR = 0,
+    TAU_OVF_OCCURED = 1,
 };
 
-#define TAUB0_ADDR          ((volatile struct __tag39 *)&TAUB0)
-
-#define TAUB_CDRn_ADDR(_CH_)    (((uint16_t*)&TAUB0_ADDR->CDR0) + 2*_CH_)
-#define TAUB_CNTn_ADDR(_CH_)    (((uint16_t*)&TAUB0_ADDR->CNT0) + 2*_CH_)
-#define TAUB_CMURn_ADDR(_CH_)   (((uint8_t*)&TAUB0_ADDR->CMUR0) + 3*_CH_)
-#define TAUB_CSRn_ADDR(_CH_)    (((uint8_t*)&TAUB0_ADDR->CSR0)  + 3*_CH_)
-#define TAUB_CSCn_ADDR(_CH_)    (((uint8_t*)&TAUB0_ADDR->CSC0)  + 3*_CH_)
-#define TAUB_CMORn_ADDR(_CH_)   (((uint16_t*)&TAUB0_ADDR->CMOR0) + 2*_CH_)
-
-
-#define TAUB_PRS0_OFFSET    (0)
-#define TAUB_PRS1_OFFSET    (4)
-#define TAUB_PRS2_OFFSET    (8)
-#define TAUB_PRS3_OFFSET    (12)
-#define TAUB_PRSn_OFFSET(n)    (4*n) //n: [0,3]
-#define TAUB_PRS0_MASK      ((uint16_t)0x0F))
-#define TAUB_PRS1_MASK      ((uint16_t)(0x0F << TAUB_PRS1_OFFSET))
-#define TAUB_PRS2_MASK      ((uint16_t)(0x0F << TAUB_PRS2_OFFSET))
-#define TAUB_PRS3_MASK      ((uint16_t)(0x0F << TAUB_PRS3_OFFSET))
-
-
-#define TAUB_CMOR_CKS_OFFSET    (14)
-#define TAUB_CMOR_CCS0_OFFSET   (12)
-#define TAUB_CMOR_MAS_OFFSET    (11)
-#define TAUB_CMOR_STS_OFFSET    (8)
-#define TAUB_CMOR_COS_OFFSET    (6)
-#define TAUB_CMOR_MD_OFFSET     (0)
-
-#define TAUB_CMOR_CKS_MASK  ((uint16_t)(0x03 << 14)) //Selects the operation clock
-#define TAUB_CMOR_CCS0_MASK ((uint16_t)(0x01 << 12)) //Selects the count clock for the TAUBnCNTm counter
-
-/*Master or slave channel during synchronous channel operation.This bit is only
-valid for even channels (CHm_even). For odd channels (CHm_odd), it is fixed to 0.*/
-#define TAUB_CMOR_MAS_MASK  ((uint16_t)(0x01 << 11))
-#define TAUB_CMOR_STS_MASK  ((uint16_t)(0x07 << 8))//Selects the external start trigger
-
-/*Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF
-of channel m are updated.These bits are only valid if channel m is in capture function
-(capture mode and capture & one-count mode).*/
-#define TAUB_CMOR_COS_MASK  ((uint16_t)(0x03 << 6))
-
-#define TAUB_CMOR_MD_MASK   ((uint16_t)0x1F) //Specifies the operation mode,14 modes
-
-#define TAUB_CSR_CSF_MASK   ((uint16_t)0x02)
-#define TAUB_CSR_OVF_MASK   ((uint16_t)0x01)
-
-/*These bits can only be rewritten when all counters using CKx are stopped
- _DIV_: 0~15, then CKn clock = PCLK/ 2^_DIV */
-#define __SET_TAUB_PRESCALER(_PRS_OFFSET_,_DIV_)    do { \
-                                                        MODIFY_REG(&(TAUB0_ADDR->TPS), \
-                                                            (uint16_t)(0x0F <<_PRS_OFFSET_), \
-                                                            _DIV_ << _PRS_OFFSET_); \
-                                                    }while(0)
-
-/*return _RET_: 0~15*/
-#define __GET_TAUB_PRESCALER(_RET_,_PRS_OFFSET_)    do{ \
-                                                        _RET_ = (TAUB0_ADDR->TPS >> _PRS_OFFSET_ & 0xF); \
-                                                    }while(0)
-
-
-#define __SET_TAUB_CDR(_CH_,_VALUE_)                do{ \
-                                                        WRITE_REG(TAUB_CDRn_ADDR(_CH_),_VALUE_ & 0xFFFF); \
-                                                    }while(0)
-#define __GET_TAUB_CDR(_RET_,_CH_)                  do{ \
-                                                        _RET_ = READ_REG(TAUB_CDRn_ADDR(_CH_)); \
-                                                    }while(0)
-/*Get data from the channel m counter register.Read-only*/
-#define __GET_TAUB_CNT(_RET,_CH_)                   do{ \
-                                                        _RET_ = READ_REG(TAUB_CNTn_ADDR(_CH_)); \
-                                                    }while(0)
-
-#define __SET_TAUB_CMOR_CKS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(TAUB_CMORn_ADDR(_CH_),\
-                                                                TAUB_CMOR_CKS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_CKS_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_CCS0(_CH_,_VALUE_)          do{ \
-                                                        MODIFY_REG(TAUB_CMORn_ADDR(_CH_),\
-                                                                TAUB_CMOR_CCS0_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_CCS0_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_MAS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(TAUB_CMORn_ADDR(_CH_),\
-                                                                TAUB_CMOR_MAS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_MAS_OFFSET); \
-                                                    }while(0)
-
-#define __SET_TAUB_CMOR_STS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(TAUB_CMORn_ADDR(_CH_),\
-                                                                TAUB_CMOR_STS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_STS_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_COS(_CH_,_VALUE_)           do{ \
-                                                        MODIFY_REG(TAUB_CMORn_ADDR(_CH_),\
-                                                                TAUB_CMOR_COS_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_COS_OFFSET); \
-                                                    }while(0)
-#define __SET_TAUB_CMOR_MD(_CH_,_VALUE_)            do{ \
-                                                        MODIFY_REG(TAUB_CMORn_ADDR(_CH_),\
-                                                                TAUB_CMOR_MD_MASK, \
-                                                                _VALUE_ << TAUB_CMOR_MD_OFFSET); \
-                                                    }while(0)
-
-#define __GET_TAUB_CMOR(_RET_,_CH_)                 do{ \
-                                                        _RET_ = READ_REG(TAUB_CMORn_ADDR(_CH_));\
-                                                    }while(0)
-
-#define __SET_TAUB_CMUR(_CH_,_VALUE_)               do{ \
-                                                        WRITE_REG(TAUB_CMURn_ADDR(_CH_),_VALUE_ & 0x03); \
-                                                    }while(0)
-
-#define __GET_TAUB_CMUR(_RET_,_CH_)                 do{ \
-                                                        _RET_ = READ_BIT(TAUB_CMURn_ADDR(_CH_),0x03); \
-                                                    }while(0)
-
-/* indicates the count direction and the overflow status of the counter for channel _CH_*/
-#define __GET_TAUB_CSR(_RET_,_CH_)                  do{ \
-                                                        _RET_ = READ_BIT(TAUB_CSRn_ADDR(_CH_),0x03); \
-                                                    }while(0)
-
-#define __CLEAR_OVERPLOW_FLAG(_CH_)                 do{ \
-                                                        if(!(READ_BIT(TAUB_CSCn_ADDR(_CH_)0x01))) \
-                                                            SET_BIT(TAUB_CSCn_ADDR(_CH_),0x01); \
-                                                    }while(0)
-
-#define __START_COUNTER(_CH_MASK_)                  do{ \
-                                                        if((TAUB0_ADDR->TE & _CH_MASK_) != _CH_MASK_) \
-                                                            SET_BIT(&(TAUB0_ADDR->TS), \
-                                                                _CH_MASK_); \
-                                                    }while(0)
-#define __STOP_COUNTER(_CH_)                        do{ \
-                                                        if(TAUB0_ADDR->TE & _CH_MASK_ != 0x00 ) \
-                                                            CLEAR_BIT(&(TAUB0_ADDR->TT), \
-                                                                _CH_MASK_); \
-                                                    }while(0)
-#define __GET_COUNTER_TE(_RET_,_CH_MASK_)                do{ \
-                                                        _RET_ = TAUB0_ADDR->TE & _CH_MASK_; \
-                                                    }while(0)
-
-/*return _RET_ 0 -- write successfully ,otherwise failed*/
-#define __ENABLE_RELOAD_DATA(_CH_,_BOOL_,_RET_)          do{ \
-                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_BOOL_ == TRUE)/*enable*/ \
-                                                                TAUB0_ADDR->RDE |= (0x01 << _CH_); \
-                                                            else /*disable*/\
-                                                                TAUB0_ADDR->RDE &= ~(0x01 << _CH_); \
-                                                        }while(0)
-/*_RET_ 0 -- Disabled  1 -- Enabled*/
-#define __GET_RELOAD_DATA_STAT(_RET_,_CH_)              do{ \
-                                                            _RET_ = TAUB0_ADDR->RDE & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Selects the control channel for simultaneous rewrite.0 -- Master channel 1-- Another upper channel
- return _RET_ 0 -- write successfully ,otherwise failed*/
-#define __SET_RELOAD_DATA_CTL_CH(_CH_,_VALUE_,_RET_)    do{ \
-                                                            __GET_COUNTER_TE(_RET_,0x01 <<_CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->RDS |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->RDS &= ~(0x01 << _CH_); \
-                                                        }while(0)
-
-#define __GET_RELOAD_DATA_CTL_CH(_RET_,_CH_)            do{ \
-                                                            _RET_ = TAUB0_ADDR->RDS & (0x01 << _CH_); \
-                                                        }while(0)
-/*Selects when the signal that controls simultaneous rewrite is generated
-  return _RET_ 0 -- write successfully ,otherwise failed*/
-#define __SET_RELAOD_DATA_MODE(_CH_,_VALUE_,_RET_)      do{ \
-                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->RDM |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->RDM &= ~(0x01 << _CH_); \
-                                                        }while(0)
-
-#define __GET_RELOAD_DATA_MODE(_RET_,_CH_)              do{ \
-                                                            _RET_ = TAUB0_ADDR->RDM & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Specifies the channel that generates the INTTAUBnIm signal that triggers simultaneous
-rewrite. return _RET_:0 -- write successfully ,otherwise failed*/
-#define __SET_RELAOD_DATA_CTL(_CH_,_VALUE_,_RET_)       do{ \
-                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->RDC |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->RDC &= ~(0x01 << _CH_); \
-                                                        }while(0)
-
-#define __GET_RELOAD_DATA_CTL(_RET_,_CH_)               do{ \
-                                                            _RET_ = TAUB0_ADDR->RDC & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Triggers the simultaneous rewrite enabling state.Write-only*/
-#define __ENABLE_RELOAD_DATA_TRIGGER(_CH_)              do{ \
-                                                            TAUB0_ADDR->RDT |= (0x01 << _CH_); \
-                                                        }while(0)
-
-/*This flag register indicates the simultaneous rewrite status Read-only*/
-#define __GET_RELOAD_STAT(_RET_,_CH_)                   do{ \
-                                                            _RET_ = TAUB0_ADDR->RSF & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Enables and disables independent channel output mode*/
-#define __ENABLE_INDEPENDENT_OUTPUT(_CH_,_BOOL_)        do{ \
-                                                            if(_BOOL_ == TRUE) /*enable*/ \
-                                                                TAUB0_ADDR->TOE |= (0x01 << _CH_); \
-                                                            else /*disable*/ \
-                                                                TAUB0_ADDR->TOE &= ~(0x01 << _CH_); \
-                                                        }while(0)
-/*Get independent channel output mode state,_RET_ :0 -- Disabled  1 -- Enabled*/
-#define __GET_INDEPENDENT_OUTPUT_STAT(_RET_,_CH_)       do{ \
-                                                            _RET_ = TAUB0_ADDR->TOE & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Specifies the level of TAUBTTOUTm _VALUE_ :0 -- low level 1-- high level
-   return _RET_:0 -- write successfully ,otherwise failed*/
-#define __SET_TOUT_LEVEL(_CH_,_VALUE_,_RET_)            do{ \
-                                                            __GET_INDEPENDENT_OUTPUT_STAT(_RET_,_CH_); \
-                                                            /*Only TAUBnTOm bits for which TOE is disabled
-                                                            (TAUBnTOEm = 0) can be written*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) /*Set high level*/ \
-                                                                TAUB0_ADDR->TO |= (0x01 << _CH_); \
-                                                            else /*Set low level*/ \
-                                                                TAUB0_ADDR->TO &= ~(0x01 << _CH_); \
-                                                        }while(0)
-/*Reads the level of TAUBTTOUTm _VALUE_,_RET_ :0 -- low level  1 -- high level*/
-#define __GET_TOUT_LEVEL(_RET_,_CH_)                    do{ \
-                                                            _RET_ = TAUB0_ADDR->TO & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Specifies the output mode of each channel,__VALUE_: 0-- Independent channel output mode
-  1-- Synchronous channel output mode*/
-#define __SET_OUTPUT_MODE(_CH_,_VALUE_,_RET_)           do{ \
-                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->TOM |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->TOM &= ~(0x01 << _CH_); \
-                                                        }while(0)
-/*Read the output mode of each channel,return _RET_: 0-- Independent channel output mode
- 1-- Synchronous channel output mode*/
- #define __GET_OUTPUT_MODE(_RET_,_CH_)                  do{ \
-                                                            _RET_ = TAUB0_ADDR->TOM & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Specifies the output mode of each channel in combination with TAUBnTOMm,
-_VALUE_: 0-- Operation mode 1 1-- Operation mode 2*/
-#define __SET_OUTPUT_CONFIG(_CH_,_VALUE_,_RET_)         do{ \
-                                                            __GET_COUNTER_TE(_RET_,0x01 << _CH_); \
-                                                            /*only be written when TAUBnTE.TAUBnTEm = 0.*/ \
-                                                            if(_RET_) break; \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->TOC |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->TOC &= ~(0x01 << _CH_); \
-                                                        }while(0)
-/*Reads the output mode of each channel in combination with TAUBnTOMm,
-return _RET_: 0-- Operation mode 1  1-- Operation mode 2*/
-#define __GET_OUTPUT_CONFIG(_RET_,_CH_)                 do{ \
-                                                            _RET_ = TAUB0_ADDR->TOC & (0x01 << _CH_); \
-                                                        }while(0)
-
-/*Specifies the output logic of the channel output bit (TAUBnTO.TAUBnTOm),
-  _VALUE_: 0-- Positive logic 1-- Negative logic*/
-#define __SET_OUTPUT_LEVEL(_CH_,_VALUE_,_RET_)          do{ \
-                                                            if(_VALUE_) \
-                                                                TAUB0_ADDR->TOL |= (0x01 << _CH_); \
-                                                            else \
-                                                                TAUB0_ADDR->TOL &= ~(0x01 << _CH_); \
-                                                        }while(0)
-/*Reads the output logic of the channel output bit (TAUBnTO.TAUBnTOm),
-  _VALUE_: 0-- Positive logic 1-- Negative logic*/
-#define __GET_OUTPUT_LEVEL(_RET_,_CH_)                  do{ \
-                                                            _RET_ = TAUB0_ADDR->TOL & (0x01 << _CH_); \
-                                                        }while(0)
-typedef uint8_t TAUB_Md_High7Bit_TypeDef;
 
 
 typedef enum{
-    TAUB_MASTER_CH_CTL,//0: Master channel
-    TAUB_UPPER_CH_CTL,//1: Another upper channel
-}TAUB_CH_CTL_Type; //Selects the control channel for simultaneous rewrite
+    TAU_CK0,TAU_CK1,TAU_CK2,TAU_CK3,
+}TAU_CLK_SEL_Type,TAUB_CLK_SEL_Type,TAUD_CLK_SEL_Type;
 
 typedef enum{
-    TAUB_MASTER_START_CNT,
-    TAUB_TOPOf_TRIANGLE_WAVE,
-}TAUB_WHEN_SIG_GEN_Type;//Selects when the signal that triggers simultaneous rewrite is generated
+    TAUB_MAS_MASTER,
+    TAUB_MAS_SLAVE,
+}TAU_MAS_Type,TAUB_MAS_Type,TAUD_MAS_Type;
 
 typedef enum{
-    TAUB_IS_TRIG_CH,
-    TAUB_NOT_TRIG_CH = !TAUB_IS_TRIG_CH,
-}TAUB_AS_TRIG_CH;
+    TAU_STS_SW_TRIG,//Software trigger
+    TAU_STS_EDGE_TIN_TRIG,//Valid edge of the TAU(B/D)TTINm input signal
+
+    /*Valid edge of the TAU(B/D)TTINm input signal is used as the start trigger and
+    the reverse edge is used as the stop trigger.*/
+    TAU_STS_EDGE_TIN_TRIG2,
+
+    TAU_STS_PROHIBITED, //Setting prohibited
+
+    TAU_STS_INT_TRIG_MASTER,//INTTAU(B/D)nIm is the start trigger of the master channel
+
+    /*INTTAU(B/D)nIm of upper channel (m – 1) is the start trigger regardless of master setting*/
+    TAU_STS_UPPER_INT_TRIG_MASTER,
+
+    /*Dead-time output signal of the TAU(B/D)TTOUTm generation unit*/
+    TAU_STS_DEAD_TIME_SIG,
+
+    /*Up/down output trigger signal of the master channel.*/
+    TAU_UP_DOWN_TRIG,
+}TAU_STS_Type,TAUB_STS_Type,TAUD_STS_Type;
+
+typedef uint8_t TAU_Md_High7Bit_TypeDef;
+
+
+typedef enum{
+    TAU_MASTER_CH_CTL,//0: Master channel
+    TAU_UPPER_CH_CTL,//1: Another upper channel
+}TAU_CH_CTL_Type,TAUB_CH_CTL_Type,TAUD_CH_CTL_Type; //Selects the control channel for simultaneous rewrite
+
+typedef enum{
+    TAU_MASTER_START_CNT,
+    TAU_TOPOf_TRIANGLE_WAVE,
+}TAU_WHEN_SIG_GEN_Type,TAUB_WHEN_SIG_GEN_Type,TAUD_WHEN_SIG_GEN_Type;//Selects when the signal that triggers simultaneous rewrite is generated
+
+typedef enum{
+    TAU_IS_TRIG_CH,
+    TAU_NOT_TRIG_CH = !TAU_IS_TRIG_CH,
+}TAU_AS_TRIG_CH,TAUB_AS_TRIG_CH,TAUD_AS_TRIG_CH;
 
 typedef struct{
-    TAUB_CH_CTL_Type ch_ctl;//
-    TAUB_WHEN_SIG_GEN_Type sig_gen;//
-    TAUB_AS_TRIG_CH is_trig_ch;//
-}TAUB_SIMULREWR_CFG_TypeDef;//simultaneous rewrite configration
+    TAU_CH_CTL_Type ch_ctl;//
+    TAU_WHEN_SIG_GEN_Type sig_gen;//
+    TAU_AS_TRIG_CH is_trig_ch;//
+}TAU_SIMULREWR_CFG_TypeDef,TAUB_SIMULREWR_CFG_TypeDef,TAUD_SIMULREWR_CFG_TypeDef;//simultaneous rewrite configration
 
 typedef struct{
     uint8_t ch_no;
-    TAUB_CLK_SEL_Type clk_sel;  //Selects the operation clock
+    TAU_CLK_SEL_Type clk_sel;  //Selects the operation clock
     uint8_t cnt_clk4cnt_counter;//Selects the count clock for the TAUBnCNTm counter
     uint8_t clk_div;
     uint16_t cdr;
-    TAUB_MAS_Type mas;
-    TAUB_STS_Type sts;
+    TAU_MAS_Type mas;
+    TAU_STS_Type sts;
     uint8_t cos;//Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF of channel m are updated
     union{
         uint8_t md;
         struct{
-            TAUB_MD_LOW1BIT_Type low1bit:1;
-            TAUB_Md_High7Bit_TypeDef high7bit:7;
+            TAU_MD_LOW1BIT_Type low1bit:1;
+            TAU_Md_High7Bit_TypeDef high7bit:7;
         }md_bits;
     }md_un;
     uint8_t enable_sim_cfg;//Enables/disables simultaneous rewrite of the data register of channel ch_no
-    TAUB_SIMULREWR_CFG_TypeDef sim_cfg;
-}TAUB_ChMode_TypeDef;
+    TAU_SIMULREWR_CFG_TypeDef sim_cfg;
+}TAU_ChMode_TypeDef,TAUB_ChMode_TypeDef,TAUD_ChMode_TypeDef;
 
 /*channel output modes*/
 typedef enum{
@@ -454,13 +535,18 @@ typedef enum{
 }TAUB_CH_OUTPUT_MODE_Type;
 /*************************************TAUB declaration End*********************/
 
+
+
+
+
+/*************************************TAUB declaration End*********************/
+
 void OSTM_Init();
 void OSTM_Delay(__IO uint32_t delay_us);
 void OSTM_Cmp_Reload(const uint32_t new_value);
 uint8_t OSTM_Count_State_Get(void* unit);
 
 void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode);
-
 void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode);
 
 
