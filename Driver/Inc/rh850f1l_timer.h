@@ -72,7 +72,7 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
 
 /******************************************************************************/
 #define _TAUD0                      (0)
-#define _TAUD0_ADDR                 ((volatile struct __tag39 *)&TAUD0)
+#define _TAUD0_ADDR                 ((volatile struct __tag38 *)&TAUD0)
 
 #define _TAUD0_CDRn_ADDR(_CH_)      (((uint16_t*)&_TAUD0_ADDR->CDR0) + 2*_CH_)
 #define _TAUD0_CNTn_ADDR(_CH_)      (((uint16_t*)&_TAUD0_ADDR->CNT0) + 2*_CH_)
@@ -362,6 +362,63 @@ return _RET_: 0-- Operation mode 1  1-- Operation mode 2*/
                                                                 _RET_ = _UNIT_##_ADDR->TOL & (0x01 << _CH_); \
                                                             }while(0)
 
+#define __ENABLE_DEAD_TIME(_UNIT_,_CH_,_BOOL_)              do{ \
+                                                                if(_BOOL_ == TRUE) /*enable*/ \
+                                                                    _UNIT_##_ADDR->TDE |= (0x01 << _CH_); \
+                                                                else /*disable*/ \
+                                                                    _UNIT_##_ADDR->TDE &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*_VALUE_ 0: Positive phase period 1: Negative phase period*/
+#define __SET_PHASE_PERIOD(_UNIT_,_CH_,_VALUE_)             do{ \
+                                                                if(_VALUE_) /*negative phase period*/ \
+                                                                    _UNIT_##_ADDR->TDL |= (0x01 << _CH_); \
+                                                                else /*disable*/ \
+                                                                    _UNIT_##_ADDR->TDL &= ~(0x01 << _CH_); \
+                                                            }while(0)
+
+/*_VALUE_ 0:When detecting the duty cycle of an upper even channel (duty dead time output)
+ *        1:When detecting the TIN input edge of a lower odd channel (one-phase dead time output)*/
+#define __SET_TAUD_TIME_ADD_DEAD_TIME(_CH_,_VALUE_)         do{ \
+                                                                if(_VALUE_) /*enable*/ \
+                                                                    _TAUD0_ADDR->TDM |= (0x01 << _CH_); \
+                                                                else /*disable*/ \
+                                                                    _TAUD0_ADDR->TDM &= ~(0x01 << _CH_); \
+                                                            }while(0)
+
+/*************TAUDn Real-time/Modulation Output Registers**********************/
+//enables/disables real-time output
+#define __ENABLE_TAUD_REAL_TIME_OUTPUT(_CH_,_BOOL_)         do{ \
+                                                                if(_BOOL_ == TRUE) /*enable real-time output*/ \
+                                                                    _TAUD0_ADDR->TRE |= (0x01 << _CH_); \
+                                                                else /*disable real-time output*/ \
+                                                                    _TAUD0_ADDR->TRE &= ~(0x01 << _CH_); \
+                                                            }while(0)
+
+/* controls the real-time output trigger of each channel
+ * _VALUE_ 0: Next upper channel with this bit set to 1
+ *        1: Channel m
+ */
+#define __SET_TAUD_TRIGGER_CHANNEL(_CH_,_VALUE_)            do{ \
+                                                                if(_VALUE_) /*enable*/ \
+                                                                    _TAUD0_ADDR->TRC |= (0x01 << _CH_); \
+                                                                else /*disable*/ \
+                                                                    _TAUD0_ADDR->TRC &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/*Sets a value which is output to TAUDTTOUTm*/
+#define __SET_TAUD_LEVEL_TO_TOUT(_CH_,_VALUE_)              do{ \
+                                                                if(_VALUE_) /*enable*/ \
+                                                                    _TAUD0_ADDR->TRO |= (0x01 << _CH_); \
+                                                                else /*disable*/ \
+                                                                    _TAUD0_ADDR->TRO &= ~(0x01 << _CH_); \
+                                                            }while(0)
+/* enables/disables modulation output for timer output and real-time output
+ * _VAULE_  0: disable  1:enable*/
+#define __ENABEL_TAUD_MODULATION_OUTPUT(_CH_,_BOOL_)        do{ \
+                                                                if(_BOOL_ == TRUE) /*enable real-time output*/ \
+                                                                    _TAUD0_ADDR->TME |= (0x01 << _CH_); \
+                                                                else /*disable real-time output*/ \
+                                                                    _TAUD0_ADDR->TME &= ~(0x01 << _CH_); \
+                                                            }while(0)
 //the operation mode TAUBnMD[4:1]
 #define TAUB_INTERVAL_MODE      (0) //Interval timer mode
 #define TAUB_JUD_MODE           (1) //Judge mode
@@ -534,12 +591,24 @@ typedef enum{
     TAUB_SYNCHRONOUS_OUTPUT_MODE_2,
 }TAUB_CH_OUTPUT_MODE_Type;
 /*************************************TAUB declaration End*********************/
-
-
-
-
-
-/*************************************TAUB declaration End*********************/
+/*************************************TAUD declaration Start*********************/
+/*channel output modes*/
+typedef enum{
+    TAUD_BY_SOFTWARE_MODE,
+    /*independent output mode*/
+    TAUD_INDEPENDENT_OUTPUT_MODE_1,
+    TAUD_INDEPENDENT_OUTPUT_MODE_1_WITH_REAL_TIME,//with real-time output
+    TAUD_INDEPENDENT_OUTPUT_MODE_2,
+    /*Synchronous output mode*/
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_1,
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_1_WITH_NON_COMP,//with non-complementary modulation output
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_2,
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_DEAD_TIME,//with dead time output
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_ONE_PHASE,//with one-phase PWM output
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_COMP,//with complementary modulation output
+    TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_NON_COMP,//with non-complementary modulation output
+}TAUD_CH_OUTPUT_MODE_Type;
+/*************************************TAUD declaration End*********************/
 
 void OSTM_Init();
 void OSTM_Delay(__IO uint32_t delay_us);
@@ -548,6 +617,9 @@ uint8_t OSTM_Count_State_Get(void* unit);
 
 void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode);
 void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode);
+
+void TAUD_Independent_Init(TAUD_ChMode_TypeDef *mode);
+void TAUD_Set_Channel_Output_Mode(uint8_t channel_num,TAUD_CH_OUTPUT_MODE_Type out_mode);
 
 
 #endif//RH850F1L_TIMER_H

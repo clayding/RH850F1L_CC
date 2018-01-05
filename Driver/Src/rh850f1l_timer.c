@@ -59,6 +59,8 @@ __IO uint32_t uw_tick;
 
 static __IO uint8_t taub_channel = 0;
 static ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode );
+static __IO uint8_t taud_channel = 0;
+static ErrorStatus TAUD_Set_Channel_Mode(TAUD_ChMode_TypeDef *mode );
 
 /*************************************OS Timer defination start****************/
 static void OSTM_Start_Ctl_Set(void* unit,OSTM_OPERATE_MODE_Type opt_mode,
@@ -155,6 +157,7 @@ void OSTM_Cmp_Reload(const uint32_t new_value)
 
 /**************************OS Timer defination end*****************************/
 
+/*************************TAUB defination start********************************/
 void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode)
 {
     __IO uint8_t i = 0;
@@ -297,3 +300,175 @@ void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type o
     }
     __SET_OUTPUT_LEVEL(_TAUB0,channel_num,0,ret);
 }
+
+/*************************TAUB defination end********************************/
+
+/*************************TAUD defination start********************************/
+void TAUD_Independent_Init(TAUD_ChMode_TypeDef *mode)
+{
+    __IO uint8_t i = 0;
+    uint16_t channel_mask = 0x00;
+
+    if(mode->ch_no / 16) return; //guarantee that taud_channel is [0,15]
+    taud_channel = mode->ch_no;
+
+    //Set the TAUDnTPS register to specify the clock frequency of CK0 to CK3.
+    for(;i <= (uint8_t)TAU_CK3;i++)
+        __SET_TAU_PRESCALER(_TAUD0,_TAUD0_PRSn_OFFSET(i),mode->clk_div);
+
+
+    if(TAUD_Set_Channel_Mode(mode) == ERROR){
+        while(1){};
+    }
+
+    __SET_TAU_CDR(_TAUD0,taud_channel,mode->cdr);
+
+    channel_mask |= 0x01 << taud_channel;
+    __START_COUNTER(_TAUD0,channel_mask);
+}
+
+void TAUD_Synchronous_Init(TAUD_ChMode_TypeDef mode_arr[],uint8_t size)
+{
+    uint8_t i = 0;
+    uint16_t channel_mask = 0x00;
+
+    for(;i <= (uint8_t)TAU_CK3;i++)
+        __SET_TAU_PRESCALER(_TAUD0,_TAUD0_PRSn_OFFSET(i),mode_arr[i].clk_div);// 40M/16 = 2500 --- 1ms
+
+    for(i = 0;i< size;i++){
+        if(mode_arr[i].ch_no / 16) continue;
+        taud_channel = mode_arr[i].ch_no;
+
+        if(TAUD_Set_Channel_Mode(&mode_arr[i]) == ERROR){
+            while(1){};
+        }
+        __SET_TAU_CDR(_TAUD0,taud_channel,mode_arr[i].cdr);
+
+        if(mode_arr[i].enable_sim_cfg){
+            TAUD_Simultaneous_Rewrite_Init(taud_channel,mode_arr[i].sim_cfg);
+        }
+
+        if(mode_arr[i].mas != 1)
+            TAUD_Set_Channel_Output_Mode(taud_channel,TAUD_SYNCHRONOUS_OUTPUT_MODE_1);
+        channel_mask |= (0x01 << taud_channel);
+    }
+
+    __START_COUNTER(_TAUD0,channel_mask);
+
+}
+
+ErrorStatus TAUD_Simultaneous_Rewrite_Init(uint8_t channel_num,TAUD_SIMULREWR_CFG_TypeDef sim_cfg)
+{
+    uint16_t ret = 0;
+
+    __ENABLE_RELOAD_DATA(_TAUD0,channel_num,TRUE,ret);
+    if(ret) return ERROR;
+
+    __SET_RELOAD_DATA_CTL_CH(_TAUD0,channel_num,sim_cfg.ch_ctl,ret);
+    if(ret) return ERROR;
+
+    __SET_RELAOD_DATA_MODE(_TAUD0,channel_num,sim_cfg.sig_gen,ret);
+    if(ret) return ERROR;
+
+    __SET_RELAOD_DATA_CTL(_TAUD0,channel_num,sim_cfg.is_trig_ch,ret);
+    if(ret) return ERROR;
+
+    __ENABLE_RELOAD_DATA_TRIGGER(_TAUB0,channel_num);
+
+}
+
+/**
+  * @brief Set the TAUDnCMORm, controls channel m operation.
+  * @param  mode: pointer to the TAUD_ChMode_TypeDef .
+  * @retval ERROR: error occured, otherwise successfully
+  */
+ErrorStatus TAUD_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
+{
+    __IO uint16_t ret_mode = 0;
+
+    __SET_TAU_CMOR_CKS(_TAUD0,taud_channel,mode->clk_sel);
+    __SET_TAU_CMOR_CCS0(_TAUD0,taud_channel,mode->cnt_clk4cnt_counter);
+
+    __SET_TAU_CMOR_MAS(_TAUD0,taud_channel,mode->mas);
+
+    if(mode->sts != TAU_STS_PROHIBITED)
+        __SET_TAU_CMOR_STS(_TAUD0,taud_channel,mode->sts);
+
+    __SET_TAU_CMOR_COS(_TAUD0,taud_channel,mode->cos);
+
+    if(mode->md_un.md_bits.high7bit == TAUD_MD_PROHIBITED1 ||
+         mode->md_un.md_bits.high7bit == TAUD_MD_PROHIBITED2 )
+         return ERROR;
+    __SET_TAU_CMOR_MD(_TAUD0,taud_channel,mode->md_un.md);
+
+    __GET_TAU_CMOR(_TAUD0,ret_mode,taud_channel);// for test
+
+    return SUCCESS;
+}
+
+/*  channel output mode     TOE     TOM     TOC     TDE
+ *  software mode           0       x       x       x
+ *
+ *  independent 1           1       0       0       0
+ *  independent 2           1       0       1       0
+ *  synchronous 1           1       1       0       0
+ *  synchronous 2           1       1       1       0
+ *synchronous 2 with dead   1       1       1       1
+ */
+
+void TAUD_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode)
+{
+    __IO uint16_t ret = 0;
+    __IO uint8_t tom = 0,toc = 0,tde = 0,tre = 0,tme = 0,tdm = 0;
+    __IO bool toe = TRUE;//default true
+
+    switch(out_mode)
+    {
+        case TAUD_BY_SOFTWARE_MODE:
+            toe = FALSE;
+            break;
+        case TAUD_INDEPENDENT_OUTPUT_MODE_1:
+            break;
+        case TAUD_INDEPENDENT_OUTPUT_MODE_1_WITH_REAL_TIME:
+            tre = 1;
+            break;
+        case TAUD_INDEPENDENT_OUTPUT_MODE_2:
+            toc =1;
+            break;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_1:
+            tom =1;
+            break;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_1_WITH_NON_COMP://with non-complementary modulation output
+            tom = 1;
+            tre = 1;
+            break;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_2:
+            tom =1;
+            toc =1;
+            break;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_ONE_PHASE://with one-phase PWM output
+            tdm = 1;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_DEAD_TIME://with dead time output
+            tom = 1;
+            toc = 1;
+            tde = 1;
+            break;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_COMP://with complementary modulation output
+            tde = 1;
+        case TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_NON_COMP://with non-complementary modulation output
+            tom = 1;
+            toc = 1;
+            tre = 1;
+            tme = 1;
+            break;
+    }
+    __ENABLE_INDEPENDENT_OUTPUT(_TAUD0,channel_num,toe);//TOE
+    __SET_OUTPUT_MODE(_TAUD0,channel_num,tom,ret);//TOM
+    __SET_OUTPUT_CONFIG(_TAUD0,channel_num,toc,ret);//TOC
+    __ENABLE_DEAD_TIME(_TAUD0,channel_num,tde);//TDE
+    __ENABLE_TAUD_REAL_TIME_OUTPUT(channel_num,tre);//TRE
+    __ENABEL_TAUD_MODULATION_OUTPUT(channel_num,tme);//TME
+    __SET_TAUD_TIME_ADD_DEAD_TIME(channel_num,tdm);//TDM
+}
+
+/*************************TAUD defination end********************************/

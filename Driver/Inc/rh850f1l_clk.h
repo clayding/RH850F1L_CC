@@ -58,7 +58,7 @@
 #define IPERI1_SRC_PPLLCLK  ((uint32_t)0x02) //10B: PPLLCLK
 
 #define IPERI2_SRC_CPUCLK2  ((uint32_t)0x01) //01B: CPUCLK2 (default)
-#define IPERI2_SRC_PPLLCLK  ((uint32_t)0x02) //10B: PPLLCLK2
+#define IPERI2_SRC_PPLLCLK2 ((uint32_t)0x02) //10B: PPLLCLK2
 
 #define CPUCLKS_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
 #define CPUCLKS_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask

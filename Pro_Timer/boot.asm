@@ -136,7 +136,7 @@
 
 	.section "EIINTTBL", const
 	.align	512
-	.dw	#_Dummy_EI ; INT0
+	.dw	#_TAUD0CH0IntHandler; INT0
 	.dw	#_Dummy_EI ; INT1
 	.dw	#_Dummy_EI ; INT2
 	.dw #_Dummy_EI ; INT3
@@ -175,7 +175,7 @@
 	.dw #_Dummy_EI ; INT36
 	.dw #_Dummy_EI ; INT37
 	.dw #_Dummy_EI ; INT38
-	.dw #_Dummy_EI ; INT39
+	.dw #_TAUD0CH1IntHandler ; INT39
 	.dw #_Dummy_EI ; INT40
 	.dw #_Dummy_EI ; INT41
 	.dw #_Dummy_EI ; INT42

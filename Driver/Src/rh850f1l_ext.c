@@ -285,10 +285,16 @@ void Eiit_Filter_Ctl_Operate(INPUT_SIGNAL_Type in_sig, OperateDirection opt_dir,
   }
 }
 
-#pragma interrupt Inp12Handler(channel = 123, enable = false, callt = false, fpu = false)
-void Inp12Handler(unsigned long eiic)
+#pragma interrupt TAUD0CH0IntHandler(channel = 0, enable = false, callt = false, fpu = false)
+void TAUD0CH0IntHandler(unsigned long eiic)
 {
-  Eiit_Handler_Ptr();
+    Eiit_Handler_Ptr();
+}
+
+#pragma interrupt TAUD0CH1IntHandler(channel = 39, enable = false, callt = false, fpu = false)
+void TAUD0CH1IntHandler(unsigned long eiic)
+{
+    Eiit_Handler_Ptr_2();
 }
 
 extern __IO uint32_t uw_tick;
@@ -297,6 +303,12 @@ void OSTMIntHandler(unsigned long eiic)
 {
   uw_tick++;
   OSTM_Cmp_Reload(CPUCLK2);
+}
+
+#pragma interrupt Inp12Handler(channel = 123, enable = false, callt = false, fpu = false)
+void Inp12Handler(unsigned long eiic)
+{
+  Eiit_Handler_Ptr();
 }
 
 #pragma interrupt TAUB0CH0IntHandler(channel = 134, enable = false, callt = false, fpu = false)
