@@ -58,9 +58,11 @@ __IO uint32_t uw_tick;
 /*************************************OS Timer declaration End*****************/
 
 static __IO uint8_t taub_channel = 0;
-static ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode );
 static __IO uint8_t taud_channel = 0;
+static ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode );
+static void TAUB_Filter_Ctl_Operate(uint8_t channel_num);
 static ErrorStatus TAUD_Set_Channel_Mode(TAUD_ChMode_TypeDef *mode );
+static void TAUD_Filter_Ctl_Operate(uint8_t channel_num);
 
 /*************************************OS Timer defination start****************/
 static void OSTM_Start_Ctl_Set(void* unit,OSTM_OPERATE_MODE_Type opt_mode,
@@ -181,7 +183,7 @@ void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode)
     __START_COUNTER(_TAUB0,channel_mask);
 }
 
-void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
+void TAUB_Batch_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
 {
     uint8_t i = 0;
     uint16_t channel_mask = 0x00;
@@ -203,7 +205,7 @@ void TAUB_Synchronous_Init(TAUB_ChMode_TypeDef mode_arr[],uint8_t size)
         }
 
         if(mode_arr[i].mas != 1)
-            TAUB_Set_Channel_Output_Mode(taub_channel,TAUB_SYNCHRONOUS_OUTPUT_MODE_1);
+            TAUB_Set_Channel_Output_Mode(taub_channel,mode_arr[i].ch_output_mode.taub_mode);
         channel_mask |= (0x01 << taub_channel);
     }
 
@@ -247,6 +249,11 @@ ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 
     if(mode->sts != TAU_STS_PROHIBITED)
         __SET_TAU_CMOR_STS(_TAUB0,taub_channel,mode->sts);
+
+    if(mode->sts == TAU_STS_EDGE_TIN_TRIG){
+        TAUB_Filter_Ctl_Operate(taub_channel);
+        __SET_TAU_CMUR(_TAUB0,taub_channel,mode->tin_detect);
+    }
 
     __SET_TAU_CMOR_COS(_TAUB0,taub_channel,mode->cos);
 
@@ -301,6 +308,14 @@ void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type o
     __SET_OUTPUT_LEVEL(_TAUB0,channel_num,0,ret);
 }
 
+/* @brief -Set(Write) or Get(Read) filter control register  DNFA TAUB0ICTL
+ * @param channel_num - the channel num defined in Table 6.10 , .....
+ */
+void TAUB_Filter_Ctl_Operate(uint8_t channel_num)
+{
+    __ENBALE_DIGITAL_NOISE_ELIMI(_TAUB0,channel_num,1);
+}
+
 /*************************TAUB defination end********************************/
 
 /*************************TAUD defination start********************************/
@@ -327,7 +342,7 @@ void TAUD_Independent_Init(TAUD_ChMode_TypeDef *mode)
     __START_COUNTER(_TAUD0,channel_mask);
 }
 
-void TAUD_Synchronous_Init(TAUD_ChMode_TypeDef mode_arr[],uint8_t size)
+void TAUD_Batch_Init(TAUD_ChMode_TypeDef mode_arr[],uint8_t size)
 {
     uint8_t i = 0;
     uint16_t channel_mask = 0x00;
@@ -349,7 +364,12 @@ void TAUD_Synchronous_Init(TAUD_ChMode_TypeDef mode_arr[],uint8_t size)
         }
 
         if(mode_arr[i].mas != 1)
-            TAUD_Set_Channel_Output_Mode(taud_channel,TAUD_SYNCHRONOUS_OUTPUT_MODE_1);
+            TAUD_Set_Channel_Output_Mode(taud_channel,mode_arr[i].ch_output_mode.taud_mode);
+            if(taud_channel == 1)
+                __SET_TAUD_TRIGGER_CHANNEL(taud_channel,1);
+            else
+                __SET_TAUD_TRIGGER_CHANNEL(taud_channel,0);
+
         channel_mask |= (0x01 << taud_channel);
     }
 
@@ -393,6 +413,10 @@ ErrorStatus TAUD_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
 
     if(mode->sts != TAU_STS_PROHIBITED)
         __SET_TAU_CMOR_STS(_TAUD0,taud_channel,mode->sts);
+    if(mode->sts == TAU_STS_EDGE_TIN_TRIG){
+        TAUD_Filter_Ctl_Operate(taud_channel);
+        __SET_TAU_CMUR(_TAUD0,taud_channel,mode->tin_detect);
+    }
 
     __SET_TAU_CMOR_COS(_TAUD0,taud_channel,mode->cos);
 
@@ -406,17 +430,8 @@ ErrorStatus TAUD_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode )
     return SUCCESS;
 }
 
-/*  channel output mode     TOE     TOM     TOC     TDE
- *  software mode           0       x       x       x
- *
- *  independent 1           1       0       0       0
- *  independent 2           1       0       1       0
- *  synchronous 1           1       1       0       0
- *  synchronous 2           1       1       1       0
- *synchronous 2 with dead   1       1       1       1
- */
 
-void TAUD_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode)
+void TAUD_Set_Channel_Output_Mode(uint8_t channel_num,TAUD_CH_OUTPUT_MODE_Type out_mode)
 {
     __IO uint16_t ret = 0;
     __IO uint8_t tom = 0,toc = 0,tde = 0,tre = 0,tme = 0,tdm = 0;
@@ -461,6 +476,8 @@ void TAUD_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type o
             tre = 1;
             tme = 1;
             break;
+        default:
+            break;
     }
     __ENABLE_INDEPENDENT_OUTPUT(_TAUD0,channel_num,toe);//TOE
     __SET_OUTPUT_MODE(_TAUD0,channel_num,tom,ret);//TOM
@@ -469,6 +486,15 @@ void TAUD_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type o
     __ENABLE_TAUD_REAL_TIME_OUTPUT(channel_num,tre);//TRE
     __ENABEL_TAUD_MODULATION_OUTPUT(channel_num,tme);//TME
     __SET_TAUD_TIME_ADD_DEAD_TIME(channel_num,tdm);//TDM
+    __SET_TAUD_LEVEL_TO_TOUT(channel_num,0);//TRO
 }
 
+
+/* @brief -Set(Write) or Get(Read) filter control register  DNFA TAUD0ICTL
+ * @param channel_num - the channel num defined in Table 6.10 , .....
+ */
+void TAUD_Filter_Ctl_Operate(uint8_t channel_num)
+{
+    __ENBALE_DIGITAL_NOISE_ELIMI(_TAUD0,channel_num,1);
+}
 /*************************TAUD defination end********************************/

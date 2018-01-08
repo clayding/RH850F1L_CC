@@ -16,6 +16,7 @@
 #include "rh850f1l_ext.h"
 #include "rh850f1l_wp.h"
 #include "rh850f1l_clk.h"
+#include "rh850f1l_timer.h"
 
 #define EIINT_ICXX_MASK ((uint16_t)(0x01 << 15))
 #define EIINT_RFXX_MASK ((uint16_t)(0x01 << 12))
@@ -285,10 +286,13 @@ void Eiit_Filter_Ctl_Operate(INPUT_SIGNAL_Type in_sig, OperateDirection opt_dir,
   }
 }
 
+static uint8_t i = 0;
 #pragma interrupt TAUD0CH0IntHandler(channel = 0, enable = false, callt = false, fpu = false)
 void TAUD0CH0IntHandler(unsigned long eiic)
 {
-    Eiit_Handler_Ptr();
+    //Eiit_Handler_Ptr();
+    __SET_TAUD_LEVEL_TO_TOUT(1,i);
+    i = !i;
 }
 
 #pragma interrupt TAUD0CH1IntHandler(channel = 39, enable = false, callt = false, fpu = false)
@@ -314,7 +318,7 @@ void Inp12Handler(unsigned long eiic)
 #pragma interrupt TAUB0CH0IntHandler(channel = 134, enable = false, callt = false, fpu = false)
 void TAUB0CH0IntHandler(unsigned long eiic)
 {
-    Eiit_Handler_Ptr();
+    //Eiit_Handler_Ptr();
 }
 
 #pragma interrupt TAUB0CH1IntHandler(channel = 135, enable = false, callt = false, fpu = false)

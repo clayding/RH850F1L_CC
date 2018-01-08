@@ -488,14 +488,14 @@ typedef enum{
     TAUnCNTm_GT_TAUBnCDRm = 1,//GT greater than -- >
 }TAU_MD_LOW1BIT_Type,TAUB_MD_LOW1BIT_Type,TAUD_MD_LOW1BIT_Type;
 
-enum{
+typedef enum{
     TAU_TIS_FALL_EDGE,
     TAU_TIS_RISE_EDGE,
     //low-width measurement selection
     TAU_TIS_FALL_RISE,//Start trigger: falling edge,Stop trigger (capture): rising edge
     //high-width measurement selection
     TAU_TIS_RISE_FALL,//Start trigger: rising edge,Stop trigger (capture): falling edge
-};
+}TAU_TIN_DETECT_Type;
 
 enum{
     TAU_CSF_CNT_UP,
@@ -562,26 +562,6 @@ typedef struct{
     TAU_AS_TRIG_CH is_trig_ch;//
 }TAU_SIMULREWR_CFG_TypeDef,TAUB_SIMULREWR_CFG_TypeDef,TAUD_SIMULREWR_CFG_TypeDef;//simultaneous rewrite configration
 
-typedef struct{
-    uint8_t ch_no;
-    TAU_CLK_SEL_Type clk_sel;  //Selects the operation clock
-    uint8_t cnt_clk4cnt_counter;//Selects the count clock for the TAUBnCNTm counter
-    uint8_t clk_div;
-    uint16_t cdr;
-    TAU_MAS_Type mas;
-    TAU_STS_Type sts;
-    uint8_t cos;//Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF of channel m are updated
-    union{
-        uint8_t md;
-        struct{
-            TAU_MD_LOW1BIT_Type low1bit:1;
-            TAU_Md_High7Bit_TypeDef high7bit:7;
-        }md_bits;
-    }md_un;
-    uint8_t enable_sim_cfg;//Enables/disables simultaneous rewrite of the data register of channel ch_no
-    TAU_SIMULREWR_CFG_TypeDef sim_cfg;
-}TAU_ChMode_TypeDef,TAUB_ChMode_TypeDef,TAUD_ChMode_TypeDef;
-
 /*channel output modes*/
 typedef enum{
     TAUB_BY_SOFTWARE_MODE,
@@ -609,6 +589,47 @@ typedef enum{
     TAUD_SYNCHRONOUS_OUTPUT_MODE_2_WITH_NON_COMP,//with non-complementary modulation output
 }TAUD_CH_OUTPUT_MODE_Type;
 /*************************************TAUD declaration End*********************/
+
+
+typedef struct{
+    uint8_t ch_no;
+    TAU_CLK_SEL_Type clk_sel;  //Selects the operation clock
+    uint8_t cnt_clk4cnt_counter;//Selects the count clock for the TAUBnCNTm counter
+    uint8_t clk_div;
+    uint16_t cdr;
+    TAU_MAS_Type mas;
+    TAU_STS_Type sts;
+    uint8_t cos;//Specifies when the capture register TAUBnCDRm and the overflow flag TAUBnCSRm.TAUBnOVF of channel m are updated
+    union{
+        uint8_t md;
+        struct{
+            TAU_MD_LOW1BIT_Type low1bit:1;
+            TAU_Md_High7Bit_TypeDef high7bit:7;
+        }md_bits;
+    }md_un;
+    TAU_TIN_DETECT_Type tin_detect;
+    uint8_t enable_sim_cfg;//Enables/disables simultaneous rewrite of the data register of channel ch_no
+    TAU_SIMULREWR_CFG_TypeDef sim_cfg;
+    union{
+        TAUB_CH_OUTPUT_MODE_Type taub_mode;
+        TAUD_CH_OUTPUT_MODE_Type taud_mode;
+    }ch_output_mode;
+}TAU_ChMode_TypeDef,TAUB_ChMode_TypeDef,TAUD_ChMode_TypeDef;
+
+
+/**********Set noise filters for corresponding port pin functions**************/
+#define DNFA_TAUB0IEN   DNFATAUB0IEN
+#define DNFA_TAUD0IEN   DNFATAUD0IEN
+
+
+#define __ENBALE_DIGITAL_NOISE_ELIMI(_UNIT_,_CH_,_VALUE_)       do{ \
+                                                                    if(_VALUE_) \
+                                                                        DNFA##_UNIT_##IEN |= (1 << _CH_); \
+                                                                    else \
+                                                                        DNFA##_UNIT_##IEN &= ~(1 << _CH_); \
+                                                                }while(0)
+
+
 
 void OSTM_Init();
 void OSTM_Delay(__IO uint32_t delay_us);
