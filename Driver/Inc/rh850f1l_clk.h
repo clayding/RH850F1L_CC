@@ -76,6 +76,9 @@
 #define AFOUTS_CTL_MASK     ((uint32_t)0x07) //C_AWO_FOUT Source Clock Selection Register Mask
 #define AFOUTS_ACT_MASK     ((uint32_t)0x07) //C_AWO_FOUT Source Clock Active Register Mas
 
+#define AWDTAD_CTL_MASK      ((uint32_t)0x03)
+#define AWDTAD_ACT_MASK      ((uint32_t)0x03)
+
 typedef enum {
     OSC_DISABLE,
     OSC_ENABLE = !OSC_DISABLE,
@@ -126,6 +129,11 @@ typedef enum {
     AFOUT_SRC_CPLLCLK2, //101B: CPLLCLK2
     AFOUT_SRC_PPLLCLK4, //110B: PPLLCLK4
 }AFOUT_SRC_CLK_Type;
+
+typedef enum{
+    AWDTA_LSOSC_128 = 1,//LS IntOSC / 128 (default)
+    AWDTA_LSOSC_1,// LS IntOSC / 1
+}AWDTA_DIV_SEL_Type;
 
 void Clock_MOSC_Config(OSC_OPT_Type opt);
 OSC_STATUS_Type Clock_OSC_Get_Status(X_OSC_Type otp);

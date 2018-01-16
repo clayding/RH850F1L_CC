@@ -12,14 +12,17 @@
 
 #include "board.h"
 
-/****************************Config part***************************************/
+/****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
-#define TAUB0_PWM_OUTPUT_MODE_TEST
+//#define TAUB0_PWM_OUTPUT_MODE_TEST
 //#define TAUD0_INTERVAL_MODE_TEST
 //#define TAUD0_PWM_OUTPUT_MODE_TEST
 //#define TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST
-#define TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST
+//#define TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST
 
+/************************WDTA Config ******************************************/
+#define WDTA0_TEST
+#define WDTA1_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized
@@ -49,6 +52,7 @@ void System_Clock_Config(void)
     Clock_Domain_Set(CPUCLK);//set clock domain for cpuclk
     Clock_Domain_Set(IPERI1);//set clock domain for iperi1
     Clock_Domain_Set(IPERI2);//set clock domain for iperi2
+    Clock_Domain_Set(AWDTA);//set clock domain for WDTA
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
 
@@ -150,6 +154,23 @@ void Board_Port_Config(void)
 
 #ifdef TAUD0_PWM_OUTPUT_MODE_TEST
         eiint.eiint_ch = 39;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+
+#ifdef WDTA0
+	{
+        WDTA_MODE_TypeDef wdta_mode;
+        wdta_mode.inter_time = WDTA_OVF_LEVEL_0;
+        wdta_mode.int_en = WDTA_INIT_ENABLE;
+        wdta_mode.err_mode = WDTA_RESET_MODE;
+        wdta_mode.ws = WDTA_WS_100_PERCENT;
+
+        WDTA_Start(_WDTA0,&wdta_mode);
+	}
+
+        eiint.eiint_ch = 32;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);

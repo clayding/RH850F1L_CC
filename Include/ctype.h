@@ -23,6 +23,9 @@
 #ifndef __CTYPE_H
 #define __CTYPE_H
 
+#define ROTATE_LEFT(x, s, n) ((x) << (n)) | ((x) >> ((s) - (n)))
+#define ROTATE_RIGHT(x, s, n) ((x) >> (n)) | ((x) << ((s) - (n)))
+
 int isalnum(int c);
 int isalpha(int c);
 int isblank(int c);
@@ -39,5 +42,5 @@ int isxdigit(int c);
 int tolower(int c);
 int toupper(int c);
 
-#endif
 
+#endif

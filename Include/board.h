@@ -14,7 +14,7 @@
 #include "rh850f1l_port.h"
 #include "rh850f1l_ext.h"
 #include "rh850f1l_timer.h"
-
+#include "rh850f1l_wdta.h"
 
 
 void Board_MCU_Init();

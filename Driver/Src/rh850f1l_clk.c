@@ -59,12 +59,15 @@ typedef struct{
 #define SET_DOMAIN_AWO_FUNC_DECLARE(index) static SET_CLK_DOMAIN_RET_Type \
                                             C_AWO_##index##_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 
+SET_DOMAIN_AWO_FUNC_DECLARE(AWDTA);
 SET_DOMAIN_AWO_FUNC_DECLARE(AFOUT);
 SET_DOMAIN_ISO_FUNC_DECLARE(CPUCLK);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI1);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI2);
 
+
 DOMAIN_SET_Ref dsf[] = {
+    {AWDTA, C_AWO_AWDTA_Domain_Set},
     {AFOUT, C_AWO_AFOUT_Domain_Set},
     {CPUCLK,C_ISO_CPUCLK_Domain_Set},
     {IPERI1,C_ISO_IPERI1_Domain_Set},
@@ -260,5 +263,19 @@ SET_CLK_DOMAIN_RET_Type C_AWO_AFOUT_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
         return SET_SRC_CLK_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
+}
 
+
+SET_CLK_DOMAIN_RET_Type C_AWO_AWDTA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Source Clock Setting for C_ISO_PERI2*/
+    val_.src_clk_ctl_val = AWDTA_LSOSC_128;//Source Clock Setting for C_AWO_WDTA
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AWDTA,D_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(AWDTA,D_CTL_MASK))) != ERROR);//Select a source clock
+    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,AWDTA,D_ACT) & STR_CONCAT2(AWDTA,D_ACT_MASK))) { //Confirm completion of selection
+        return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
 }

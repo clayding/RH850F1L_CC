@@ -16,6 +16,7 @@
 #include <iodefine.h>
 #include <io.h>
 #include <reg.h>
+#include <ctype.h>
 /**
 * @}
 */
