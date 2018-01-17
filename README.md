@@ -9,3 +9,7 @@
 2018年1月3号
 1.完成TAUB interval timer function 和PWM output function 的代码编写和测试
 2.添加新版的user manual,在1.32版的中发现一些问题。新版改正了。因此TAUD下面的用新版的UM
+
+2018年1月17日
+1.完成TAUD的代码编写和测试
+2.完成WDTA0 和WDTA1的代码编写和测试,并测试了时间的准确度，证明overflow interval time 是比较准确的

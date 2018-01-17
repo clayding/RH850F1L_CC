@@ -20,12 +20,18 @@
  *the WDTA counter when the VAC function is not used (start-up option OPWDVAC = 0).
  */
 #define __ENABLE_WDTA(_UNIT_)                   do{ \
-                                                    _UNIT_##_BASE.WDTE = 0xAC; \
+                                                    if(_UNIT_ == _WDTA0) \
+                                                        _WDTA0_BASE.WDTE = 0xAC; \
+                                                    else \
+                                                        _WDTA1_BASE.WDTE = 0xAC; \
                                                 }while(0);
 
 /*Get the result whether the WDTAn is started or stopped*/
 #define __GET_WDTA_ENBALE_STAT(_UINT_,_RET_)    do{ \
-                                                    _RET_ = _UNIT_##_BASE.WDTE; \
+                                                    if(_UNIT_ == _WDTA0) \
+                                                        _RET_ = _WDTA0_BASE.WDTE; \
+                                                    else \
+                                                        _RET_ = _WDTA1_BASE.WDTE; \
                                                 }while(0);
 
 /*Writing a correct activation code to this register generates a WDTA trigger
@@ -33,22 +39,33 @@
  *(start-up option OPWDVAC = 1)
  */
 #define __ENABLE_WDTA_VAC(_UNIT_,_VAC_)         do{ \
-                                                    _UNIT_##_BASE.EVAC = _VAC_; \
+                                                    if(_UNIT_ == _WDTA0) \
+                                                        _WDTA0_BASE.EVAC = _VAC_; \
+                                                    else \
+                                                        _WDTA1_BASE.EVAC = _VAC_; \
                                                 }while(0);
 
 /*2CH is returned (in software trigger start mode, before the activation of WDTAn).
  *The variable activation code written last is read (after the activation of WDTAn
  */
 #define __GET_WDTA_VAC_ENBALE_STAT(_UINT_,_RET_)    do{ \
-                                                        _RET_ = _UNIT_##_BASE.EVAC; \
+                                                        if(_UNIT_ == _WDTA0) \
+                                                            _RET_ = _WDTA0_BASE.EVAC; \
+                                                        else \
+                                                            _RET_ = _WDTA1_BASE.EVAC; \
                                                     }while(0);
 
 /*Get the reference value for calculating the activation code of the VAC function*/
-#define __GET_WDTA_REFER_VALUE(_UNIT_)              _UNIT_##_BASE.REF
+#define __GET_WDTA_REFER_VALUE(_UNIT_)              (_UNIT_ == _WDTA0?_WDTA0_BASE.REF:_WDTA1_BASE.REF)
 
 /*specifies the overflow interval time, 75% interrupt enable/disable, the error
  *mode, and the window-open period.*/
-#define __SET_WDTA_MODE(_UNIT_,_MODE_)              (_UNIT_##_BASE.MD = _MODE_)
+#define __SET_WDTA_MODE(_UNIT_,_MODE_)              do{ \
+                                                        if(_UNIT_ == _WDTA0) \
+                                                            _WDTA0_BASE.MD = _MODE_; \
+                                                        else \
+                                                            _WDTA1_BASE.MD = _MODE_; \
+                                                    }while(0);
 
 typedef enum{
     _WDTA0,
@@ -90,10 +107,15 @@ typedef struct{
     WDTA_WIN_OPEN_PERIOD_Type ws;
 }WDTA_MODE_TypeDef;
 
-
-
-void WDTA_Start(WDTA_UNIT_Type unit, WDTA_MODE_TypeDef *mode);
-void WDTA_Mode_Config(WDTA_UNIT_Type unit, WDTA_MODE_TypeDef *mode);
+struct WDTA_param{
+    __IO bool is_vac_enabled;
+    __IO uint8_t expect_tm;
+    __IO uint8_t ref_val;
+    __IO uint8_t next_ref_value;
+};
+void WDTA_Init(WDTA_UNIT_Type unit, WDTA_MODE_TypeDef *mode);
+void WDTA_Start(WDTA_UNIT_Type unit);
+static void WDTA_Mode_Config(WDTA_UNIT_Type unit, WDTA_MODE_TypeDef *mode);
 void WDTA_Reload(WDTA_UNIT_Type unit);
 
 

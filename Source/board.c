@@ -159,18 +159,35 @@ void Board_Port_Config(void)
         Eiit_Init(&eiint);
 #endif
 
-#ifdef WDTA0
+#ifdef WDTA0_TEST //Make sure that the OPBT0 has been set before testing this funtion
 	{
         WDTA_MODE_TypeDef wdta_mode;
-        wdta_mode.inter_time = WDTA_OVF_LEVEL_0;
+        wdta_mode.inter_time = WDTA_OVF_LEVEL_7;
         wdta_mode.int_en = WDTA_INIT_ENABLE;
         wdta_mode.err_mode = WDTA_RESET_MODE;
         wdta_mode.ws = WDTA_WS_100_PERCENT;
-
-        WDTA_Start(_WDTA0,&wdta_mode);
+        WDTA_Init(_WDTA0,&wdta_mode);
+        WDTA_Start(_WDTA0);
 	}
 
         eiint.eiint_ch = 32;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+
+#ifdef WDTA1_TEST
+	{
+        WDTA_MODE_TypeDef wdta_mode;
+        wdta_mode.inter_time = WDTA_OVF_LEVEL_7;
+        wdta_mode.int_en = WDTA_INIT_ENABLE;
+        wdta_mode.err_mode = WDTA_RESET_MODE;
+        wdta_mode.ws = WDTA_WS_100_PERCENT;
+        WDTA_Init(_WDTA1,&wdta_mode);
+        WDTA_Start(_WDTA1);
+	}
+
+        eiint.eiint_ch = 33;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);

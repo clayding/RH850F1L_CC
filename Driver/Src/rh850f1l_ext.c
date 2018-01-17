@@ -17,7 +17,7 @@
 #include "rh850f1l_wp.h"
 #include "rh850f1l_clk.h"
 #include "rh850f1l_timer.h"
-#include "rh850f1l_wdta.h"
+#include "rh850f1l_WDTA.h"
 
 #define EIINT_ICXX_MASK ((uint16_t)(0x01 << 15))
 #define EIINT_RFXX_MASK ((uint16_t)(0x01 << 12))
@@ -299,15 +299,23 @@ void TAUD0CH0IntHandler(unsigned long eiic)
 #pragma interrupt WDTA0IntHandler(channel = 32, enable = false, callt = false, fpu = false)
 void WDTA0IntHandler(unsigned long eiic)
 {
+    static int count = 0;
     WDTA_Reload(_WDTA0);
-    Eiit_Handler_Ptr_2();
+    if(++count / 5){
+    	Eiit_Handler_Ptr_2();
+	count = 0;
+    }
 }
 
 #pragma interrupt WDTA1IntHandler(channel = 33, enable = false, callt = false, fpu = false)
 void WDTA1IntHandler(unsigned long eiic)
 {
+    static int count = 0;
     WDTA_Reload(_WDTA1);
-    Eiit_Handler_Ptr_2();
+    if(++count / 5){
+    	Eiit_Handler_Ptr();
+	    count = 0;
+    }
 }
 
 #pragma interrupt TAUD0CH1IntHandler(channel = 39, enable = false, callt = false, fpu = false)
