@@ -6,7 +6,7 @@
   * @date   15-January-2018
   * @brief   Window Watchdog Timer module driver.
   *          This file provides firmware functions to manage the following
-  *          functionalities of the Reset and timer/counter peripheral:
+  *          functionalities of the Window Watchdog Time peripheral:
   *           + Initialization and de-initialization functions
   *           + Window Watchdog Timer functions
   ******************************************************************************

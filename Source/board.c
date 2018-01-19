@@ -21,8 +21,8 @@
 //#define TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST
 
 /************************WDTA Config ******************************************/
-#define WDTA0_TEST
-#define WDTA1_TEST
+//#define WDTA0_TEST
+//#define WDTA1_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized
