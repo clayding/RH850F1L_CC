@@ -24,6 +24,10 @@
 //#define WDTA0_TEST
 //#define WDTA1_TEST
 
+/************************RTCA Config ******************************************/
+#define RTCA0_TEST
+
+
 /*!
  * Flag to indicate if the MCU is Initialized
  */
@@ -46,13 +50,15 @@ void System_Clock_Config(void)
 
     while(Clock_OSC_Get_Status(R_OSC_TYPE) == OSC_INACTIVE); //HI IntOSC is not actived,just loop
     //while(Clock_ROSC_Get_Status() == OSC_ACTIVED);//Just for test,del later
-    //HI Int OSc is actived
+    //HI Int OSC is actived
     Clock_MOSC_Config(OSC_ENABLE);//Config Main OSC
+    Clock_SOSC_Config(OSC_ENABLE);//Config Sub OSC
     Clock_PLL_Config(OSC_ENABLE); //Config PLL
     Clock_Domain_Set(CPUCLK);//set clock domain for cpuclk
     Clock_Domain_Set(IPERI1);//set clock domain for iperi1
     Clock_Domain_Set(IPERI2);//set clock domain for iperi2
     Clock_Domain_Set(AWDTA);//set clock domain for WDTA
+    Clock_Domain_Set(ARTCA);
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
 
@@ -191,6 +197,27 @@ void Board_Port_Config(void)
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);
+#endif
+#ifdef RTCA0_TEST
+
+    {
+        RTCA_INIT_TypeDef rtca_init;
+        rtca_init.time_cal.time.second = 0;
+        rtca_init.time_cal.time.minute = 20;
+        rtca_init.time_cal.time.hour = 10;
+
+        rtca_init.time_cal.calendar.day = 12;
+        rtca_init.time_cal.calendar.month =11;
+        rtca_init.time_cal.calendar.year = 20;
+
+        RTCA_Init(rtca_init);
+    }
+
+        eiint.eiint_ch = 201;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
 #endif
         //OSTM_Init();
         {

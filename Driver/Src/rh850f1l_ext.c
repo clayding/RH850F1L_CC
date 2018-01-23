@@ -355,3 +355,10 @@ void TAUB0CH2IntHandler(unsigned long eiic)
 {
 
 }
+
+#pragma interrupt RTCA01SIntHandler(channel = 201, enable = false, callt = false, fpu = false)
+void RTCA01SIntHandler(unsigned long eiic)
+{
+    Eiit_Handler_Ptr_2();
+
+}

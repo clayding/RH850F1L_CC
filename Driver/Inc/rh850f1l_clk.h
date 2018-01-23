@@ -22,8 +22,14 @@
 #define MOSCDISTRG_MASK     ((uint32_t)(0x01 << 1))
 #define MOSCCLKACT_MASK     ((uint32_t)(0x01 << 2))
 #define MOSCAMPSEL_MASK     ((uint32_t)(0x03))
-#define MOSCCLKST_MASK      ((uint32_t)0x0FFFF)
-#define STABLIZATION_TIME   (2*ROSCCLK_FREQUENCY/1000) //when HI OSC actived,about 2ms
+#define MOSCCLKST_MASK      ((uint32_t)0x1FFFF)
+#define MOSC_STABLE_TIME   (2*ROSCCLK_FREQUENCY/100) //when HI OSC actived,about 2ms
+
+#define SOSCENTRG_MASK      ((uint32_t)(0x01))
+#define SOSCDISTRG_MASK     ((uint32_t)(0x01 << 1))
+#define SOSCCLKACT_MASK     ((uint32_t)(0x01 << 2))
+#define SOSCCLKST_MASK      ((uint32_t)0x3FFFFFFF)
+#define SOSC_STABLE_TIME    (2*ROSCCLK_FREQUENCY)
 
 #define PLLENTRG_MASK       ((uint32_t)0x01 << 0)
 #define PLLDISTRG_MASK      ((uint32_t)0x01 << 1)
@@ -76,8 +82,19 @@
 #define AFOUTS_CTL_MASK     ((uint32_t)0x07) //C_AWO_FOUT Source Clock Selection Register Mask
 #define AFOUTS_ACT_MASK     ((uint32_t)0x07) //C_AWO_FOUT Source Clock Active Register Mas
 
-#define AWDTAD_CTL_MASK      ((uint32_t)0x03)
-#define AWDTAD_ACT_MASK      ((uint32_t)0x03)
+#define AWDTAD_CTL_MASK     ((uint32_t)0x03)
+#define AWDTAD_ACT_MASK     ((uint32_t)0x03)
+
+#define ARTCAS_CTL_MASK     ((uint32_t)0x03)
+#define ARTCAS_ACT_MASK     ((uint32_t)0x03)
+#define ARTCAD_CTL_MASK     ((uint32_t)0x07)
+#define ARTCAD_ACT_MASK     ((uint32_t)0x07)
+
+#define ARTCA_DIVI_DISABLE  ((uint32_t)0x00)//(Default)
+#define ARTCA_CTL_DIVI_1    ((uint32_t)0x01) //001B: CKSC_ARTCAS_CTL selection /1
+#define ARTCA_CTL_DIVI_2    ((uint32_t)0x02) //010B: CKSC_ARTCAS_CTL selection /2
+#define ARTCA_CTL_DIVI_4    ((uint32_t)0x03) //011B: CKSC_ARTCAS_CTL selection /4
+#define ARTCA_CTL_DIVI_8    ((uint32_t)0x04) //100B: CKSC_ARTCAS_CTL selection /8
 
 typedef enum {
     OSC_DISABLE,
@@ -98,6 +115,7 @@ typedef enum {
 
 typedef enum {
     M_OSC_TYPE,//Main OSC
+    S_OSC_TYPE,//Sub OSC
     R_OSC_TYPE,//HI Int OSC
     PLL_TYPE,//PLL
 }X_OSC_Type;
@@ -135,7 +153,15 @@ typedef enum{
     AWDTA_LSOSC_1,// LS IntOSC / 1
 }AWDTA_DIV_SEL_Type;
 
+typedef enum{
+    ARTCA_DISABLED,//00B: Disable (default)
+    ARTCA_SUBOSC,//01B: SubOSC*1
+    ARTCA_MAINOSC,//10B: MainOSC*2
+    ARTCA_LSINTOSC,//11B: LS IntOSC
+}ARTCA_DIV_SEL_Type;
+
 void Clock_MOSC_Config(OSC_OPT_Type opt);
+void Clock_SOSC_Config(OSC_OPT_Type opt);
 OSC_STATUS_Type Clock_OSC_Get_Status(X_OSC_Type otp);
 void Clock_PLL_Config(OSC_OPT_Type opt);
 

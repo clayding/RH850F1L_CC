@@ -337,7 +337,7 @@
 	.dw #_Dummy_EI ; INT198
 	.dw #_Dummy_EI ; INT199
 	.dw #_Dummy_EI ; INT200
-	.dw #_Dummy_EI ; INT201
+	.dw #_RTCA01SIntHandler ; INT201
 	.dw #_Dummy_EI ; INT202
 	.dw #_Dummy_EI ; INT203
 	.dw #_Dummy_EI ; INT204

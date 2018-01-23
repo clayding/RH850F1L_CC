@@ -138,7 +138,7 @@ of channel m are updated.These bits are only valid if channel m is in capture fu
                                                         }while(0)
 
 #define __GET_TAU_CDR(_UNIT_,_RET_,_CH_)                do{ \
-                                                        _RET_ = READ_REG(_UNIT_##_CDRn_ADDR(_CH_)); \
+                                                            _RET_ = READ_REG(_UNIT_##_CDRn_ADDR(_CH_)); \
                                                         }while(0)
 /*Get data from the channel m counter register.Read-only*/
 #define __GET_TAU_CNT(_UNIT_,_RET,_CH_)                 do{ \

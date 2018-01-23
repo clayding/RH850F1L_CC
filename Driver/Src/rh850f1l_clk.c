@@ -35,10 +35,16 @@ set the PLL output clock frequencies fPPLLCLK and fCPLLCLK*/
                                                 reg = tmp_val; \
                                             }while(0)
 /*Set MainOSC stabilization time,Note: set this register when MainOSC is stopped*/
-#define __MOSCST_CLK_CONFIG(value)  do { \
+#define __MOSCST_CLK_CONFIG(value)          do { \
+                                                uint32_t tmp_val; \
+                                                tmp_val = value & MOSCCLKST_MASK; \
+                                                MOSCST = tmp_val; \
+                                            }while(0)
+
+#define __SOSCST_CLK_CONFIG(value)  do { \
                                         uint32_t tmp_val; \
-                                        tmp_val = value & MOSCCLKST_MASK; \
-                                        MOSCST = tmp_val; \
+                                        tmp_val = value & SOSCCLKST_MASK; \
+                                        SOSCST = tmp_val; \
                                     }while(0)
 
 #define __SET_FOUTDIV_RATIO(value)  do { \
@@ -60,6 +66,7 @@ typedef struct{
                                             C_AWO_##index##_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 
 SET_DOMAIN_AWO_FUNC_DECLARE(AWDTA);
+SET_DOMAIN_AWO_FUNC_DECLARE(ARTCA);
 SET_DOMAIN_AWO_FUNC_DECLARE(AFOUT);
 SET_DOMAIN_ISO_FUNC_DECLARE(CPUCLK);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI1);
@@ -68,6 +75,7 @@ SET_DOMAIN_ISO_FUNC_DECLARE(IPERI2);
 
 DOMAIN_SET_Ref dsf[] = {
     {AWDTA, C_AWO_AWDTA_Domain_Set},
+    {ARTCA, C_AWO_ARTCA_Domain_Set},
     {AFOUT, C_AWO_AFOUT_Domain_Set},
     {CPUCLK,C_ISO_CPUCLK_Domain_Set},
     {IPERI1,C_ISO_IPERI1_Domain_Set},
@@ -79,7 +87,7 @@ static MOSC_AMP_GAIN_Type Clock_MOSC_Control(OperateDirection optd, MOSC_AMP_GAI
 void Clock_MOSC_Config(OSC_OPT_Type opt)
 {
     if(Clock_OSC_Get_Status(M_OSC_TYPE) == OSC_INACTIVE) {
-        __MOSCST_CLK_CONFIG(STABLIZATION_TIME);//set this register when MOSC stopped
+        __MOSCST_CLK_CONFIG(MOSC_STABLE_TIME);//set this register when MOSC stopped
         //__OSCC_CLK_WRITE(MOSCC,MOSCAMPSEL_MASK,MOSC_AMP_MID_LOW);//the external resonator is 16MHz
         Clock_MOSC_Control(OPT_WRITE,MOSC_AMP_MID_LOW);//the external resonator is 16MH
         if(opt == OSC_ENABLE) {
@@ -98,6 +106,26 @@ void Clock_MOSC_Config(OSC_OPT_Type opt)
         __OSCE_CLK_DISABLE(MOSCE,MOSCDISTRG_MASK); //TODO
 }
 
+void Clock_SOSC_Config(OSC_OPT_Type opt)
+{
+    if(Clock_OSC_Get_Status(S_OSC_TYPE) == OSC_INACTIVE) {
+        __SOSCST_CLK_CONFIG(SOSC_STABLE_TIME);//set this register when SOSC stopped
+        if(opt == OSC_ENABLE) {
+            WP_Opt_Reg clk_wp_reg; \
+            clk_wp_reg.dst_protect_stat_reg_addr = &PROTS0; \
+            clk_wp_reg.dst_protect_cmd_reg_addr  = &PROTCMD0; \
+            clk_wp_reg.dst_protect_reg_addr = &SOSCE; \
+            __OSCE_CLK_ENABLE(clk_wp_reg,SOSCENTRG_MASK);
+            //Wait for stabilization TDO
+            while(Clock_OSC_Get_Status(S_OSC_TYPE) == OSC_INACTIVE);
+
+            return ;// Now the SOSC is actived
+        }
+    }
+    if(opt == OSC_DISABLE) //opt == OSC_DISABLE
+        __OSCE_CLK_DISABLE(SOSCE,SOSCDISTRG_MASK); //TODO
+}
+
 OSC_STATUS_Type Clock_OSC_Get_Status(X_OSC_Type otp)
 {
     uint32_t bit_mask  = 0;
@@ -105,6 +133,10 @@ OSC_STATUS_Type Clock_OSC_Get_Status(X_OSC_Type otp)
     if(otp == M_OSC_TYPE) { //Status about Main OSC
         bit_mask = MOSCS & MOSCCLKACT_MASK;
         act_mask = MOSCCLKACT_MASK;
+    }
+    if(otp == S_OSC_TYPE){
+        bit_mask = SOSCS & SOSCCLKACT_MASK;
+        act_mask = SOSCCLKACT_MASK;
     }
     if(otp == PLL_TYPE) { //Status about PLL
         bit_mask = PLLS & PLLCLKACT_MASK;
@@ -270,12 +302,34 @@ SET_CLK_DOMAIN_RET_Type C_AWO_AWDTA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 {
     WP_Opt_Reg *ptr = wp_reg_ptr;
     SET_CLK_DOMAIN_Struct val_;
-    /*Source Clock Setting for C_ISO_PERI2*/
+    /*Source Clock Setting for C_AWO_WDTA*/
     val_.src_clk_ctl_val = AWDTA_LSOSC_1;//Source Clock Setting for C_AWO_WDTA
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AWDTA,D_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(AWDTA,D_CTL_MASK))) != ERROR);//Select a source clock
     if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,AWDTA,D_ACT) & STR_CONCAT2(AWDTA,D_ACT_MASK))) { //Confirm completion of selection
         return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+}
+
+SET_CLK_DOMAIN_RET_Type C_AWO_ARTCA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Source Clock Setting for C_AWO_RTCA*/
+    val_.src_clk_ctl_val = ARTCA_SUBOSC;//Source Clock Setting for C_AWO_RTCA
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ARTCA,S_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ARTCA,S_CTL_MASK))) != ERROR);//Select a source clock
+    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ARTCA,S_ACT) & STR_CONCAT2(ARTCA,S_ACT_MASK))) { //Confirm completion of selection
+        return SET_SRC_CLK_FAIL;
+    }
+
+    val_.clk_divider_val = ARTCA_CTL_DIVI_1;//CKSC_ARTCAS_CTL selection /1 (Default)
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ARTCA,D_CTL);
+    while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(ARTCA,D_CTL_MASK))) != ERROR);//Select a clock divider
+
+    if(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ARTCA,D_ACT) & STR_CONCAT2(ARTCA,D_ACT_MASK))) { //Confirm completion of selection
+        return SET_CLK_DIVIDER_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
 }
