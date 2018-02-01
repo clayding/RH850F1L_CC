@@ -71,6 +71,8 @@ SET_DOMAIN_AWO_FUNC_DECLARE(AFOUT);
 SET_DOMAIN_ISO_FUNC_DECLARE(CPUCLK);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI1);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI2);
+SET_DOMAIN_ISO_FUNC_DECLARE(ICAN);
+SET_DOMAIN_ISO_FUNC_DECLARE(ICANOSC);
 
 
 DOMAIN_SET_Ref dsf[] = {
@@ -80,6 +82,8 @@ DOMAIN_SET_Ref dsf[] = {
     {CPUCLK,C_ISO_CPUCLK_Domain_Set},
     {IPERI1,C_ISO_IPERI1_Domain_Set},
     {IPERI2,C_ISO_IPERI2_Domain_Set},
+    {ICAN,  C_ISO_ICAN_Domain_Set},
+    {ICANOSC,C_ISO_ICANOSC_Domain_Set},
 };
 
 static MOSC_AMP_GAIN_Type Clock_MOSC_Control(OperateDirection optd, MOSC_AMP_GAIN_Type val);
@@ -267,6 +271,37 @@ SET_CLK_DOMAIN_RET_Type C_ISO_IPERI2_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 
 }
 
+SET_CLK_DOMAIN_RET_Type C_ISO_ICAN_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Source Clock Setting for C_ISO_CAN*/
+    val_.src_clk_ctl_val = ICAN_SRC_CPUCLK;//Source Clock Setting for C_ISO_CAN
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ICAN,S_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ICAN,S_CTL_MASK))) != ERROR);//Select a source clock
+    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ICAN,S_ACT) & STR_CONCAT2(ICAN,S_ACT_MASK))) { //Confirm completion of selection
+        return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+
+}
+
+SET_CLK_DOMAIN_RET_Type C_ISO_ICANOSC_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Set up a clock divider*/
+    val_.clk_divider_val = ICANOSC_DIV_MAINOSC_1;//CKSC_ICANOSCD_CTL MainOSC /1
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ICANOSC,D_CTL);
+    while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(ICANOSC,D_CTL_MASK))) != ERROR);//Select a clock divider
+
+    if(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ICANOSC,D_ACT) & STR_CONCAT2(ICANOSC,D_ACT_MASK))) { //Confirm completion of selection
+        return SET_CLK_DIVIDER_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+
+}
+
 void Clock_Fout_Config(void)
 {
     uint32_t mask = 0,flag = FOUTCLKACT_MASK ;//| FOUTSYNC_MASK;
@@ -287,7 +322,7 @@ SET_CLK_DOMAIN_RET_Type C_AWO_AFOUT_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 {
     WP_Opt_Reg *ptr = wp_reg_ptr;
     SET_CLK_DOMAIN_Struct val_;
-    /*Source Clock Setting for C_ISO_PERI2*/
+    /*Source Clock Setting for C_AWO_FOUT*/
     val_.src_clk_ctl_val = AFOUT_SRC_MOSC;//Source Clock Setting for C_AWO_FOUT
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AFOUT,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(AFOUT,S_CTL_MASK))) != ERROR);//Select a source clock
@@ -302,7 +337,7 @@ SET_CLK_DOMAIN_RET_Type C_AWO_AWDTA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
 {
     WP_Opt_Reg *ptr = wp_reg_ptr;
     SET_CLK_DOMAIN_Struct val_;
-    /*Source Clock Setting for C_AWO_WDTA*/
+    /*Set up a clock divider*/
     val_.src_clk_ctl_val = AWDTA_LSOSC_1;//Source Clock Setting for C_AWO_WDTA
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AWDTA,D_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(AWDTA,D_CTL_MASK))) != ERROR);//Select a source clock

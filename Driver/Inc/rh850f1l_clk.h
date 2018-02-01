@@ -75,6 +75,13 @@
 #define IPERI2S_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
 #define IPERI2S_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask
 
+#define ICAN_SRC_
+
+#define ICANS_CTL_MASK      ((uint32_t)0x03) //CKSC_CANS_CTL Bit Mask
+#define ICANS_ACT_MASK      ((uint32_t)0x03) //CKSC_CANS_ACT Bit Mask
+#define ICANOSCD_CTL_MASK   ((uint32_t)0x03) //CKSC_ICANOSCD_CTL Bit Mask
+#define ICANOSCD_ACT_MASK   ((uint32_t)0x03) //CKSC_ICANOSCD_ACT  Bit Mask
+
 #define FOUT_DIV_MASK       ((uint32_t)0x3F) //FOUTDIV Mask
 #define FOUTSYNC_MASK       ((uint32_t)0x01) //FOUTSTAT FOUTSYNC Mask
 #define FOUTCLKACT_MASK     ((uint32_t)0x01 << 1) //FOUTSTAT FOUTCLKACT Mask
@@ -158,7 +165,20 @@ typedef enum{
     ARTCA_SUBOSC,//01B: SubOSC*1
     ARTCA_MAINOSC,//10B: MainOSC*2
     ARTCA_LSINTOSC,//11B: LS IntOSC
-}ARTCA_DIV_SEL_Type;
+}ARTCA_SRC_SEL_Type;
+
+typedef enum{
+    ICAN_SRC_DISABLED, //00B:Disabled
+    ICAN_SRC_MAINOSC, //01B: MainOSC
+    ICAN_SRC_CPLLCLK, //10B: CPLLCLK
+    ICAN_SRC_CPUCLK,  //11B: CPUCLK (default)
+}ICAN_SRC_CLK_Type;
+
+typedef enum{
+    ICANOSC_DIV_DISABLED, //00B:Disabled (default)
+    ICANOSC_DIV_MAINOSC_1, //01B: MainOSC /1
+    ICANOSC_DIV_MAINOSC_2, //10B: MainOSC /2
+}ICANOSC_DIV_CLK_Type;
 
 void Clock_MOSC_Config(OSC_OPT_Type opt);
 void Clock_SOSC_Config(OSC_OPT_Type opt);
