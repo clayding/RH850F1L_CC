@@ -58,9 +58,7 @@ typedef enum {
   * @}
   */
 
-#define STR_CONCAT2(s1,s2)    (s1##s2)
-
-#define STR_CONCAT3(s1,s2,s3) (s1##s2##s3)
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
+#define STR_CONCAT2(s1,s2)      (s1##s2)
+#define STR_CONCAT3(s1,s2,s3)   (s1##s2##s3)
+#define ARRAY_SIZE(arr)         (sizeof(arr)/sizeof(arr[0]))
 #endif //RH850F1L_H
