@@ -33,6 +33,14 @@
 #define _GAFLCFG1               GAFLCFG1.UINT8
 #define _GAFLID0                GAFLID0.UINT32
 #define _GAFLM0                 GAFLM0.UINT32
+#define _GAFLP0                 GAFLP00.UINT32
+#define _GAFLP1                 GAFLP10.UINT32
+
+#define _RMNB                   RMNB.UINT32
+#define _RFCC0                  RFCC0.UINT32
+#define _CFCC0                  CFCC0.UINT32
+#define _TXQCC0                 TXQCC0.UINT32
+#define _TMIEC0                 TMIEC0.UINT32
 
 /*RSCAN0CmCFG — Channel Configuration Register (m = 0 to 5) bits mask and offset*/
 #define CAN_SJW_OFFSET          24
@@ -129,18 +137,69 @@
 #define CAN_GAFLFDPH_MASK       ((uint32_t)0x3FFFF << CAN_GAFLFDPH_OFFSET)
 #define CAN_GAFLFDPL_MASK       ((uint32_t)0xFF)
 
+/*RSCAN0RMNB — Receive Buffer Number Register*/
+#define CAN_NRXMB_MASK          ((uint32_t)0xFF)
+
+/*RSCAN0RFCCx — Receive FIFO Buffer Configuration and Control Register(x = 0 to 7)*/
+#define CAN_RFIGCV_OFFSET       13
+#define CAN_RFIM_OFFSET         12
+#define CAN_RFDC_OFFSET         8
+#define CAN_RFIE_OFFSET         1
+
+#define CAN_RFIGCV_MASK         ((uint32_t)0x07 << CAN_RFIGCV_OFFSET)//Receive FIFO Interrupt Request Timing Select
+#define CAN_RFIM_MASK           ((uint32_t)0x01 << CAN_RFIM_OFFSET) //Receive FIFO Interrupt Source Select
+#define CAN_RFDC_MASK           ((uint32_t)0x07 << CAN_RFDC_OFFSET) //Receive FIFO Buffer Depth Configuration
+#define CAN_RFIE_MASK           ((uint32_t)0x01 << CAN_RFIE_OFFSET) //Receive FIFO Interrupt Enable
+#define CAN_RFE_MASK            ((uint32_t)0x01) //Receive FIFO Buffer Enable
+
+/*RSCAN0CFCCk — Transmit/receive FIFO Buffer Configuration and Control
+Register k (k = 0 to 17)*/
+#define CAN_CFITT_OFFSET        24
+#define CAN_CFTML_OFFSET        20
+#define CAN_CFITR_OFFSET        19
+#define CAN_CFITSS_OFFSET       18
+#define CAN_CFM_OFFSET          16
+#define CAN_CFIGCV_OFFSET       13
+#define CAN_CFIM_OFFSET         12
+#define CAN_CFDC_OFFSET         8
+#define CAN_CFTXIE_OFFSET       2
+#define CAN_CFRXIE_OFFSET       1
+
+#define CAN_CFITT_MASK          ((uint32_t)0xFF << CAN_CFITT_OFFSET)
+#define CAN_CFTML_MASK          ((uint32_t)0x0F << CAN_CFTML_OFFSET)
+#define CAN_CFITR_MASK          ((uint32_t)0x01 << CAN_CFITR_OFFSET)
+#define CAN_CFITSS_MASK         ((uint32_t)0x01 << CAN_CFITSS_OFFSET)
+#define CAN_CFM_MASK            ((uint32_t)0x03 << CAN_CFM_OFFSET)
+#define CAN_CFIGCV_MASK         ((uint32_t)0x07 << CAN_CFIGCV_OFFSET)
+#define CAN_CFIM_MASK           ((uint32_t)0x01 << CAN_CFIM_OFFSET)
+#define CAN_CFDC_MASK           ((uint32_t)0x07 << CAN_CFDC_OFFSET)
+#define CAN_CFTXIE_MASK         ((uint32_t)0x01 << CAN_CFTXIE_OFFSET)
+#define CAN_CFRXIE_MASK         ((uint32_t)0x01 << CAN_CFRXIE_OFFSET)
+#define CAN_CFE_MASK            ((uint32_t)0x01)
+
+/*RSCAN0TXQCCm — Transmit Queue Configuration and Control Register
+(m = 0 to 5)*/
+#define CAN_TXQIM_OFFSET        13
+#define CAN_TXQIE_OFFSET        12
+#define CAN_TXQDC_OFFSET        8
+
+#define CAN_TXQIM_MASK          ((uint32_t)0x01 << CAN_TXQIM_OFFSET)
+#define CAN_TXQIE_MASK          ((uint32_t)0x01 << CAN_TXQIE_OFFSET)
+#define CAN_TXQDC_MASK          ((uint32_t)0x0F << CAN_TXQDC_OFFSET)
+#define CAN_TXQE_MASK           ((uint32_t)0x01)
 
 
-#define REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)                     ((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_)
-#define REG_VAL(_CNT_,_BASE_REG_,,_OFFSET_B_)                      (*((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_))
-/*Set the channel control register*/
+#define REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)           ((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_)
+#define REG_VAL(_CNT_,_BASE_REG_,,_OFFSET_B_)           (*((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_))
+
+/*Config RSCAN0CmCFG — Channel Configuration Register (_CH_ = 0 to 5)
+Modify the RSCAN0CmCFG register in channel reset mode or channel halt mode. */
 #define __RSCAN_SET_CHANNEL_CFG(_CH_,_VALUE_)           (REG_VAL(_CH_,_C0CFG,0x10) = _VALUE_ & 0xFFFFFFFF)
 
 #define __RSCAN_GET_CHANNEL_CFG(_CH_)                   REG_VAL(_CH_,_C0CFG,0x10)
 
 /*Set the channel control register*/
-#define __RSCAN_SET_CHANNEL_CTL(_CH_,_MASK_,_VALUE_)    \
-                                                        do{ \
+#define __RSCAN_SET_CHANNEL_CTL(_CH_,_MASK_,_VALUE_)    do{ \
                                                             MODIFY_REG(REG_ADDR(_CH_,_C0CTR),_MASK_,_VALUE_);\
                                                         }while(0)
 /*Get the channel control register*/
@@ -150,15 +209,16 @@
 #define __RSCAN_GET_CHANNEL_STAT(_CH_,_MASK_)           (REG_VAL(_CH_,_C0STS,0x10) & _MASK_)
 
 
-/*Set the global configuration  register*/
-#define __RSCAN_SET_GLOBAL_CFG(_MASK_,_VALUE_,) do{ \
+/*Config RSCAN0GCFG — Global Configuration Register
+Modify the RSCAN0GCFG register only in global reset mode.*/
+#define __RSCAN_SET_GLOBAL_CFG(_MASK_,_VALUE_,)         do{ \
                                                             MODIFY_REG(&RSCAN0_BASE._GCFG,_MASK_,_VALUE_);\
                                                         }while(0)
 /*Get the global configuration register*/
 #define __RSCAN_GET_GLOBAL_CFG(_MASK_)                  (RSCAN0_BASE._GCFG & _MASK_)
 
 /*Set the global control register*/
-#define __RSCAN_SET_GLOBAL_CTL(_MASK_,_VALUE_) do{ \
+#define __RSCAN_SET_GLOBAL_CTL(_MASK_,_VALUE_)          do{ \
                                                             MODIFY_REG(&RSCAN0_BASE._GCTR,_MASK_,_VALUE_);\
                                                         }while(0)
 /*Get the global control register*/
@@ -168,7 +228,7 @@
 
 
 //Enable or disable receive rule table write 0--disbale 1 -- Enable
-#define __RSCAN_RECV_TABLE_WRITE_EN(_ENABLE_)           do{ \
+#define __RSCAN_ENABLE_RECV_TABLE_WRITE(_ENABLE_)       do{ \
                                                             if(_ENBALE_) \
                                                                 RSCAN0_BASE._GAFLECTR |= CAN_AFLDAE_MASK; \
                                                             else \
@@ -178,12 +238,15 @@
 #define __RSCAN_RECV_TABLE_WRITE_STAT()                 (RSCAN0_BASE._GAFLECTR & CAN_AFLDAE_MASK)
 
 //Receive Rule Table Page Number Configuration,_NUMBER_ within the range of 00000B(0) to 10111B(23).
-#define __RSCAN_RECV_TABLE_PAGE_NO_CFG(_NUMBER_)        MODIFY_REG(&RSCAN0_BASE._GAFLECTR,CAN_AFLPN_MASK,_NUMBER_)
+#define __RSCAN_RECV_TABLE_PAGE_NUM_CFG(_NUMBER_)        MODIFY_REG(&RSCAN0_BASE._GAFLECTR,CAN_AFLPN_MASK,_NUMBER_)
 
-/*Used to set the number(_NUMBER_) of rules to be registered in the channel x
- _INDEX_: 0-3*/
+/*Config RSCAN0GAFLCFG0 — Receive Rule Configuration Register 0
+Used to set the number(_NUMBER_) of rules to be registered in the channel x
+_INDEX_: 0-3. Modify the RSCAN0GAFLCFG0 register only in global reset mode.*/
 #define __RSCAN_SET_RULE_NUMBER_0(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG0[_INDEX_] = _NUMBER_ & 0xFF
-/*_INDEX_: 4,5*/
+
+/*Config RSCAN0GAFLCFG0 — Receive Rule Configuration Register 1 _INDEX_: 4,5
+Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
 #define __RSCAN_SET_RULE_NUMBER_1(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG0[_INDEX_] = _NUMBER_ & 0xFF
 
 /*Set the RSCAN0GAFLIDj — Receive Rule ID Register*/
@@ -191,9 +254,28 @@
 /*Get the RSCAN0GAFLIDj — Receive Rule ID Register*/
 #define __RSCAN_GET_RULE_ID(_CNT_,_VALUE_)              REG_VAL(_CNT_,RSCAN0_BASE._GAFLID0,0x10)
 
-#define __RSCAN_SET_RULE_MASK(_CNT_,_MASK_,_VALUE_)     MODIFY_REG(REG_ADDR(RSCAN0_BASE._GAFLM0,0x10),CAN_AFLPN_MASK,_VALUE_)
+#define __RSCAN_SET_RULE_MASK(_CNT_,_MASK_,_VALUE_)     MODIFY_REG(REG_ADDR(_CNT_,RSCAN0_BASE._GAFLM0,0x10),_MASK_,_VALUE_)
 
-#define __RSCAN_SET_RULE_POINTER(_CNT,_MASK_)
+/*Config the RSCAN0GAFLP0j and RSCAN0GAFLP1j*/
+#define __RSCAN_SET_RULE_POINTER0(_CNT,_VALUE_)         REG_VAL(_CNT_,RSCAN0_BASE._GAFLP0,0x10) = _VALUE_
+#define __RSCAN_SET_RULE_POINTER1(_CNT,_VALUE_)         REG_VAL(_CNT_,RSCAN0_BASE._GAFLP1,0x10) = _VALUE_
+
+#define __RSCAN_SET_TOTAL_RECV_BUF_NUM(_NUM_)           RSCAN0_BASE._RMNB = _NUM_ & CAN_NRXMB_MASK
+
+/*Config the RSCAN0RFCCx Receive FIFO Buffer Configuration and Control Register
+(x = 0 to 7)*/
+#define __RSCAN_SET_RECV_FIFO_BUF(_X_,_MASK_,_VALUE_)   MODIFY_REG(REG_ADDR(_X_,RSCAN0_BASE._RFCC0,0x04),_MASK_,_VALUE_)
+
+/*Config the RSCAN0CFCCx  Transmit/receive FIFO Buffer Configuration and Control
+Register k (k = 0 to 17)*/
+#define __RSCAN_SET_TrRe_FIFO_BUF(_K_,_MASK_,_VALUE_)   MODIFY_REG(REG_ADDR(_K_,RSCAN0_BASE._CFCC0,0x04),_MASK_,_VALUE_)
+
+/*Config RSCAN0TXQCCm — Transmit Queue Configuration and Control Register
+(m = 0 to 5)*/
+#define __RSCAN_SET_TRANSMIT_QUEUE(_M_,_MASK_,_VALUE_)  MODIFY_REG(REG_ADDR(_M_,RSCAN0_BASE._TXQCC0,0x04),_MASK_,_VALUE_)
+
+/*Config RSCAN0TMIECy — Transmit Buffer Interrupt Enable Configuration Register*/
+#define __RSCAN_ENABLE_TRANSMIT_BUF_INT(_Y_,_MASK_,_VALUE_)     MODIFY_REG(REG_ADDR(_M_,RSCAN0_BASE._TMIEC0,0x04),_MASK_,_VALUE_)
 
 typedef enum{
     RSCAN_OPERATE_MODE,     //Global operating mode
