@@ -345,3 +345,101 @@ void RSCAN_Eiint_Init(void)
     eiint.eiint_ch = 18;//CAN0 transmit interrupt
     Eiit_Init(&eiint);
 }
+
+int8_t RSCAN_Transmit_From_Buffer(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+        uint8_t* data_p)
+{
+    uint8_t p = 0, size = 0,len = 0;
+    uint32_t val = 0;
+
+
+    if(id_info.index > 95) return -1;// max 95
+    p = id_info.index;
+
+    val = (uint32_t)(((id_info.ide << CAN_TMIDE_OFFSET) & CAN_TMIDE_MASK) |
+        ((id_info.rtr << CAN_TMRTR_OFFSET) & CAN_TMRTR_MASK) |
+        ((id_info.his_en << CAN_THLEN_OFFSET) & CAN_THLEN_MASK));
+
+    /*Set the ID of the receive rule.For the standard ID, set the ID in bits
+    b10 to b0 and set bits b28 to b11 to 0.*/
+    if(id_info.ide == 0)
+        val |= id_info.id & (CAN_TMID_MASK >> 18);
+    else
+        val |= id_info.id & CAN_TMID_MASK;
+
+    __RSCAN_SET_TRANSMIT_BUF_ID(p,val);
+
+    val = (uint32_t)(((data_len << CAN_TMDLC_OFFSET) & CAN_TMDLC_MASK) |
+        ((id_info.label_t << CAN_TMPTR_OFFSET) & CAN_TMPTR_MASK));
+
+    __RSCAN_SET_TRANSMIT_BUF_POINTER(p,val);
+
+    if(data_len  > 8) len = 8;
+
+    for(size = 0; len && size < len; size++){
+        if(i / 4){
+            __RSCAN_WRITE_TRANSMIT_BUF_DATA_H(p,size- 4;data_p[size]);
+        }else{
+            __RSCAN_WRITE_TRANSMIT_BUF_DATA_L(p,size;data_p[size]);
+        }
+    }
+
+    //Set the TMTR bit in the corresponding RSCAN0TMCp register to 1 (requesting transmission)
+    __RSCAN_SET_TRANSMIT_BUF_CTL(p,CAN_TMTR_MASK,1);
+
+    return size;//return the actual data size to be transmited
+}
+
+void RSCAN_Transmit_From_FIFO(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+        uint8_t* data_p)
+{
+    uint8_t k = 0, size = 0,len = 0;
+    uint32_t val = 0;
+
+    // Is transmit/receive FIFO buffer full?
+    // (Is CFFLL flag in the RSCAN0CFSTSk register 1?)
+    if(__RSCAN_GET_TrRe_FIFO_STAT(k,CAN_CFFLL_MASK))
+        return ;//if full, return
+
+    if(id_info.index > 17) return -1;// max 17
+    k = id_info.index;
+
+    val = (uint32_t)(((id_info.ide << CAN_CFIDE_OFFSET) & CAN_CFIDE_MASK) |
+        ((id_info.rtr << CAN_CFRTR_OFFSET) & CAN_CFRTR_MASK) |
+        ((id_info.his_en << CAN_THLEN_OFFSET) & CAN_THLEN_MASK));
+
+    /*Set the ID of the receive rule.For the standard ID, set the ID in bits
+    b10 to b0 and set bits b28 to b11 to 0.*/
+    if(id_info.ide == 0)
+        val |= id_info.id & (CAN_CFID_MASK >> 18);
+    else
+        val |= id_info.id & CAN_CFID_MASK;
+
+    __RSCAN_SET_TrRe_FIFO_ID(k,val);
+
+    val = (uint32_t)(((data_len << CAN_CFDLC_OFFSET) & CAN_TMDLC_MASK) |
+        ((id_info.label_t << CAN_CFPTR_OFFSET) & CAN_CFPTR_MASK));
+
+    __RSCAN_SET_TrRe_FIFO_POINTER(p,val);
+
+    if(data_len  > 8) len = 8;
+
+    for(size = 0; len && size < len; size++){
+        if(i / 4){
+            __RSCAN_WRITE_TrRe_FIFO_DATA_H(p,size- 4;data_p[size]);
+        }else{
+            __RSCAN_WRITE_TrRe_FIFO_DATA_L(p,size;data_p[size]);
+        }
+    }
+
+
+
+
+
+
+}
+
+void RSCAN_Transmit_From_Queue()
+{
+
+}
