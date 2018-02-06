@@ -12,16 +12,23 @@
   ******************************************************************************
   */
 #include "rh850f1l_rscan.h"
+#include "rh850f1l_ext.h"
 
 #define MAX_CHANNEL_NUM         3  // 0-2 channel
 #define TOTAL_RECV_BUF_NUM      1  // Receive Buffer Number Configuration - set to 1, max 96
 
-static uint32_t  RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl, uint8_t val);
+static uint32_t  RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
+static void RSCAN_Communication_Speed_Set(uint8_t channel, RSCAN_COM_SPEED_PARAM_TypeDef speed_param );
+static void RSCAN_Receive_Rule_Set(uint8_t channel);
+static void RSCAN_RuleID_Set(uint8_t j,uint32_t id,uint8_t tar_meg,uint8_t rtr,uint8_t ide);
+static void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef rule_p);
+static void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m);
+void RSCAN_Eiint_Init(void);
 
 void RSCAN_Init(void)
 {
     uint8_t channel = 0;
-    RSCAN_Set_Communication_Speed com_sp;
+    RSCAN_COM_SPEED_PARAM_TypeDef com_sp;
     //rscan clock domain Setting
 
     /*the GRAMINIT flag in the RSCAN0GSTS register is cleared to 0 when CAN RAM
@@ -41,11 +48,11 @@ void RSCAN_Init(void)
     while(__RSCAN_GET_CHANNEL_STAT(channel,CAN_CSLPSTS_MASK));
 
     //Config the clock, bit_timing and communication speed
-    RSCAN_Communication_Speed_Set(com_sp);
+    RSCAN_Communication_Speed_Set(0,com_sp);
 
     RSCAN_Receive_Rule_Set(0);
 
-    RSCAN_Buffer_Set();
+    RSCAN_Buffer_Set(0,0,0);
 
     RSCAN_Global_Mode_Ctl(RSCAN_RESET_MODE,1);
     RSCAN_Channel_Mode_Ctl(0,RSCAN_RESET_MODE,1);
@@ -55,7 +62,7 @@ void RSCAN_Init(void)
 
     //Transition to global operating mode (Set GMDC[1:0] in the RSCAN0GCTR register to 00B)
     RSCAN_Global_Mode_Ctl(RSCAN_OPERATE_MODE,1);
-    while((__RSCAN_GET_GLOBAL_STAT(CAN_GRSTSTS_MASK));
+    while(__RSCAN_GET_GLOBAL_STAT(CAN_GRSTSTS_MASK));
 
     //Transition to channel communication mode (Set CHMDC[1:0] in the RSCAN0CmCTR register to 00B)
     RSCAN_Channel_Mode_Ctl(0,RSCAN_COMMUNICATION_MODE,1);
@@ -158,6 +165,7 @@ void RSCAN_Communication_Speed_Set(uint8_t channel, RSCAN_COM_SPEED_PARAM_TypeDe
 void RSCAN_Receive_Rule_Set(uint8_t channel)
 {
     uint8_t j = 0;
+    RSCAN_RECV_RULE_POINTER_TypeDef rule;
     if(channel > MAX_CHANNEL_NUM) return;
 
     //Set the number of receive rules
@@ -177,7 +185,7 @@ void RSCAN_Receive_Rule_Set(uint8_t channel)
 
     for(;j < 1; j++){
         RSCAN_RuleID_Set(j,0,0,0,0);
-        RSCAN_Rule_Pointer_Set();
+        RSCAN_Rule_Pointer_Set(j,rule);
     }
 
 
@@ -235,12 +243,10 @@ void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef rule_p)
     //TODO Only receive FIFO buffers and the transmit/receive FIFO buffer for which the
     //CFM[1:0] bits in the RSCAN0CFCCk register are set to 00B (receive mode) or 10B (gateway mode)
     //are selectable.
-    val = 0x01 << (tr_sel + 8);
-    val |= 0x01 << r_sel;
+    val = 0x01 << (rule_p.tr_sel + 8);
+    val |= 0x01 << rule_p.r_sel;
     __RSCAN_SET_RULE_POINTER1(j,val);
 }
-
-
 
 void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m)
 {
@@ -250,7 +256,7 @@ void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m)
     //Set receive buffer (the RSCAN0RMNB register)
     //TOTAL_RECV_BUF_NUM must be lower than 96
     __RSCAN_SET_TOTAL_RECV_BUF_NUM(TOTAL_RECV_BUF_NUM);
-
+#if 0
     //Set receive FIFO buffer (the RSCAN0RFCCx register)
     // Select receive interrupt request timing by the RFIGCV[2:0] bits
     // Select an interrupt source by the RFIM bit
@@ -309,14 +315,12 @@ void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m)
     __RSCAN_SET_TRANSMIT_QUEUE(m,CAN_TXQIE_MASK,1);
     // Enable transmit history interrupts by the THLIE bit in the RSCAN0THLCCm register
     //TODO...
+#endif
 }
 
 void RSCAN_Eiint_Init(void)
 {
     Eiint_InitTypeDef eiint;
-
-    if(channel > MAX_CHANNEL_NUM) return; //channel not supoort
-
     /*  channel NO.     error       transmit/receive FIFO       transmit    receive FIFO
                         interrupt   receive complete interrupt  interrupt   interrupt
          5              279                 280                     281         X
