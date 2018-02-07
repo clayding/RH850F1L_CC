@@ -346,10 +346,11 @@ void RSCAN_Eiint_Init(void)
     Eiit_Init(&eiint);
 }
 
-int8_t RSCAN_Transmit_From_Buffer(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+int8_t RSCAN_Transmit_Buffer_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
         uint8_t* data_p)
 {
     uint8_t p = 0, size = 0,len = 0;
+    uint8_t data[8] = {0};
     uint32_t val = 0;
 
 
@@ -374,15 +375,14 @@ int8_t RSCAN_Transmit_From_Buffer(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_
 
     __RSCAN_SET_TRANSMIT_BUF_POINTER(p,val);
 
-    if(data_len  > 8) len = 8;
+    len = (data_len > 8) ? 8: data_len;//data length not greater than 8
 
     for(size = 0; len && size < len; size++){
-        if(i / 4){
-            __RSCAN_WRITE_TRANSMIT_BUF_DATA_H(p,size- 4;data_p[size]);
-        }else{
-            __RSCAN_WRITE_TRANSMIT_BUF_DATA_L(p,size;data_p[size]);
-        }
+        data[size] = data_p[size];
     }
+
+    __RSCAN_WRITE_TRANSMIT_BUF_DATA_H(p,&data[0]);
+    __RSCAN_WRITE_TRANSMIT_BUF_DATA_L(p,&data[4]);
 
     //Set the TMTR bit in the corresponding RSCAN0TMCp register to 1 (requesting transmission)
     __RSCAN_SET_TRANSMIT_BUF_CTL(p,CAN_TMTR_MASK,1);
@@ -390,19 +390,20 @@ int8_t RSCAN_Transmit_From_Buffer(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_
     return size;//return the actual data size to be transmited
 }
 
-void RSCAN_Transmit_From_FIFO(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+int8_t RSCAN_Transmit_Recv_FIFO_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
         uint8_t* data_p)
 {
     uint8_t k = 0, size = 0,len = 0;
+    uint8_t data[8] = {0};
     uint32_t val = 0;
+
+    if(id_info.index > 17) return -1;// max 17
+    k = id_info.index;
 
     // Is transmit/receive FIFO buffer full?
     // (Is CFFLL flag in the RSCAN0CFSTSk register 1?)
     if(__RSCAN_GET_TrRe_FIFO_STAT(k,CAN_CFFLL_MASK))
         return ;//if full, return
-
-    if(id_info.index > 17) return -1;// max 17
-    k = id_info.index;
 
     val = (uint32_t)(((id_info.ide << CAN_CFIDE_OFFSET) & CAN_CFIDE_MASK) |
         ((id_info.rtr << CAN_CFRTR_OFFSET) & CAN_CFRTR_MASK) |
@@ -420,26 +421,150 @@ void RSCAN_Transmit_From_FIFO(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t da
     val = (uint32_t)(((data_len << CAN_CFDLC_OFFSET) & CAN_TMDLC_MASK) |
         ((id_info.label_t << CAN_CFPTR_OFFSET) & CAN_CFPTR_MASK));
 
-    __RSCAN_SET_TrRe_FIFO_POINTER(p,val);
+    __RSCAN_SET_TrRe_FIFO_POINTER(k,val);
 
-    if(data_len  > 8) len = 8;
+    len = (data_len > 8) ? 8: data_len;
 
     for(size = 0; len && size < len; size++){
-        if(i / 4){
-            __RSCAN_WRITE_TrRe_FIFO_DATA_H(p,size- 4;data_p[size]);
-        }else{
-            __RSCAN_WRITE_TrRe_FIFO_DATA_L(p,size;data_p[size]);
-        }
+        data[size] = data_p[size];
     }
 
+    __RSCAN_WRITE_TrRe_FIFO_DATA_H(k,&data[0]);
+    __RSCAN_WRITE_TrRe_FIFO_DATA_L(k,&data_p[4]);
 
+    //Set the RSCAN0CFPCTRk register to 0xFF
+    _RSCAN_SET_TrRe_FIFO_POINTER(k);
 
-
-
-
+    return size;
 }
 
-void RSCAN_Transmit_From_Queue()
+int8_t RSCAN_Transmit_Queue_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+        uint8_t* data_p)
+{
+    uint8_t p = 0, m = 0,size = 0,len = 0;
+    uint8_t data[8] = {0};
+    uint32_t val = 0;
+
+
+    if(id_info.index > 5) return -1;// max 5
+    m = id_info.index;
+    p = m * 16 + 15; //p = m × 16 + 15, m = 0 to 5
+
+    //Is transmit queue full?(Is TXQFLL flag in the RSCAN0TXQSTSm register 1?)
+    if(__RSCAN_GET_TRANSMIT_QUEUE_STAT(m,CAN_TXQFLL_MASK))
+        return -1;//if full, return
+
+
+    val = (uint32_t)(((id_info.ide << CAN_TMIDE_OFFSET) & CAN_TMIDE_MASK) |
+        ((id_info.rtr << CAN_TMRTR_OFFSET) & CAN_TMRTR_MASK) |
+        ((id_info.his_en << CAN_THLEN_OFFSET) & CAN_THLEN_MASK));
+
+    /*Set the ID of the receive rule.For the standard ID, set the ID in bits
+    b10 to b0 and set bits b28 to b11 to 0.*/
+    if(id_info.ide == 0)
+        val |= id_info.id & (CAN_TMID_MASK >> 18);
+    else
+        val |= id_info.id & CAN_TMID_MASK;
+
+    __RSCAN_SET_TRANSMIT_BUF_ID(p,val);
+
+    val = (uint32_t)(((data_len << CAN_TMDLC_OFFSET) & CAN_TMDLC_MASK) |
+        ((id_info.label_t << CAN_TMPTR_OFFSET) & CAN_TMPTR_MASK));
+
+    __RSCAN_SET_TRANSMIT_BUF_POINTER(p,val);
+
+    len = (data_len > 8) ? 8: data_len;
+
+    for(size = 0; len && size < len; size++){
+        data[size] = data_p[size];
+    }
+
+    __RSCAN_WRITE_TRANSMIT_BUF_DATA_H(p,&data[0]);
+    __RSCAN_WRITE_TRANSMIT_BUF_DATA_L(p,&data[4]);
+
+    //Set the RSCAN0TXQPCTRm register to 0xFF
+    __RSCAN_SET_TRANSMIT_QUEUE_POINTER(m);
+
+    return size;
+}
+
+
+int8_t RSCAN_Receive_Buffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
+{
+    uint8_t q = 0,y = 0,bit_pos = 0,i = 0;
+    uint8_t recv_size = 0,data[8] = {0};
+
+    if(id_info_p->index > 95) return -1;// max 95
+    q = id_info_p->index;
+
+    bit_pos = q % 32;
+    y = q - bit_pos;
+
+    //Has a new message been received? (Is the RMNSq flag in the RSCAN0RMNDy register 1?)
+    if(__RSCAN_CHECK_RECV_NEW_MSG(y,0x01 << bit_pos) == 0){
+        return -1; //no new message in receive buffer q
+    }
+
+    //Set the RMNSq flag in the RSCAN0RMNDy register to 0
+    __RSCAN_CLEAR_NEW_MSG_FLAG(y,0x01 << bit_pos);
+
+    id_info_p->ide = __RSCAN_GET_RECV_BUF_ID(q,CAN_RMIDE_MASK) >> CAN_RMIDE_OFFSET;
+    id_info_p->rtr = __RSCAN_GET_RECV_BUF_ID(q,CAN_RMRTR_MASK) >> CAN_RMRTR_OFFSET;
+    id_info_p->id  = __RSCAN_GET_RECV_BUF_ID(q,CAN_RMID_MASK);
+
+    id_info_p->label_t = __RSCAN_GET_RECV_BUF_POINTER(q,CAN_RMPTR_MASK)  >> CAN_RMPTR_OFFSET;
+    recv_size = __RSCAN_GET_RECV_BUF_POINTER(q,CAN_RMDLC_MASK)  >> CAN_RMDLC_OFFSET;
+    id_info_p->time_stamp = __RSCAN_GET_RECV_BUF_POINTER(q,CAN_RMTS_MASK);
+
+    *((uint32_t*)&data[0]) = __RSCAN_READ_RECV_BUF_DATA_L(q);
+    *((uint32_t*)&data[4]) = __RSCAN_READ_RECV_BUF_DATA_H(q);
+
+    for(; recv_size && i <recv_size;i++){
+        data_p[i] = data[i];
+    }
+
+    //TODO Are all RMNSq flags in the RSCAN0RMNDy register 0?????????
+    return recv_size;
+}
+
+int8_t RSCAN_Transmit_Recv_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
+{
+    uint8_t k = 0 ,len = 0, i = 0;
+    uint8_t recv_size = 0,data[8] = {0};
+    uint32_t val = 0;
+
+    if(id_info_p->index > 17) return -1;// max 17
+    k = id_info_p->index;
+
+    if(__RSCAN_GET_TrRe_FIFO_STAT(k,CAN_CFEMP_MASK))
+        return ;//if empty, return
+
+    val = __RSCAN_GET_TrRe_FIFO_ID(k);
+
+    id_info_p->ide = (val & CAN_CFIDE_MASK) >> CAN_CFIDE_OFFSET;
+    id_info_p->rtr = (val & CAN_CFRTR_MASK) >> CAN_CFRTR_OFFSET;
+    id_info_p->id  = (val & CAN_CFID_MASK);
+
+    val = __RSCAN_GET_TrRe_FIFO_POINTER(k);
+
+    id_info_p->label_t = (val & CAN_CFPTR_MASK)  >> CAN_CFPTR_OFFSET;
+    recv_size = (val & CAN_CFDLC_MASK)  >> CAN_CFDLC_OFFSET;
+    id_info_p->time_stamp = (val & CAN_CFTS_MASK);
+
+    *((uint32_t*)&data[0]) = __RSCAN_READ_TrRe_FIFO_DATA_L(k);
+    *((uint32_t*)&data[4]) = __RSCAN_READ_TrRe_FIFO_DATA_H(k);
+
+    for(; recv_size && i <recv_size;i++){
+        data_p[i] = data[i];
+    }
+
+    //Set the RSCAN0CFPCTRk register to 0xFF
+    _RSCAN_SET_TrRe_FIFO_POINTER(k);
+
+    return recv_size;
+}
+
+int8_t RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
 {
 
 }
