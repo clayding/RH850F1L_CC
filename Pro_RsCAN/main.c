@@ -12,6 +12,7 @@
 #include "rh850f1l_port.h"
 #include "rh850f1l_ext.h"
 #include "rh850f1l_timer.h"
+#include "rh850f1l_rscan.h"
 #include "delay.h"
 
 typedef struct
@@ -40,10 +41,10 @@ void main(void)
 
     while (1)
     {
-         //led_blink1();
-        // mdelay(1000);
-        // if(OSTM_Count_State_Get(&OSTM0) == 0x00)
-        //     while(1){}
+       R_CAN_Send_TxBuf0();
+       while(__RSCAN_GET_TRANSMIT_STAT(0,CAN_TMTRF_MASK) == 0);
+       //while(__RSCAN_GET_TRANSMIT_STAT(0,CAN_TMTRF_MASK));
+       //while(x--);
 
     }
 }

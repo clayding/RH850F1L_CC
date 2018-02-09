@@ -296,6 +296,12 @@ void TAUD0CH0IntHandler(unsigned long eiic)
     i = !i;
 }
 
+#pragma interrupt RSCAN0CH0SendCompleteIntHandler(channel = 18, enable = false, callt = false, fpu = false)
+void RSCAN0CH0SendCompleteIntHandler(unsigned long eiic)
+{
+    Eiit_Handler_Ptr();
+}
+
 #pragma interrupt WDTA0IntHandler(channel = 32, enable = false, callt = false, fpu = false)
 void WDTA0IntHandler(unsigned long eiic)
 {

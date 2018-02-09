@@ -25,7 +25,10 @@
 //#define WDTA1_TEST
 
 /************************RTCA Config ******************************************/
-#define RTCA0_TEST
+//#define RTCA0_TEST
+
+/************************RSCAN Config *****************************************/
+#define RSCAN_TEST
 
 
 /*!
@@ -61,6 +64,10 @@ void System_Clock_Config(void)
     Clock_Domain_Set(ARTCA);
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
+
+    //rscan clock domain Setting
+    Clock_Domain_Set(ICAN);
+    Clock_Domain_Set(ICANOSC);
 
 }
 
@@ -123,6 +130,39 @@ void Board_Port_Config(void)
     port.bmc_t = BIDIRECTION_MODE_ENABLED;
     port.alter_t = ALT_FUNC_2;
     Port_Init(PortGroupNum9,&port);
+#endif
+#ifdef RSCAN_TEST
+    /*port.pin_mask = PORT_PIN_0;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum10,&port);
+
+    port.pin_mask = PORT_PIN_1;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    //port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum10,&port);*/
+    /* RS-CAN port settings (Channel 0) */
+    /* P10_0 (CAN0RX) */
+    PFCAE10 &= 0xFFFEU;
+    PFCE10  &= 0xFFFEU;
+    PFC10   |= 0x0001U;
+    PM10    |= 0x0001U;
+    PMC10   |= 0x0001U;
+
+    /* P10_1 (CAN0TX) */
+    PFCAE10 &= 0xFFFDU;
+    PFCE10  &= 0xFFFDU;
+    PFC10   |= 0x0002U;
+    P10     |= 0x0002U;
+    PM10    &= 0xFFFDU;
+    PMC10   |= 0x0002U;
+
 #endif
     {
         Eiint_InitTypeDef eiint;
@@ -368,6 +408,21 @@ void Board_Port_Config(void)
             ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
             TAUD_Batch_Init(ch_mode,2);
         }
+#endif
+
+#ifdef RSCAN_TEST
+    {
+        RSCAN_InitTypeDef rscan0;
+        rscan0.channel = 0;
+        rscan0.sp.fcan_src = 1;
+        rscan0.sp.bit_time.sjw = 0x0;// 1Tq
+        rscan0.sp.bit_time.tseg2 = 0x3;// 4Tq
+        rscan0.sp.bit_time.tseg1 = 0x0a;// 11Tq
+        rscan0.sp.bit_time.brp = 4-1;
+
+        RSCAN_Init(&rscan0);
+    }
+
 #endif
         }
     }

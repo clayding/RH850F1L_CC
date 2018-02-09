@@ -154,7 +154,7 @@
 	.dw #_Dummy_EI ; INT15
 	.dw #_Dummy_EI ; INT16
 	.dw #_Dummy_EI ; INT17
-	.dw #_Dummy_EI ; INT18
+	.dw #_RSCAN0CH0SendCompleteIntHandler ; INT18
 	.dw #_Dummy_EI ; INT19
 	.dw #_Dummy_EI ; INT20
 	.dw #_Dummy_EI ; INT21

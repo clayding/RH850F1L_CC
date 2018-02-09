@@ -279,8 +279,8 @@ SET_CLK_DOMAIN_RET_Type C_ISO_ICAN_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     val_.src_clk_ctl_val = ICAN_SRC_CPUCLK;//Source Clock Setting for C_ISO_CAN
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ICAN,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ICAN,S_CTL_MASK))) != ERROR);//Select a source clock
-    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ICAN,S_ACT) & STR_CONCAT2(ICAN,S_ACT_MASK))) { //Confirm completion of selection
-        return SET_SRC_CLK_FAIL;
+    while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ICAN,S_ACT) & STR_CONCAT2(ICAN,S_ACT_MASK))) { //Confirm completion of selection
+        //return SET_SRC_CLK_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
 
@@ -295,8 +295,8 @@ SET_CLK_DOMAIN_RET_Type C_ISO_ICANOSC_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ICANOSC,D_CTL);
     while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(ICANOSC,D_CTL_MASK))) != ERROR);//Select a clock divider
 
-    if(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ICANOSC,D_ACT) & STR_CONCAT2(ICANOSC,D_ACT_MASK))) { //Confirm completion of selection
-        return SET_CLK_DIVIDER_FAIL;
+    while(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ICANOSC,D_ACT) & STR_CONCAT2(ICANOSC,D_ACT_MASK))) { //Confirm completion of selection
+        //return SET_CLK_DIVIDER_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
 
@@ -355,16 +355,16 @@ SET_CLK_DOMAIN_RET_Type C_AWO_ARTCA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     val_.src_clk_ctl_val = ARTCA_SUBOSC;//Source Clock Setting for C_AWO_RTCA
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ARTCA,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ARTCA,S_CTL_MASK))) != ERROR);//Select a source clock
-    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ARTCA,S_ACT) & STR_CONCAT2(ARTCA,S_ACT_MASK))) { //Confirm completion of selection
-        return SET_SRC_CLK_FAIL;
+    while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ARTCA,S_ACT) & STR_CONCAT2(ARTCA,S_ACT_MASK))) { //Confirm completion of selection
+        //return SET_SRC_CLK_FAIL;
     }
 
     val_.clk_divider_val = ARTCA_CTL_DIVI_1;//CKSC_ARTCAS_CTL selection /1 (Default)
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ARTCA,D_CTL);
     while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(ARTCA,D_CTL_MASK))) != ERROR);//Select a clock divider
 
-    if(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ARTCA,D_ACT) & STR_CONCAT2(ARTCA,D_ACT_MASK))) { //Confirm completion of selection
-        return SET_CLK_DIVIDER_FAIL;
+    while(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ARTCA,D_ACT) & STR_CONCAT2(ARTCA,D_ACT_MASK))) { //Confirm completion of selection
+        //return SET_CLK_DIVIDER_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
 }

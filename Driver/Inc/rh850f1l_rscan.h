@@ -12,8 +12,8 @@
 #include "rh850f1l.h"
 
 /*Clock Supply Setting*/
-#define RSCAN_CLK_XINCAN        0 //select the clk_xincan as clock source of the RS-CAN module
-#define RSCAN_CLKC              1 //select the clkc as clock source of the RS-CAN module
+#define RSCAN_CLK_XINCAN        1 //select the clk_xincan as clock source of the RS-CAN module
+#define RSCAN_CLKC              !RSCAN_CLK_XINCAN //select the clkc as clock source of the RS-CAN module
 #define RSCAN_CLK_XINCAN_FRE    8 //8 MHz ≤ clk_xincan ≤ pclk/2  or 4 MHz ≤ clk_xincan ≤ pclk/2
 #define RSCAN_CLKC_FRE          12.5 //12.5 MHz ≤ clkc ≤ pclk/2
 #define RSCAN_PCLK              ()
@@ -23,6 +23,7 @@
 #define _C0CFG                  C0CFG.UINT32
 #define _C0CTR                  C0CTR.UINT32
 #define _C0STS                  C0STS.UINT32
+#define _C0ERFL                 C0ERFL.UINT32
 
 #define _GCFG                   GCFG.UINT32
 #define _GCTR                   GCTR.UINT32
@@ -42,6 +43,7 @@
 #define _TXQCC0                 TXQCC0.UINT32
 #define _TMIEC0                 TMIEC0.UINT32
 
+#define _TMSTS0                 TMSTS0
 #define _TMID0                  TMID0.UINT32
 #define _TMPTR0                 TMPTR0.UINT32
 #define _TMDF00                 TMDF00.UINT32
@@ -71,7 +73,7 @@
 #define _RMDF00                 RMDF00.UINT32
 #define _RMDF10                 RMDF10.UINT32
 
-
+/*******************************************************************************/
 /*RSCAN0CmCFG — Channel Configuration Register (m = 0 to 5) bits mask and offset*/
 #define CAN_SJW_OFFSET          24
 #define CAN_TSEG2_OFFSET        20
@@ -124,6 +126,14 @@
 #define CAN_CSLPSTS_MASK        ((uint32_t)0x01 << 2) //Channel Stop Status Flag
 #define CAN_CHLTSTS_MASK        ((uint32_t)0x01 << 1) //Channel Test Status Flag
 #define CAN_CRSTSTS_MASK        ((uint32_t)0x01 << 0) //Channel Reset Status Flag
+
+/*RSCAN0CmERFL — Channel Error Flag Register (m = 0 to 5)*/
+#define CAN_CRCREG_MASK
+#define CAN_ADERR_MASK
+#define CAN_B0ERR_MASK
+#define CAN_B1ERR_MASK
+#define CAN_CERR_MASK
+#define CAN_AERR_MASK
 
 /*RSCAN0GCFG — Global Configuration Register bits mask*/
 #define CAN_ITRCP_OFFSET        16
@@ -186,7 +196,7 @@
 #define CAN_GAFLRMDP_OFFSET     8
 
 #define CAN_GAFLDLC_MASK        ((uint32_t)0x0F   << CAN_GAFLDLC_OFFSET) //Receive Rule DLC mask
-#define CAN_GAFLPTR_MASK        ((uint32_t)0xFFF << CAN_GAFLPTR_OFFSET) //Receive Rule Label mask
+#define CAN_GAFLPTR_MASK        ((uint32_t)0xFFF  << CAN_GAFLPTR_OFFSET) //Receive Rule Label mask
 #define CAN_GAFLRMV_MASK        ((uint32_t)0x01   << CAN_GAFLRMV_OFFSET) //Receive Buffer Enable mask
 #define CAN_GAFLRMDP_MASK       ((uint32_t)0x7F   << CAN_GAFLRMDP_OFFSET)//Receive Buffer Number Select mask
 
@@ -196,9 +206,29 @@
 #define CAN_GAFLFDPH_MASK       ((uint32_t)0x3FFFF << CAN_GAFLFDPH_OFFSET)
 #define CAN_GAFLFDPL_MASK       ((uint32_t)0xFF)
 
+/******************************************************************************/
 /*RSCAN0RMNB — Receive Buffer Number Register*/
 #define CAN_NRXMB_MASK          ((uint32_t)0xFF)
 
+/*None RSCAN0RMNDy — Receive Buffer New Data Register (y = 0 to 2)*/
+
+/*RSCAN0RMIDq — Receive Buffer ID Register (q = 0 to 95)*/
+#define CAN_RMIDE_OFFSET        31
+#define CAN_RMRTR_OFFSET        30
+
+#define CAN_RMIDE_MASK          ((uint32_t)0x01 << CAN_RMIDE_OFFSET) //Receive Buffer IDE
+#define CAN_RMRTR_MASK          ((uint32_t)0x01 << CAN_RMRTR_OFFSET) //Receive Buffer RTR
+#define CAN_RMID_MASK           ((uint32_t)0x1FFFFFFF) //Receive Buffer ID Data [28:0]
+
+/*RSCAN0RMPTRq — Receive Buffer Pointer Register (q = 0 to 95)*/
+#define CAN_RMDLC_OFFSET        28
+#define CAN_RMPTR_OFFSET        16
+
+#define CAN_RMDLC_MASK          ((uint32_t)0x0F << CAN_RMDLC_OFFSET) //Receive Buffer DLC Data [31:28]
+#define CAN_RMPTR_MASK          ((uint32_t)0xFFF << CAN_RMPTR_OFFSET) //Receive Buffer Label Data [27:16]
+#define CAN_RMTS_MASK           ((uint32_t)0xFFFF) //Receive Buffer Timestamp Data [15:0]
+
+/******************************************************************************/
 /*RSCAN0RFCCx — Receive FIFO Buffer Configuration and Control Register(x = 0 to 7)*/
 #define CAN_RFIGCV_OFFSET       13
 #define CAN_RFIM_OFFSET         12
@@ -211,6 +241,38 @@
 #define CAN_RFIE_MASK           ((uint32_t)0x01 << CAN_RFIE_OFFSET) //Receive FIFO Interrupt Enable
 #define CAN_RFE_MASK            ((uint32_t)0x01) //Receive FIFO Buffer Enable
 
+/*RSCAN0RFSTSx — Receive FIFO Buffer Status Register (x = 0 to 7)*/
+#define CAN_RFMC_OFFSET         8
+#define CAN_RFIF_OFFSET         3
+#define CAN_RFMLT_OFFSET        2
+#define CAN_RFFLL_OFFSET        1
+
+#define CAN_RFMC_MASK           ((uint32_t)0xFF << CAN_RFMC_OFFSET) //Receive FIFO Unread Message Counter [15:8]
+#define CAN_RFIF_MASK           ((uint32_t)0x01 << CAN_RFIF_OFFSET) //Receive FIFO Interrupt Request Flag
+#define CAN_RFMLT_MASK          ((uint32_t)0x01 << CAN_RFMLT_OFFSET)//Receive FIFO Message Lost Flag
+#define CAN_RFFLL_MASK          ((uint32_t)0x01 << CAN_RFFLL_OFFSET)//Receive FIFO Buffer Full Status Flag
+#define CAN_RFEMP_MASK          ((uint32_t)0x01) //Receive FIFO Buffer Empty Status Flag
+
+/*RSCAN0RFPCTRx — Receive FIFO Buffer Pointer Control Register (x = 0 to 7)*/
+#define CAN_RFPC_MASK           ((uint32_t)0xFF) //Receive FIFO Pointer Control
+
+/*RSCAN0RFIDx — Receive FIFO Buffer Access ID Register (k = 0 to 7)*/
+#define CAN_RFIDE_OFFSET        31
+#define CAN_RFRTR_OFFSET        30
+
+#define CAN_RFIDE_MASK          ((uint32_t)0x01 << CAN_RFIDE_OFFSET) //Receive FIFO Buffer IDE
+#define CAN_RFRTR_MASK          ((uint32_t)0x01 << CAN_RFRTR_OFFSET) //Receive FIFO Buffer RTR
+#define CAN_RFID_MASK           ((uint32_t)0x1FFFFFFF) //Receive FIFO Buffer ID Data
+
+/*RSCAN0RFPTRx — Receive FIFO Buffer Access Pointer Register (k = 0 to 7)*/
+#define CAN_RFDLC_OFFSET        28
+#define CAN_RFPTR_OFFSET        16
+
+#define CAN_RFDLC_MASK          ((uint32_t)0x0F << CAN_RFDLC_OFFSET)
+#define CAN_RFPTR_MASK          ((uint32_t)0xFFF << CAN_RFPTR_OFFSET)
+#define CAN_RFTS_MASK           ((uint32_t)0xFFFF)
+
+/******************************************************************************/
 /*RSCAN0CFCCk — Transmit/receive FIFO Buffer Configuration and Control
 Register k (k = 0 to 17)*/
 #define CAN_CFITT_OFFSET        24
@@ -236,42 +298,6 @@ Register k (k = 0 to 17)*/
 #define CAN_CFRXIE_MASK         ((uint32_t)0x01 << CAN_CFRXIE_OFFSET)
 #define CAN_CFE_MASK            ((uint32_t)0x01)
 
-/*RSCAN0TXQCCm — Transmit Queue Configuration and Control Register
-(m = 0 to 5)*/
-#define CAN_TXQIM_OFFSET        13
-#define CAN_TXQIE_OFFSET        12
-#define CAN_TXQDC_OFFSET        8
-
-#define CAN_TXQIM_MASK          ((uint32_t)0x01 << CAN_TXQIM_OFFSET)
-#define CAN_TXQIE_MASK          ((uint32_t)0x01 << CAN_TXQIE_OFFSET)
-#define CAN_TXQDC_MASK          ((uint32_t)0x0F << CAN_TXQDC_OFFSET)
-#define CAN_TXQE_MASK           ((uint32_t)0x01)
-
-/*RSCAN0TMIDp — Transmit Buffer ID Register (p = 0 to 95)*/
-#define CAN_TMIDE_OFFSET        31
-#define CAN_TMRTR_OFFSET        30
-#define CAN_THLEN_OFFSET        29
-
-#define CAN_TMIDE_MASK          ((uint32_t)0x01 << CAN_TMIDE_OFFSET)
-#define CAN_TMRTR_MASK          ((uint32_t)0x01 << CAN_TMRTR_OFFSET)
-#define CAN_THLEN_MASK          ((uint32_t)0x01 << CAN_THLEN_OFFSET)
-#define CAN_TMID_MASK           ((uint32_t)0x1FFFFFFF)
-
-/*RSCAN0TMPTRp — Transmit Buffer Pointer Register (p= 0 to 95)*/
-#define CAN_TMDLC_OFFSET        28
-#define CAN_TMPTR_OFFSET        16
-
-#define CAN_TMDLC_MASK          ((uint32_t)0x0F << CAN_TMDLC_OFFSET)
-#define CAN_TMPTR_MASK          ((uint32_t)0xFF << CAN_TMPTR_OFFSET)
-
-/*RSCAN0TMCp — Transmit Buffer Control Register (p = 0 to 95)*/
-#define CAN_TMOM_OFFSET         2
-#define CAN_TMTAR_OFFSET        1
-
-#define CAN_TMOM_MASK           ((uint32_t)0x01 << CAN_TMOM_OFFSET)
-#define CAN_TMTAR_MASK          ((uint32_t)0x01 << CAN_TMTAR_OFFSET)
-#define CAN_TMTR_MASK           ((uint32_t)0x01)
-
 /*RSCAN0CFSTSk — Transmit/receive FIFO Buffer Status Register (k = 0 to 17)*/
 #define CAN_CFMC_OFFSET         8
 #define CAN_CFTXIF_OFFSET       4
@@ -291,8 +317,8 @@ Register k (k = 0 to 17)*/
 #define CAN_CFRTR_OFFSET        30
 //#define CAN_THLEN_OFFSET        29
 
-#define CAN_CFIDE_MASK          ((uint32_t)0x01 << CAN_TMIDE_OFFSET)
-#define CAN_CFRTR_MASK          ((uint32_t)0x01 << CAN_TMRTR_OFFSET)
+#define CAN_CFIDE_MASK          ((uint32_t)0x01 << CAN_CFIDE_OFFSET)
+#define CAN_CFRTR_MASK          ((uint32_t)0x01 << CAN_CFRTR_OFFSET)
 //#define CAN_THLEN_MASK          ((uint32_t)0x01 << CAN_THLEN_OFFSET)
 #define CAN_CFID_MASK           ((uint32_t)0x1FFFFFFF)
 
@@ -300,12 +326,60 @@ Register k (k = 0 to 17)*/
 #define CAN_CFDLC_OFFSET        28
 #define CAN_CFPTR_OFFSET        16
 
-#define CAN_CFDLC_MASK          ((uint32_t)0x0F << CAN_TMDLC_OFFSET)
-#define CAN_CFPTR_MASK          ((uint32_t)0xFFF << CAN_TMPTR_OFFSET)
+#define CAN_CFDLC_MASK          ((uint32_t)0x0F << CAN_CFDLC_OFFSET)
+#define CAN_CFPTR_MASK          ((uint32_t)0xFFF << CAN_CFPTR_OFFSET)
 #define CAN_CFTS_MASK           ((uint32_t)0xFFFF)
 
 /*RSCAN0CFPCTRk — Transmit/receive FIFO Buffer Pointer Control Register (k = 0 to 17)*/
 #define CAN_CFPC_MASK           ((uint32_t)0xFF)
+
+/******************************************************************************/
+/*RSCAN0TMCp — Transmit Buffer Control Register (p = 0 to 95)*/
+#define CAN_TMOM_OFFSET         2
+#define CAN_TMTAR_OFFSET        1
+
+#define CAN_TMOM_MASK           ((uint32_t)0x01 << CAN_TMOM_OFFSET)
+#define CAN_TMTAR_MASK          ((uint32_t)0x01 << CAN_TMTAR_OFFSET)
+#define CAN_TMTR_MASK           ((uint32_t)0x01)
+
+/*RSCAN0TMSTSp — Transmit Buffer Status Register (p = 0 to 95)*/
+#define CAN_TMTARM_OFFSET       4
+#define CAN_TMTRM_OFFSET        3
+#define CAN_TMTRF_OFFSET        1
+
+#define CAN_TMTARM_MASK         ((uint32_t)0x01 << CAN_TMTARM_OFFSET)
+#define CAN_TMTRM_MASK          ((uint32_t)0x01 << CAN_TMTRM_OFFSET)
+#define CAN_TMTRF_MASK          ((uint32_t)0x03 << CAN_TMTRF_OFFSET)
+#define CAN_TMTSTS_MASK         ((uint32_t)0x01)
+
+/*RSCAN0TMIDp — Transmit Buffer ID Register (p = 0 to 95)*/
+#define CAN_TMIDE_OFFSET        31
+#define CAN_TMRTR_OFFSET        30
+#define CAN_THLEN_OFFSET        29
+
+#define CAN_TMIDE_MASK          ((uint32_t)0x01 << CAN_TMIDE_OFFSET)
+#define CAN_TMRTR_MASK          ((uint32_t)0x01 << CAN_TMRTR_OFFSET)
+#define CAN_THLEN_MASK          ((uint32_t)0x01 << CAN_THLEN_OFFSET)
+#define CAN_TMID_MASK           ((uint32_t)0x1FFFFFFF)
+
+/*RSCAN0TMPTRp — Transmit Buffer Pointer Register (p= 0 to 95)*/
+#define CAN_TMDLC_OFFSET        28
+#define CAN_TMPTR_OFFSET        16
+
+#define CAN_TMDLC_MASK          ((uint32_t)0x0F << CAN_TMDLC_OFFSET)
+#define CAN_TMPTR_MASK          ((uint32_t)0xFF << CAN_TMPTR_OFFSET)
+
+/******************************************************************************/
+/*RSCAN0TXQCCm — Transmit Queue Configuration and Control Register
+(m = 0 to 5)*/
+#define CAN_TXQIM_OFFSET        13
+#define CAN_TXQIE_OFFSET        12
+#define CAN_TXQDC_OFFSET        8
+
+#define CAN_TXQIM_MASK          ((uint32_t)0x01 << CAN_TXQIM_OFFSET)
+#define CAN_TXQIE_MASK          ((uint32_t)0x01 << CAN_TXQIE_OFFSET)
+#define CAN_TXQDC_MASK          ((uint32_t)0x0F << CAN_TXQDC_OFFSET)
+#define CAN_TXQE_MASK           ((uint32_t)0x01)
 
 /*RSCAN0TXQSTSm — Transmit Queue Status Register (m = 0 to 5)*/
 #define CAN_TXQIF_OFFSET        2
@@ -317,24 +391,7 @@ Register k (k = 0 to 17)*/
 
 /*RSCAN0TXQPCTRm — Transmit Queue Pointer Control Register (m = 0 to 5)*/
 #define CAN_TXQPC_MASK          ((uint32_t)0xFF)
-
-/*RSCAN0RMIDq — Receive Buffer ID Register (q = 0 to 95)*/
-#define CAN_RMIDE_OFFSET        31
-#define CAN_RMRTR_OFFSET        30
-
-#define CAN_RMIDE_MASK          ((uint32_t)0x01 << CAN_RMIDE_OFFSET) //Receive Buffer IDE
-#define CAN_RMRTR_MASK          ((uint32_t)0x01 << CAN_RMRTR_OFFSET) //Receive Buffer RTR
-#define CAN_RMID_MASK           ((uint32_t)0x1FFFFFFF) //Receive Buffer ID Data [28:0]
-
-/*RSCAN0RMIDq — Receive Buffer ID Register (q = 0 to 95)*/
-#define CAN_RMDLC_OFFSET        28
-#define CAN_RMPTR_OFFSET        16
-
-#define CAN_RMDLC_MASK          ((uint32_t)0x0F << CAN_RMDLC_OFFSET) //Receive Buffer DLC Data [31:28]
-#define CAN_RMPTR_MASK          ((uint32_t)0xFFF << CAN_RMPTR_OFFSET) //Receive Buffer Label Data [27:16]
-#define CAN_RMTS_MASK           ((uint32_t)0xFFFF) //Receive Buffer Timestamp Data [15:0]
-
-
+/******************************************************************************/
 
 #define CAN_REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)           ((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_)
 #define CAN_REG_VAL(_CNT_,_BASE_REG_,_OFFSET_B_)           (*((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_))
@@ -346,15 +403,16 @@ Modify the RSCAN0CmCFG register in channel reset mode or channel halt mode. */
 #define __RSCAN_GET_CHANNEL_CFG(_M_)                   CAN_REG_VAL(_M_,_C0CFG,0x10)
 
 /*Config RSCAN0CmCTR — Channel Control Register (m = 0 to 5)*/
-#define __RSCAN_SET_CHANNEL_CTL(_M_,_MASK_,_VALUE_)    do{ \
+#define __RSCAN_SET_CHANNEL_CTL(_M_,_MASK_,_VALUE_)     do{ \
                                                             MODIFY_REG(CAN_REG_ADDR(_M_,_C0CTR,0x10),_MASK_,_VALUE_);\
                                                         }while(0)
-#define __RSCAN_GET_CHANNEL_CTL(_M_,_MASK_)            (CAN_REG_VAL(_M_,_C0CTR,0x10) & _MASK_)
+#define __RSCAN_GET_CHANNEL_CTL(_M_,_MASK_)             (CAN_REG_VAL(_M_,_C0CTR,0x10) & _MASK_)
 
 /*Read the RSCAN0CmSTS — Channel Status Register (m = 0 to 5) read-only*/
-#define __RSCAN_GET_CHANNEL_STAT(_M_,_MASK_)           (CAN_REG_VAL(_M_,_C0STS,0x10) & _MASK_)
+#define __RSCAN_GET_CHANNEL_STAT(_M_,_MASK_)            (CAN_REG_VAL(_M_,_C0STS,0x10) & _MASK_)
 
-/*TODO Config or read RSCAN0CmERFL — Channel Error Flag Register (m = 0 to 5)*/
+/*Config or read RSCAN0CmERFL — Channel Error Flag Register (m = 0 to 5)*/
+#define __RSCAN_GET_CHANNEL_Error(_M_,_MASK_)           CAN_REG_VAL(_M_,_C0ERFL,0x10) & _MASK_)
 
 /*********************************19.3.6--19.3.12******************************/
 /*Config RSCAN0GCFG — Global Configuration Register
@@ -393,12 +451,12 @@ Enable or disable receive rule table write 0--disbale 1 -- Enable*/
 
 /*Config RSCAN0GAFLCFG0 — Receive Rule Configuration Register 0
 Used to set the number(_NUMBER_) of rules to be registered in the channel x
-_INDEX_: 0-3. Modify the RSCAN0GAFLCFG0 register only in global reset mode.*/
+_INDEX_: 0-3,_NUMBER_: 0x00 -0x80. Modify the RSCAN0GAFLCFG0 register only in global reset mode.*/
 #define __RSCAN_SET_RULE_NUMBER_0(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG0[_INDEX_] = _NUMBER_ & 0xFF
 
-/*Config RSCAN0GAFLCFG1 — Receive Rule Configuration Register 1 _INDEX_: 4,5
+/*Config RSCAN0GAFLCFG1 — Receive Rule Configuration Register 1 _INDEX_: 4-5 ,_NUMBER_: 0x00 -0x80
 Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
-#define __RSCAN_SET_RULE_NUMBER_1(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG0[_INDEX_] = _NUMBER_ & 0xFF
+#define __RSCAN_SET_RULE_NUMBER_1(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG1[_INDEX_] = _NUMBER_ & 0xFF
 
 
 /*Config the RSCAN0GAFLIDj — Receive Rule ID Register*/
@@ -422,10 +480,10 @@ Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
 #define __RSCAN_CLEAR_NEW_MSG_FLAG(_Y_,_MASK_)              (CAN_REG_VAL(_Y_,_RMND0,0x04) &= ~(_MASK_))
 
 /*Read the RSCAN0RMIDq — Receive Buffer ID Register (q = 0 to 95)*/
-#define __RSCAN_GET_RECV_BUF_ID(_Q_,_MASK_)                 (CAN_REG_VAL(_Q_,_RMID0,0x10) & (_MASK_))
+#define __RSCAN_GET_RECV_BUF_ID(_Q_)                        (CAN_REG_VAL(_Q_,_RMID0,0x10))
 
 /*Read the RSCAN0RMPTRq — Receive Buffer Pointer Register (q = 0 to 95)*/
-#define __RSCAN_GET_RECV_BUF_POINTER(_Q_,_MASK_)            (CAN_REG_VAL(_Q_,_RMPTR0,0x10) & (_MASK_))
+#define __RSCAN_GET_RECV_BUF_POINTER(_Q_)            (CAN_REG_VAL(_Q_,_RMPTR0,0x10))
 
 /*Read the RSCAN0RMDF0q — Receive Buffer Data Field 0 Register (q = 0 to 95)*/
 #define __RSCAN_READ_RECV_BUF_DATA_L(_Q_)                   (CAN_REG_VAL(_Q_,_RMDF00,0x10))
@@ -434,7 +492,7 @@ Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
 
 /*********************************19.3.26--19.3.32*****************************/
 /*Config the RSCAN0RFCCx Receive FIFO Buffer Configuration and Control Register (x = 0 to 7)*/
-#define __RSCAN_SET_RECV_FIFO_BUF(_X_,_MASK_,_VALUE_)   MODIFY_REG(CAN_REG_ADDR(_X_,_RFCC0,0x04),_MASK_,_VALUE_)
+#define __RSCAN_SET_RECV_FIFO_BUF(_X_,_MASK_,_VALUE_)       MODIFY_REG(CAN_REG_ADDR(_X_,_RFCC0,0x04),_MASK_,_VALUE_)
 
 /*Read the RSCAN0RFSTSx — Receive FIFO Buffer Status Register (x = 0 to 7)*/
 #define __RSCAN_GET_RECV_FIFO_STAT(_X_,_MASK_)              CAN_REG_VAL(_X_,_RFSTS0,0x04) & (_MASK_)
@@ -453,7 +511,7 @@ This register is read-only when receive mode*/
 #define __RSCAN_READ_RECV_FIFO_DATA_L(_X_)                  CAN_REG_VAL(_X_,_RFDF00,0x10)
 /*Read the RSCAN0RFDF1x — Receive FIFO Buffer Access Data Field 1 Register (k = 0 to 7)
 This register is read-only when receive mode*/
-#define __RSCAN_READ_RECV_FIFO_DATA_H(_X_,_MSG_BASE_)       CAN_REG_VAL(_X_,_RFDF10,0x10)
+#define __RSCAN_READ_RECV_FIFO_DATA_H(_X_)       CAN_REG_VAL(_X_,_RFDF10,0x10)
 
 /*********************************19.3.33--19.3.39*****************************/
 /*Config the RSCAN0CFCCx  Transmit/receive FIFO Buffer Configuration and Control
@@ -496,7 +554,9 @@ This register is writable only when transmit mode, readable only when the CFM[1:
 /*Config RSCAN0TMCp — Transmit Buffer Control Register (p = 0 to 95)*/
 #define __RSCAN_SET_TRANSMIT_BUF_CTL(_P_,_MASK_,_VALUE_)    MODIFY_REG(CAN_REG_ADDR(_P_,_TMC0,0x01),_MASK_,_VALUE_ & 0xFFFFFFFF)
 
-/*TODO Config or read the RSCAN0TMSTSp — Transmit Buffer Status Register (p = 0 to 95)*/
+/*Config or read the RSCAN0TMSTSp — Transmit Buffer Status Register (p = 0 to 95)*/
+#define __RSCAN_GET_TRANSMIT_STAT(_P_,_MASK_)               (CAN_REG_VAL(_P_,_TMSTS0,0x01) & (_MASK_))
+
 /*TODO Config or read the RSCAN0TMTRSTSy — Transmit Buffer Transmit Request Status Register (y = 0 to 2)*/
 /*TODO Config or read the RSCAN0TMTARSTSy — Transmit Buffer Transmit Abort Request Status Register (y = 0 to 2)*/
 /*TODO Config or read the RSCAN0TMTCSTSy — Transmit Buffer Transmit Complete Status Register (y = 0 to 2)*/
@@ -537,9 +597,6 @@ Modify this register when no transmit request is present*/
 /*TODO Config or read the RSCAN0RPGACCr — RAM Test Page Access Register (r = 0 to 63)*/
 
 
-
-
-
 typedef enum{
     RSCAN_OPERATE_MODE,     //Global operating mode
     RSCAN_COMMUNICATION_MODE = RSCAN_OPERATE_MODE, //Channel communication mode
@@ -561,7 +618,7 @@ typedef enum{
 }RSCAN_COM_SPEED_Type;
 
 typedef struct{
-    uint8_t fcan_src; //set the CAN clock (fCAN) as a clock source of the RS-CAN module
+    uint8_t fcan_src; //RSCAN_CLKC or RSCAN_CLK_XINCAN,set the CAN clock (fCAN) as a clock source of the RS-CAN module
     RSCAN_BIT_TIMING_TypeDef bit_time;//to set the bit timing
     RSCAN_COM_SPEED_Type com_speed;
 }RSCAN_COM_SPEED_PARAM_TypeDef;
@@ -583,8 +640,8 @@ typedef struct{
     uint16_t label_t;           //the 12-bit label information.
     bool recv_buf_used;         //TRUE or FLASE
     uint8_t buf_num;            //the receive buffer number to store received message
-    uint8_t tr_sel;             //transmit/receive FIFO buffer number k 0-17
-    uint8_t r_sel;              //receive FIFO buffer number x 0-7
+    int8_t k_index;             //transmit/receive FIFO buffer number k 0-17, if -1, this var not take effect
+    int8_t x_index;              //receive FIFO buffer number x 0-7,if -1, this var not take effect
 }RSCAN_RECV_RULE_POINTER_TypeDef;
 
 typedef struct{
@@ -599,5 +656,12 @@ typedef struct{
     uint16_t time_stamp;
 }RSCAN_TRANSMIT_ID_INFO_TypeDef,RSCAN_RECV_ID_INFO_TypeDef;
 
+typedef struct{
+    uint8_t channel;
+    RSCAN_COM_SPEED_PARAM_TypeDef sp;
+}RSCAN_InitTypeDef;
+
+
+bool R_CAN_Send_TxBuf0(void);
 
 #endif //RH850F1L_RSCAN_H
