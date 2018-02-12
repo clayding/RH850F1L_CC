@@ -18,6 +18,16 @@
 #define RSCAN_CLKC_FRE          12.5 //12.5 MHz ≤ clkc ≤ pclk/2
 #define RSCAN_PCLK              ()
 
+#define RSCAN_RECV_IDE_STD      0 //IDE Select0: Standard ID
+#define RSCAN_RECV_IDE_EXT      1 //1: Extended ID
+
+#define RSCAN_RECV_DATA_FRM     0 // Data frame
+#define RSCAN_RECV_REMOTE_FRM   1 //Remote Frame
+
+#define RSCAN_RECV_FROM_OTHER   0 //When a message transmitted from another CAN node is received
+#define RSCAN_RECV_FROM_OWN     1 //When the own transmitted message is received
+
+
 #define RSCAN0_BASE             RSCAN0
 
 #define _C0CFG                  C0CFG.UINT32
@@ -393,8 +403,9 @@ Register k (k = 0 to 17)*/
 #define CAN_TXQPC_MASK          ((uint32_t)0xFF)
 /******************************************************************************/
 
-#define CAN_REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)           ((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_)
-#define CAN_REG_VAL(_CNT_,_BASE_REG_,_OFFSET_B_)           (*((uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))+ _OFFSET_B_*_CNT_))
+#define TEST_FUNC(_BASE_REG_)       (uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))
+#define CAN_REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)            ((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *_CNT_))
+#define CAN_REG_VAL(_CNT_,_BASE_REG_,_OFFSET_B_)           (*((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *_CNT_)))
 
 /*********************************19.3.2--19.3.5******************************/
 /*Config RSCAN0CmCFG — Channel Configuration Register (m = 0 to 5)
@@ -453,10 +464,11 @@ Enable or disable receive rule table write 0--disbale 1 -- Enable*/
 Used to set the number(_NUMBER_) of rules to be registered in the channel x
 _INDEX_: 0-3,_NUMBER_: 0x00 -0x80. Modify the RSCAN0GAFLCFG0 register only in global reset mode.*/
 #define __RSCAN_SET_RULE_NUMBER_0(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG0[_INDEX_] = _NUMBER_ & 0xFF
-
+#define __RSCAN_GET_RULE_NUMBER_0(_INDEX_)              (RSCAN0_BASE._GAFLCFG0[_INDEX_])
 /*Config RSCAN0GAFLCFG1 — Receive Rule Configuration Register 1 _INDEX_: 4-5 ,_NUMBER_: 0x00 -0x80
 Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
 #define __RSCAN_SET_RULE_NUMBER_1(_INDEX_,_NUMBER_)     RSCAN0_BASE._GAFLCFG1[_INDEX_] = _NUMBER_ & 0xFF
+#define __RSCAN_GET_RULE_NUMBER_1(_INDEX_)              (RSCAN0_BASE._GAFLCFG1[_INDEX_])
 
 
 /*Config the RSCAN0GAFLIDj — Receive Rule ID Register*/
@@ -486,9 +498,9 @@ Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
 #define __RSCAN_GET_RECV_BUF_POINTER(_Q_)            (CAN_REG_VAL(_Q_,_RMPTR0,0x10))
 
 /*Read the RSCAN0RMDF0q — Receive Buffer Data Field 0 Register (q = 0 to 95)*/
-#define __RSCAN_READ_RECV_BUF_DATA_L(_Q_)                   (CAN_REG_VAL(_Q_,_RMDF00,0x10))
+#define __RSCAN_READ_RECV_BUF_DATA_L(_Q_)                   (CAN_REG_ADDR(_Q_,_RMDF00,0x10))
 /*Read the RSCAN0RMDF1q — Receive Buffer Data Field 1 Register (q = 0 to 95)*/
-#define __RSCAN_READ_RECV_BUF_DATA_H(_Q_)                   (CAN_REG_VAL(_Q_,_RMDF10,0x10))
+#define __RSCAN_READ_RECV_BUF_DATA_H(_Q_)                   (CAN_REG_ADDR(_Q_,_RMDF10,0x10))
 
 /*********************************19.3.26--19.3.32*****************************/
 /*Config the RSCAN0RFCCx Receive FIFO Buffer Configuration and Control Register (x = 0 to 7)*/
@@ -636,13 +648,26 @@ typedef enum{
 }RSCAN_DLC_CHECK_Type;
 
 typedef struct{
+    uint8_t ide;    //RSCAN_RECV_IDE_STD or RSCAN_RECV_IDE_EXT
+    uint8_t rtr;    //RSCAN_RECV_DATA_FRM or RSCAN_RECV_REMOTE_FRM
+    uint8_t target_msg;//RSCAN_RECV_FROM_OTHER or RSCAN_RECV_FROM_OWN
+    uint32_t id;   //up to [28:0] bits id,For the standard ID, set the ID in bits b10 to b0 and set bits b28 to b11 to 0
+    uint32_t mask; //the combination of CAN_GAFLIDEM_MASK, CAN_GAFLRTRM_MASK and CAN_GAFLIDM_MASK
+}RSCAN_RECV_RULE_ID_INFO_TypeDef;
+
+typedef struct{
     RSCAN_DLC_CHECK_Type dlc_t; //Receive Rule DLC disable or 1-8 data bytes
     uint16_t label_t;           //the 12-bit label information.
     bool recv_buf_used;         //TRUE or FLASE
-    uint8_t buf_num;            //the receive buffer number to store received message
+    uint8_t recv_buf_index;     //the receive buffer number to store received message
     int8_t k_index;             //transmit/receive FIFO buffer number k 0-17, if -1, this var not take effect
     int8_t x_index;              //receive FIFO buffer number x 0-7,if -1, this var not take effect
 }RSCAN_RECV_RULE_POINTER_TypeDef;
+
+typedef struct{
+    RSCAN_RECV_RULE_ID_INFO_TypeDef r_id_info;
+    RSCAN_RECV_RULE_POINTER_TypeDef r_pointer;
+}RSCAN_RECV_RULE_TypeDef;
 
 typedef struct{
     uint8_t index;//p:0--95
@@ -662,6 +687,6 @@ typedef struct{
 }RSCAN_InitTypeDef;
 
 
-bool R_CAN_Send_TxBuf0(void);
+bool R_CAN_Send_TxBuf0(uint8_t);
 
 #endif //RH850F1L_RSCAN_H

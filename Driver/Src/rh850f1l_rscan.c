@@ -14,33 +14,54 @@
 #include "rh850f1l_rscan.h"
 #include "rh850f1l_ext.h"
 
-#define MAX_CHANNEL_NUM         3  // 0-2 channel
-#define TOTAL_RECV_BUF_NUM      1  // Receive Buffer Number Configuration - set to 1, max 96
+#define MAX_CHANNEL_NUM         4  // 0-3 channel
+#define TOTAL_RECV_BUF_NUM      10  // Receive Buffer Number Configuration - set to 1, max 96
+#define MAX_RULE_NUM_PER_PAGE   16
 
 static uint32_t  RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
 static int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uint8_t ctl);
 static void RSCAN_Communication_Speed_Set(uint8_t channel, RSCAN_COM_SPEED_PARAM_TypeDef *speed_param );
-void RSCAN_Receive_Rule_Set(uint8_t channel,RSCAN_RECV_RULE_POINTER_TypeDef *rule_p,uint8_t rule_num,uint8_t page_index, uint8_t num_per_page);
-static void RSCAN_RuleID_Set(uint8_t j,uint32_t id,uint8_t tar_meg,uint8_t rtr,uint8_t ide);
+void RSCAN_Receive_Rule_Set(uint8_t channel,RSCAN_RECV_RULE_TypeDef *rule_p,uint8_t rule_num);
+static void RSCAN_RuleID_Set(uint8_t j,RSCAN_RECV_RULE_ID_INFO_TypeDef *id_info_p);
 static void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *rule_p);
-static void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m);
+static void RSCAN_Buffer_Set(uint8_t m,int8_t x,int8_t k);
 void RSCAN_Eiint_Init(void);
 
 void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
 {
     uint8_t channel = 0;
     RSCAN_COM_SPEED_PARAM_TypeDef com_sp;
-    RSCAN_RECV_RULE_POINTER_TypeDef rule;
+    RSCAN_RECV_RULE_TypeDef rule[2];
     {//for example
-        rule.dlc_t = RSCAN_DLC_CHECK_DISABLED;
-        rule.label_t = 0x123;
-        rule.recv_buf_used = 1;
-        rule.buf_num = 0;//是index 还是数量？？？？
-        rule.k_index = -1;
-        rule.x_index = -1;
+        rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
+        rule[0].r_pointer.label_t = 0x891;
+        rule[0].r_pointer.recv_buf_used = 1;
+        rule[0].r_pointer.recv_buf_index = 0;
+        rule[0].r_pointer.k_index = -1;
+        rule[0].r_pointer.x_index = -1;
+
+        rule[0].r_id_info.ide = RSCAN_RECV_IDE_STD;
+        rule[0].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
+        rule[0].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
+        rule[0].r_id_info.id = 0x123;
+        rule[0].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
+
+
+        rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
+        rule[1].r_pointer.label_t = 0x745;
+        rule[1].r_pointer.recv_buf_used = 1;
+        rule[1].r_pointer.recv_buf_index = 1;
+        rule[1].r_pointer.k_index = -1;
+        rule[1].r_pointer.x_index = -1;
+	    rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
+        rule[1].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
+        rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
+        rule[1].r_id_info.id = 0x456;
+	    rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
+
     }
 
-    channel = Rscan_InitStruct->channel;
+    channel = Rscan_InitStruct->channel; //channel 3
     com_sp = Rscan_InitStruct->sp;
 
     /*the GRAMINIT flag in the RSCAN0GSTS register is cleared to 0 when CAN RAM
@@ -62,12 +83,12 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
     //Config the clock, bit_timing and communication speed
     RSCAN_Communication_Speed_Set(channel,&com_sp);
 
-    RSCAN_Receive_Rule_Set(0,&rule,1,0,1);
+    RSCAN_Receive_Rule_Set(channel,rule,ARRAY_SIZE(rule));
 
-    RSCAN_Buffer_Set(rule.x_index,rule.k_index ,0);
+    RSCAN_Buffer_Set(channel,rule[0].r_pointer.x_index,rule[0].r_pointer.k_index);
 
     RSCAN_Global_Mode_Ctl(RSCAN_RESET_MODE,1);
-    RSCAN_Channel_Mode_Ctl(0,RSCAN_RESET_MODE,1);
+    RSCAN_Channel_Mode_Ctl(channel,RSCAN_RESET_MODE,1);
 
     //Interrupt control register of interrupt controller
     RSCAN_Eiint_Init();
@@ -77,7 +98,7 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
     while(__RSCAN_GET_GLOBAL_STAT(CAN_GRSTSTS_MASK));
 
     //Transition to channel communication mode (Set CHMDC[1:0] in the RSCAN0CmCTR register to 00B)
-    RSCAN_Channel_Mode_Ctl(0,RSCAN_COMMUNICATION_MODE,1);
+    RSCAN_Channel_Mode_Ctl(channel,RSCAN_COMMUNICATION_MODE,1);
     while(__RSCAN_GET_CHANNEL_STAT(channel,CAN_CRSTSTS_MASK));
 }
 /*
@@ -119,8 +140,7 @@ int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uin
     RSCAN_TEST_MODE                 0               1               0
     RSCAN_STOP_MODE                 1               x               x*/
 
-    mask = CAN_GSLPR_MASK | CAN_GMDC_MASK;
-
+    mask = CAN_CSLPR_MASK | CAN_CHMDC_MASK;
     if(ctl){ //write into
         __RSCAN_SET_CHANNEL_CTL(channel,mask,(uint32_t)mode);
     }
@@ -175,31 +195,62 @@ void RSCAN_Communication_Speed_Set(uint8_t channel, RSCAN_COM_SPEED_PARAM_TypeDe
 }
 /*page_index :select the index of page to register the receive rule 0-23
   num_per_page: up to 16 receive rules can be registered per page */
-void RSCAN_Receive_Rule_Set(uint8_t channel,RSCAN_RECV_RULE_POINTER_TypeDef *rule_p,
-    uint8_t rule_num,uint8_t page_index, uint8_t num_per_page)
+void RSCAN_Receive_Rule_Set(uint8_t channel,RSCAN_RECV_RULE_TypeDef *rule_p,
+    uint8_t rule_num)
 {
-    uint8_t j = 0;
-    if(channel > MAX_CHANNEL_NUM) return;
+    uint8_t j = 0, i = 0,rule_n = 0,rule_num_per_page = MAX_RULE_NUM_PER_PAGE;
+    uint8_t page_index_useful = 0,current_rule_num = 0,pages = 0;
+    if(channel > MAX_CHANNEL_NUM - 1) return;
 
-    //Set the number of receive rules
-    if(channel / 4)
-        __RSCAN_SET_RULE_NUMBER_1(7-channel,rule_num); //default 0x80,should be modified
-    else /*channel < 4 */
-        __RSCAN_SET_RULE_NUMBER_0(3-channel,rule_num);
+    // Get the page index available,all the page registered sequentially
+    for(i = 0; i < MAX_CHANNEL_NUM;i++){
+        if(i /4)
+            rule_n += __RSCAN_GET_RULE_NUMBER_1(7-i);
+        else
+            rule_n += __RSCAN_GET_RULE_NUMBER_0(3-i);
+        if(i == (MAX_CHANNEL_NUM - 1)){
+            page_index_useful = rule_n / MAX_RULE_NUM_PER_PAGE;
+        }
+    }
+
+    //Set the number of receive rules for channel x
+    if(channel / 4){
+        current_rule_num = __RSCAN_GET_RULE_NUMBER_1(7-channel);
+        if(rule_num != current_rule_num){
+            __RSCAN_SET_RULE_NUMBER_1(7-channel,rule_num); //default 0x80,should be modified
+            current_rule_num = rule_num;
+        }
+    }else{ /*channel < 4 */
+        current_rule_num = __RSCAN_GET_RULE_NUMBER_0(3-channel);
+        if(rule_num != current_rule_num){
+            __RSCAN_SET_RULE_NUMBER_0(3-channel,rule_num);
+            current_rule_num = rule_num;
+        }
+    }
 
     /*Set the AFLDAE bit [8] in the RSCAN0GAFLECTR register to 1 to enable writing
     data to the receive rule table*/
     __RSCAN_ENABLE_RECV_TABLE_WRITE(1);
 
-    //Select a page to be set by the AFLPN[4:0] bits in the RSCAN0GAFLECTR register
-    __RSCAN_RECV_TABLE_PAGE_NUM_CFG(page_index);
+    pages  = (current_rule_num / MAX_RULE_NUM_PER_PAGE);
+    if(current_rule_num % MAX_RULE_NUM_PER_PAGE) pages++;
 
-    //Set receive rules by the RSCAN0GAFLIDj, RSCAN0GAFLMj,RSCAN0GAFLP0j and RSCAN0GAFLP1j registers.
-
-    for(;j < num_per_page; j++){
-        RSCAN_RuleID_Set(j,0,1,0,0);//id = 0,When the own transmitted message is received,data frame,standard ID
-        RSCAN_Rule_Pointer_Set(j,rule_p);
+    for(i = page_index_useful;i < page_index_useful + pages;i++){
+        uint8_t start_rule_num_index = 0;
+        //Select a page to be set by the AFLPN[4:0] bits in the RSCAN0GAFLECTR register
+        __RSCAN_RECV_TABLE_PAGE_NUM_CFG(i);
+        if( i == (page_index_useful + pages - 1)){
+            rule_num_per_page = current_rule_num % MAX_RULE_NUM_PER_PAGE;
+        }
+        start_rule_num_index = (i == page_index_useful) ? (rule_n % MAX_RULE_NUM_PER_PAGE):0;
+        //Set receive rules by the RSCAN0GAFLIDj, RSCAN0GAFLMj,RSCAN0GAFLP0j and RSCAN0GAFLP1j registers.
+        for( j = start_rule_num_index ;j < rule_num_per_page; j++){
+            uint8_t arr_index = j - start_rule_num_index;
+            RSCAN_RuleID_Set(j,&rule_p[arr_index].r_id_info);//id = 0,When the own transmitted message is received,data frame,standard ID
+            RSCAN_Rule_Pointer_Set(j,&rule_p[arr_index].r_pointer);
+        }
     }
+
 
 
     /*Set the AFLDAE bit in the RSCAN0GAFLECTR register to 0 to disable writing
@@ -213,39 +264,38 @@ void RSCAN_Receive_Rule_Set(uint8_t channel,RSCAN_RECV_RULE_POINTER_TypeDef *rul
     1: When the own transmitted message is received
   id Set the ID of the receive rule.For the standard ID, set the ID in bits b10
     to b0 and set bits b28 to b11 to 0.*/
-void RSCAN_RuleID_Set(uint8_t j,uint32_t id,uint8_t tar_meg,uint8_t rtr,uint8_t ide)
+void RSCAN_RuleID_Set(uint8_t j,RSCAN_RECV_RULE_ID_INFO_TypeDef *id_info_p)
 {
-    __IO uint32_t val = id;
+    __IO uint32_t val = id_info_p->id;
 
     /*Set the ID of the receive rule.For the standard ID, set the ID in bits
     b10 to b0 and set bits b28 to b11 to 0.*/
-    val &= (ide == 0)?(CAN_GAFLID_MASK >> 18) : CAN_GAFLID_MASK;
+    val &= (id_info_p->ide == 0)?(CAN_GAFLID_MASK >> 18) : CAN_GAFLID_MASK;
 
     //Receive Rule Target Message Select
-    val |= (tar_meg << CAN_GAFLLB_OFFSET) & CAN_GAFLLB_MASK;
+    val |= (id_info_p->target_msg << CAN_GAFLLB_OFFSET) & CAN_GAFLLB_MASK;
     //RTR Select 0: Data frame 1: Remote frame
-    val |= (rtr << CAN_GAFLRTR_OFFSET) & CAN_GAFLRTR_MASK;
+    val |= (id_info_p->rtr << CAN_GAFLRTR_OFFSET) & CAN_GAFLRTR_MASK;
     //IDE Select 0: Standard ID 1: Extended ID
-    val |= (ide << CAN_GAFLIDE_OFFSET) & CAN_GAFLIDE_MASK;
+    val |= (id_info_p->ide << CAN_GAFLIDE_OFFSET) & CAN_GAFLIDE_MASK;
 
 
     __RSCAN_SET_RULE_ID(j,val);
-
     /*//The IDE bit is compared and the RTR bit is compared*/
-    val = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK;
-    __RSCAN_SET_RULE_MASK(j,CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK,val);
+    val = id_info_p->mask;
+    __RSCAN_SET_RULE_MASK(j, id_info_p->mask,val);
 }
 
-void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *rule_p)
+void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *pointer_p)
 {
     uint32_t val = 0;
 
-    val = (uint32_t)(((rule_p->dlc_t << CAN_GAFLDLC_OFFSET) & CAN_GAFLDLC_MASK) |
-        ((rule_p->label_t << CAN_GAFLPTR_OFFSET) & CAN_GAFLPTR_MASK));
+    val = (uint32_t)(((pointer_p->dlc_t << CAN_GAFLDLC_OFFSET) & CAN_GAFLDLC_MASK) |
+        ((pointer_p->label_t << CAN_GAFLPTR_OFFSET) & CAN_GAFLPTR_MASK));
 
-    if(rule_p->recv_buf_used){
-        val |= ((rule_p->recv_buf_used << CAN_GAFLRMV_OFFSET) & CAN_GAFLRMV_MASK) |
-            ((rule_p->buf_num << CAN_GAFLRMDP_OFFSET) & CAN_GAFLRMDP_MASK);
+    if(pointer_p->recv_buf_used){
+        val |= ((pointer_p->recv_buf_used << CAN_GAFLRMV_OFFSET) & CAN_GAFLRMV_MASK) |
+            ((pointer_p->recv_buf_index << CAN_GAFLRMDP_OFFSET) & CAN_GAFLRMDP_MASK);
     }
 
     __RSCAN_SET_RULE_POINTER0(j,val);
@@ -257,18 +307,18 @@ void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *rule_p)
     //CFM[1:0] bits in the RSCAN0CFCCk register are set to 00B (receive mode) or 10B (gateway mode)
     //are selectable.
     val  = 0;
-    if(rule_p->k_index >=0 && rule_p->k_index <= 17)
-        val = 0x01 << (rule_p->k_index + 8);
-    if(rule_p->x_index >= 0 && rule_p->x_index <= 7)
-        val |= 0x01 << rule_p->x_index;
+    if(pointer_p->k_index >=0 && pointer_p->k_index <= 17)
+        val = 0x01 << (pointer_p->k_index + 8);
+    if(pointer_p->x_index >= 0 && pointer_p->x_index <= 7)
+        val |= 0x01 << pointer_p->x_index;
 
     __RSCAN_SET_RULE_POINTER1(j,val);
 }
 
-void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m)
+void RSCAN_Buffer_Set(uint8_t m,int8_t x,int8_t k)
 {
     uint32_t val = 0,mask = 0;
-    uint8_t trans_buf_index = 0;
+    uint8_t trans_buf_index = 48;
 
     //Set receive buffer (the RSCAN0RMNB register)
     //TOTAL_RECV_BUF_NUM must be lower than 96
@@ -328,12 +378,12 @@ void RSCAN_Buffer_Set(uint8_t x,uint8_t k,uint8_t m)
     __RSCAN_SET_TrRe_FIFO_BUF(k,CAN_CFRXIE_MASK,1);
 #endif
     // Enable transmit abort interrupts by the TAIE bit in the RSCAN0CmCTR register.
-    __RSCAN_SET_CHANNEL_CTL(m,CAN_TAIE_MASK,1);
+    __RSCAN_SET_CHANNEL_CTL(m,CAN_TAIE_MASK,1 << CAN_TAIE_OFFSET);
 
     // Enable transmit complete interrupts by the TMIE bit in the RSCAN0TMIECy register.
     val = (uint32_t)(0x01 << (trans_buf_index % 32));
     mask = val;
-    __RSCAN_ENABLE_TRANSMIT_BUF_INT(trans_buf_index/32,mask,val); //TODO...
+    __RSCAN_ENABLE_TRANSMIT_BUF_INT((trans_buf_index/32),mask,val); //TODO...
 #if 0
     // Enable transmit queue interrupts by the TXQIE bit in the RSCAN0TXQCCm register.
     __RSCAN_SET_TRANSMIT_QUEUE(m,CAN_TXQIE_MASK,1);
@@ -516,15 +566,15 @@ int8_t RSCAN_Transmit_Queue_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_
 
 int8_t RSCAN_Receive_Buffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
 {
-    uint8_t q = 0,y = 0,bit_pos = 0,i = 0;
-    uint8_t recv_size = 0,data[8] = {0};
-    uint32_t val = 0;
+    __IO uint8_t q = 0,y = 0,bit_pos = 0,i = 0;
+    __IO uint8_t recv_size = 0,*p = NULL;
+    __IO uint32_t val = 0;
 
     if(id_info_p->index > 95) return -1;// max 95
     q = id_info_p->index;
 
     bit_pos = q % 32;
-    y = q - bit_pos;
+    y = q /32;
 
     //Has a new message been received? (Is the RMNSq flag in the RSCAN0RMNDy register 1?)
     if(__RSCAN_CHECK_RECV_NEW_MSG(y,0x01 << bit_pos) == 0){
@@ -544,11 +594,10 @@ int8_t RSCAN_Receive_Buffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* 
     recv_size = (val & CAN_RMDLC_MASK)  >> CAN_RMDLC_OFFSET;
     id_info_p->time_stamp = (val & CAN_RMTS_MASK);
 
-    *((uint32_t*)&data[0]) = __RSCAN_READ_RECV_BUF_DATA_L(q);
-    *((uint32_t*)&data[4]) = __RSCAN_READ_RECV_BUF_DATA_H(q);
+    p =(uint8_t*)__RSCAN_READ_RECV_BUF_DATA_L(q);
 
-    for(; recv_size && i <recv_size;i++){
-        data_p[i] = data[i];
+    for( i = 0; recv_size && i <recv_size;i++){
+        data_p[i] = p[i];
     }
 
     //TODO Are all RMNSq flags in the RSCAN0RMNDy register 0?????????
@@ -558,7 +607,7 @@ int8_t RSCAN_Receive_Buffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* 
 int8_t RSCAN_Transmit_Recv_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
 {
     uint8_t k = 0, i = 0;
-    uint8_t recv_size = 0,data[8] = {0};
+    uint8_t recv_size = 0,*p = NULL;
     uint32_t val = 0;
 
     if(id_info_p->index > 17) return -1;// max 17
@@ -579,13 +628,11 @@ int8_t RSCAN_Transmit_Recv_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8
     recv_size = (val & CAN_CFDLC_MASK)  >> CAN_CFDLC_OFFSET;
     id_info_p->time_stamp = (val & CAN_CFTS_MASK);
 
-    *((uint32_t*)&data[0]) = __RSCAN_READ_TrRe_FIFO_DATA_L(k);
-    *((uint32_t*)&data[4]) = __RSCAN_READ_TrRe_FIFO_DATA_H(k);
+    p =(uint8_t*)__RSCAN_READ_RECV_BUF_DATA_L(k);
 
-    for(; recv_size && i <recv_size;i++){
-        data_p[i] = data[i];
+    for( i = 0; recv_size && i <recv_size;i++){
+        data_p[i] = p[i];
     }
-
     //Set the RSCAN0CFPCTRk register to 0xFF
     _RSCAN_SET_TrRe_FIFO_POINTER(k);
 
@@ -595,7 +642,7 @@ int8_t RSCAN_Transmit_Recv_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8
 int8_t RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
 {
     uint8_t x = 0, i = 0;
-    uint8_t recv_size = 0,data[8] = {0};
+    uint8_t recv_size = 0,*p = NULL;
     uint32_t val = 0;
 
     if(id_info_p->index > 7) return -1;// max 7
@@ -616,11 +663,10 @@ int8_t RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* da
     recv_size = (val & CAN_RFDLC_MASK)  >> CAN_RFDLC_OFFSET;
     id_info_p->time_stamp = (val & CAN_RFTS_MASK);
 
-    *((uint32_t*)&data[0]) = __RSCAN_READ_RECV_FIFO_DATA_L(x);
-    *((uint32_t*)&data[4]) = __RSCAN_READ_RECV_FIFO_DATA_H(x);
+    p =(uint8_t*)__RSCAN_READ_RECV_BUF_DATA_L(x);
 
-    for(; recv_size && i <recv_size;i++){
-        data_p[i] = data[i];
+    for( i = 0; recv_size && i <recv_size;i++){
+        data_p[i] = p[i];
     }
 
     //Set the RSCAN0RFPCTRx register to 0xFF
@@ -629,15 +675,17 @@ int8_t RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* da
     return recv_size;
 }
 
-bool R_CAN_Send_TxBuf0(void)
+bool R_CAN_Send_TxBuf0(uint8_t channel)
 {
     uint8_t data[8] = {0x45,0x56,0x78,0x89,0x90};
     uint8_t p = 0,sent_size = 0;
     RSCAN_TRANSMIT_ID_INFO_TypeDef id_info;
-    id_info.index = 0;
-    id_info.ide = 0;
-    id_info.rtr = 0;
-    id_info.id = 0x21;
+    {
+        id_info.index = channel * 16 + 0;
+        id_info.ide = 0;
+        id_info.rtr = 0;
+        id_info.id = 0x21;
+    }
 
     p = id_info.index;
 
@@ -646,4 +694,23 @@ bool R_CAN_Send_TxBuf0(void)
         return FALSE;
 
     sent_size = RSCAN_Transmit_Buffer_Write(id_info,5,data);
+
+    return TRUE;
+}
+
+
+bool R_CAN_Receive_RxBuf0(uint32_t *p_can_id, uint8_t * p_dlc, uint8_t msg[8])
+{
+    int8_t ret = -1;
+    RSCAN_RECV_ID_INFO_TypeDef id_info;
+
+    id_info.index = 1;
+    while(ret == -1){
+        ret  = RSCAN_Receive_Buffer_Read(&id_info,msg);
+    }
+
+    *p_can_id = id_info.id;
+    *p_dlc = ret;
+
+    return TRUE;
 }
