@@ -38,7 +38,7 @@ void main(void)
     uint32_t can_id;
     uint8_t  dlc;
     uint8_t  msg[8];
-    uint8_t	 STATE = 0;
+    uint8_t	STATE = 0;
     uint8_t	 send_msg[8] = {0,1,2,3,4,5,6,7};
 
     LED_Struct_Init(lcs, ARRAY_SIZE(lcs));

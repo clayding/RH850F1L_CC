@@ -608,6 +608,13 @@ Modify this register when no transmit request is present*/
 /*TODO Config or read the  RSCAN0GLOCKK — Global Lock Key Register*/
 /*TODO Config or read the RSCAN0RPGACCr — RAM Test Page Access Register (r = 0 to 63)*/
 
+typedef enum{
+    RSCAN_RECV_FIFO_EMPTY,
+    RSCAN_RECV_FIFO_NOT_EMPTY,
+    RSCAN_RECV_FIFO_FULL,
+    RSCAN_RECV_FIFO_ERR,
+    RSCAN_RECV_FIFO_NO_MSG,
+}RSCAN_RECV_FIFO_RESULT_Type;
 
 typedef enum{
     RSCAN_OPERATE_MODE,     //Global operating mode
@@ -685,6 +692,8 @@ typedef struct{
     uint8_t channel;
     RSCAN_COM_SPEED_PARAM_TypeDef sp;
 }RSCAN_InitTypeDef;
+
+
 
 
 bool R_CAN_Send_TxBuf0(uint8_t);

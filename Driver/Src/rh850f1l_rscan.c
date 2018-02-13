@@ -36,7 +36,7 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
         rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rule[0].r_pointer.label_t = 0x891;
         rule[0].r_pointer.recv_buf_used = 1;
-        rule[0].r_pointer.recv_buf_index = 0;
+        rule[0].r_pointer.recv_buf_index = 95;
         rule[0].r_pointer.k_index = -1;
         rule[0].r_pointer.x_index = -1;
 
@@ -49,15 +49,15 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
 
         rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rule[1].r_pointer.label_t = 0x745;
-        rule[1].r_pointer.recv_buf_used = 1;
+        rule[1].r_pointer.recv_buf_used = 0;
         rule[1].r_pointer.recv_buf_index = 1;
         rule[1].r_pointer.k_index = -1;
-        rule[1].r_pointer.x_index = -1;
-	    rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
+        rule[1].r_pointer.x_index = 0;
+        rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
         rule[1].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
         rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
         rule[1].r_id_info.id = 0x456;
-	    rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
+        rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
 
     }
 
@@ -85,7 +85,7 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
 
     RSCAN_Receive_Rule_Set(channel,rule,ARRAY_SIZE(rule));
 
-    RSCAN_Buffer_Set(channel,rule[0].r_pointer.x_index,rule[0].r_pointer.k_index);
+    RSCAN_Buffer_Set(channel,rule[1].r_pointer.x_index,rule[1].r_pointer.k_index);
 
     RSCAN_Global_Mode_Ctl(RSCAN_RESET_MODE,1);
     RSCAN_Channel_Mode_Ctl(channel,RSCAN_RESET_MODE,1);
@@ -96,7 +96,7 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
     //Transition to global operating mode (Set GMDC[1:0] in the RSCAN0GCTR register to 00B)
     RSCAN_Global_Mode_Ctl(RSCAN_OPERATE_MODE,1);
     while(__RSCAN_GET_GLOBAL_STAT(CAN_GRSTSTS_MASK));
-
+    __RSCAN_SET_RECV_FIFO_BUF(0,CAN_RFE_MASK,1);
     //Transition to channel communication mode (Set CHMDC[1:0] in the RSCAN0CmCTR register to 00B)
     RSCAN_Channel_Mode_Ctl(channel,RSCAN_COMMUNICATION_MODE,1);
     while(__RSCAN_GET_CHANNEL_STAT(channel,CAN_CRSTSTS_MASK));
@@ -317,27 +317,27 @@ void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *pointer_p
 
 void RSCAN_Buffer_Set(uint8_t m,int8_t x,int8_t k)
 {
-    uint32_t val = 0,mask = 0;
-    uint8_t trans_buf_index = 48;
+    __IO uint32_t val = 0,mask = 0;
+    __IO uint8_t trans_buf_index = 48;
 
     //Set receive buffer (the RSCAN0RMNB register)
     //TOTAL_RECV_BUF_NUM must be lower than 96
     __RSCAN_SET_TOTAL_RECV_BUF_NUM(TOTAL_RECV_BUF_NUM);
 
-    if(x != -1 ){
-        //Set receive FIFO buffer (the RSCAN0RFCCx register)
+    if(1){
+        //Set receive FIFO buffer (the RSCAN0RFCCx register)  x >= 0 && x <= 7
         // Select receive interrupt request timing by the RFIGCV[2:0] bits
         // Select an interrupt source by the RFIM bit
         // Set the number of FIFO buffer stages by the RFDC [2:0] bits
         val = (uint32_t)(((0x01 << CAN_RFIGCV_OFFSET) & CAN_RFIGCV_MASK) |
-            ((0x01 << CAN_RFIM_OFFSET) & CAN_RFIM_MASK) |
-            ((0x01 << CAN_RFDC_OFFSET) & CAN_RFDC_OFFSET));
+            ((0x00 << CAN_RFIM_OFFSET) & CAN_RFIM_MASK) |
+            ((0x01 << CAN_RFDC_OFFSET) & CAN_RFDC_MASK));
 
         mask = CAN_RFIGCV_MASK | CAN_RFIM_MASK | CAN_RFDC_OFFSET;
         __RSCAN_SET_RECV_FIFO_BUF(x,mask,val);
     }
 
-    if(k != -1){
+    if(k >=0 && k <= 17){
         //Set transmit/receive FIFO buffer (the RSCAN0CFCCk register)
         // Set the number of transmit buffer to be linked by the CFTML[3:0] bits.
         // Select an interval timer count source by the CFITR and CFITSS bits.
@@ -377,6 +377,9 @@ void RSCAN_Buffer_Set(uint8_t m,int8_t x,int8_t k)
     // Enable transmit/receive FIFO receive interrupts by the CFRXIE bit in the RSCAN0CFCCk register.
     __RSCAN_SET_TrRe_FIFO_BUF(k,CAN_CFRXIE_MASK,1);
 #endif
+    //Enable interrupt of buffer to be used
+    // Enable receive FIFO interrupts by the RFIE bit in the RSCAN0RFCCx register.
+    __RSCAN_SET_RECV_FIFO_BUF(x,CAN_RFIE_MASK,1 << CAN_RFIE_OFFSET);
     // Enable transmit abort interrupts by the TAIE bit in the RSCAN0CmCTR register.
     __RSCAN_SET_CHANNEL_CTL(m,CAN_TAIE_MASK,1 << CAN_TAIE_OFFSET);
 
@@ -411,6 +414,9 @@ void RSCAN_Eiint_Init(void)
     eiint.eiint_refer_method = TABLE_REFER_METHOD;
     eiint.eiint_priority = INT_PRIORITY_7;
     eiint.eiint_detect = LEVEL_DETECTION |LOW_LEVEL_DETECT;
+    Eiit_Init(&eiint);
+
+    eiint.eiint_ch = 15; //Global Receive FIFOinterrupts
     Eiit_Init(&eiint);
 
     eiint.eiint_ch = 16; //CAN0 error interrupt
@@ -639,17 +645,19 @@ int8_t RSCAN_Transmit_Recv_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8
     return recv_size;
 }
 
-int8_t RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
+RSCAN_RECV_FIFO_RESULT_Type RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t *len_p,uint8_t* data_p)
 {
     uint8_t x = 0, i = 0;
     uint8_t recv_size = 0,*p = NULL;
     uint32_t val = 0;
 
-    if(id_info_p->index > 7) return -1;// max 7
+    if(id_info_p->index > 7)
+        return RSCAN_RECV_FIFO_ERR;// max 7
+
     x = id_info_p->index;
 
     if(__RSCAN_GET_RECV_FIFO_STAT(x,CAN_RFEMP_MASK))
-        return -1;//if empty, return
+        return RSCAN_RECV_FIFO_NO_MSG;//if no message, return directly
 
     val = __RSCAN_GET_RECV_FIFO_ID(x);
 
@@ -669,10 +677,13 @@ int8_t RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* da
         data_p[i] = p[i];
     }
 
-    //Set the RSCAN0RFPCTRx register to 0xFF
-    _RSCAN_SET_RECV_FIFO_POINTER(x);
+    if(__RSCAN_GET_RECV_FIFO_STAT(x,CAN_RFEMP_MASK) == 0){
+        //Set the RSCAN0RFPCTRx register to 0xFF
+        _RSCAN_SET_RECV_FIFO_POINTER(x);
+        return  RSCAN_RECV_FIFO_NOT_EMPTY;
+    }
 
-    return recv_size;
+    return RSCAN_RECV_FIFO_EMPTY;
 }
 
 bool R_CAN_Send_TxBuf0(uint8_t channel)
@@ -704,7 +715,7 @@ bool R_CAN_Receive_RxBuf0(uint32_t *p_can_id, uint8_t * p_dlc, uint8_t msg[8])
     int8_t ret = -1;
     RSCAN_RECV_ID_INFO_TypeDef id_info;
 
-    id_info.index = 1;
+    id_info.index = 95;
     while(ret == -1){
         ret  = RSCAN_Receive_Buffer_Read(&id_info,msg);
     }
@@ -713,4 +724,16 @@ bool R_CAN_Receive_RxBuf0(uint32_t *p_can_id, uint8_t * p_dlc, uint8_t msg[8])
     *p_dlc = ret;
 
     return TRUE;
+}
+
+#pragma interrupt RSCAN0RecvFIFOIntHandler(channel = 15, enable = false, callt = false, fpu = false)
+void RSCAN0RecvFIFOIntHandler(unsigned long eiic)
+{
+    uint8_t msg[8] = {0},len = 0;
+    RSCAN_RECV_ID_INFO_TypeDef id_info;
+
+    id_info.index = 0;
+
+    while(RSCAN_Receive_FIFO_Read(&id_info,&len,&msg) == RSCAN_RECV_FIFO_NOT_EMPTY){};
+
 }

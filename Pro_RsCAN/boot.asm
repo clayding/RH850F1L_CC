@@ -151,7 +151,7 @@
 	.dw #_Dummy_EI ; INT12
 	.dw #_Dummy_EI ; INT13
 	.dw #_Dummy_EI ; INT14
-	.dw #_Dummy_EI ; INT15
+	.dw #_RSCAN0RecvFIFOIntHandler ; INT15
 	.dw #_Dummy_EI ; INT16
 	.dw #_Dummy_EI ; INT17
 	.dw #_RSCAN0CH0SendCompleteIntHandler ; INT18
