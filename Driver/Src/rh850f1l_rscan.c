@@ -14,9 +14,9 @@
 #include "rh850f1l_rscan.h"
 #include "rh850f1l_ext.h"
 
-#define MAX_CHANNEL_NUM         4  // 0-3 channel
-#define TOTAL_RECV_BUF_NUM      10  // Receive Buffer Number Configuration - set to 1, max 96
-#define MAX_RULE_NUM_PER_PAGE   16
+#define MAX_CHANNEL_NUM             4  // 0-3 channel
+#define TOTAL_RECV_BUF_NUM          10  // Receive Buffer Number Configuration - set to 1, max 96
+#define MAX_RULE_NUM_PER_PAGE       16
 
 static uint32_t  RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
 static int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uint8_t ctl);
@@ -29,8 +29,9 @@ void RSCAN_Eiint_Init(void);
 
 void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
 {
-    uint8_t channel = 0;
+    uint8_t channel = 0,rule_num = 0;
     RSCAN_COM_SPEED_PARAM_TypeDef com_sp;
+    RSCAN_RECV_RULE_TypeDef *rule_p = &Rscan_InitStruct->rule;
     RSCAN_RECV_RULE_TypeDef rule[2];
     {//for example
         rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
@@ -83,9 +84,10 @@ void RSCAN_Init(RSCAN_InitTypeDef *Rscan_InitStruct)
     //Config the clock, bit_timing and communication speed
     RSCAN_Communication_Speed_Set(channel,&com_sp);
 
-    RSCAN_Receive_Rule_Set(channel,rule,ARRAY_SIZE(rule));
+    //RSCAN_Receive_Rule_Set(channel,rule,ARRAY_SIZE(rule));
+    RSCAN_Receive_Rule_Set(channel,rule,rule_num);
 
-    RSCAN_Buffer_Set(channel,rule[1].r_pointer.x_index,rule[1].r_pointer.k_index);
+    RSCAN_Buffer_Set(channel,rule[1].r_pointer.x_index,rule_p[1].r_pointer.k_index);
 
     RSCAN_Global_Mode_Ctl(RSCAN_RESET_MODE,1);
     RSCAN_Channel_Mode_Ctl(channel,RSCAN_RESET_MODE,1);
@@ -324,7 +326,7 @@ void RSCAN_Buffer_Set(uint8_t m,int8_t x,int8_t k)
     //TOTAL_RECV_BUF_NUM must be lower than 96
     __RSCAN_SET_TOTAL_RECV_BUF_NUM(TOTAL_RECV_BUF_NUM);
 
-    if(1){
+    if(0){
         //Set receive FIFO buffer (the RSCAN0RFCCx register)  x >= 0 && x <= 7
         // Select receive interrupt request timing by the RFIGCV[2:0] bits
         // Select an interrupt source by the RFIM bit
@@ -710,12 +712,12 @@ bool R_CAN_Send_TxBuf0(uint8_t channel)
 }
 
 
-bool R_CAN_Receive_RxBuf0(uint32_t *p_can_id, uint8_t * p_dlc, uint8_t msg[8])
+bool R_CAN_Receive_RxBuf0(uint32_t *p_can_id, uint8_t *p_dlc, uint8_t msg[8])
 {
     int8_t ret = -1;
     RSCAN_RECV_ID_INFO_TypeDef id_info;
 
-    id_info.index = 95;
+    id_info.index = 0;
     while(ret == -1){
         ret  = RSCAN_Receive_Buffer_Read(&id_info,msg);
     }

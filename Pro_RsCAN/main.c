@@ -38,8 +38,6 @@ void main(void)
     uint32_t can_id;
     uint8_t  dlc;
     uint8_t  msg[8];
-    uint8_t	STATE = 0;
-    uint8_t	 send_msg[8] = {0,1,2,3,4,5,6,7};
 
     LED_Struct_Init(lcs, ARRAY_SIZE(lcs));
     Board_MCU_Init();
@@ -47,11 +45,15 @@ void main(void)
     while (1)
     {
        R_CAN_Receive_RxBuf0(&can_id,&dlc,msg);
-       R_CAN_Send_TxBuf0(3);
+       //R_CAN_Send_TxBuf0(3);
+       //CanMsgReceived(95,&can_id,&dlc,msg);
+       //CanTransmitBuffer(48);
+       CanTransmit(48,can_id,dlc,msg);
+       while(Can_TxConfirmation(48) == FALSE);
 
-       while(__RSCAN_GET_TRANSMIT_STAT(48,CAN_TMTRF_MASK) == 0);
-       //while(__RSCAN_GET_TRANSMIT_STAT(3,CAN_TMTRF_MASK));
-       //while(x--);
+       //transmit successfully
+       __RSCAN_SET_TRANSMIT_STAT(48,CAN_TMTRF_MASK,0);
+
 
     }
 }

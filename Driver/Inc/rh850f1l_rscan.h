@@ -11,6 +11,7 @@
 #define RH850F1L_RSCAN_H
 #include "rh850f1l.h"
 
+#define MAX_RULE_NUM_PER_CHANNEL    128//
 /*Clock Supply Setting*/
 #define RSCAN_CLK_XINCAN        1 //select the clk_xincan as clock source of the RS-CAN module
 #define RSCAN_CLKC              !RSCAN_CLK_XINCAN //select the clkc as clock source of the RS-CAN module
@@ -568,6 +569,7 @@ This register is writable only when transmit mode, readable only when the CFM[1:
 
 /*Config or read the RSCAN0TMSTSp — Transmit Buffer Status Register (p = 0 to 95)*/
 #define __RSCAN_GET_TRANSMIT_STAT(_P_,_MASK_)               (CAN_REG_VAL(_P_,_TMSTS0,0x01) & (_MASK_))
+#define __RSCAN_SET_TRANSMIT_STAT(_P_,_MASK_,_VALUE_)       MODIFY_REG(CAN_REG_ADDR(_P_,_TMSTS0,0x01),_MASK_,_VALUE_)
 
 /*TODO Config or read the RSCAN0TMTRSTSy — Transmit Buffer Transmit Request Status Register (y = 0 to 2)*/
 /*TODO Config or read the RSCAN0TMTARSTSy — Transmit Buffer Transmit Abort Request Status Register (y = 0 to 2)*/
@@ -607,6 +609,13 @@ Modify this register when no transmit request is present*/
 /*TODO Config or read the RSCAN0GTSTCTR — Global Test Control Register*/
 /*TODO Config or read the  RSCAN0GLOCKK — Global Lock Key Register*/
 /*TODO Config or read the RSCAN0RPGACCr — RAM Test Page Access Register (r = 0 to 63)*/
+
+
+#define RSCAN_TRANSMIT_IN_PROCESS               0   //Transmission is in progress or no transmit request is present
+#define RSCAN_TRANSMIT_NO_REQUEST               RSCAN_TRANSMIT_IN_PROCESS
+#define RSCAN_TRANSMIT_ABORT_COMPLETED          2   //Transmit abort has been completed.
+#define RSCAN_TRANSMIT_COMPLETED_WITHOUT_ABORT  4   //Transmission has been completed (without transmit abort request)
+#define RSCAN_TRANSMIT_COMPLETED_WITH_ABORT     6   //Transmission has been completed (with transmit abort request)
 
 typedef enum{
     RSCAN_RECV_FIFO_EMPTY,
@@ -691,6 +700,8 @@ typedef struct{
 typedef struct{
     uint8_t channel;
     RSCAN_COM_SPEED_PARAM_TypeDef sp;
+    uint8_t rule_num;
+    RSCAN_RECV_RULE_TypeDef rule[MAX_RULE_NUM_PER_CHANNEL];
 }RSCAN_InitTypeDef;
 
 

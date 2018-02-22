@@ -11,7 +11,7 @@
   */
 
 #include "board.h"
-
+#include "can.h"
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
@@ -406,7 +406,7 @@ void Board_Port_Config(void)
 
 #ifdef RSCAN_TEST
     {
-        RSCAN_InitTypeDef rscan3;
+        /*RSCAN_InitTypeDef rscan3;
         rscan3.channel = 3;
         rscan3.sp.fcan_src = 1;
         rscan3.sp.bit_time.sjw = 0x0;// 1Tq
@@ -414,7 +414,9 @@ void Board_Port_Config(void)
         rscan3.sp.bit_time.tseg1 = 0x0a;// 11Tq
         rscan3.sp.bit_time.brp = 4-1;
 
-        RSCAN_Init(&rscan3);
+        RSCAN_Init(&rscan3);*/
+
+        CanInit();
     }
 
 #endif
