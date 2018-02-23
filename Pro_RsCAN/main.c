@@ -44,15 +44,23 @@ void main(void)
 
     while (1)
     {
-       R_CAN_Receive_RxBuf0(&can_id,&dlc,msg);
+        /*uint8_t i = 1;
+        uint32_t test_data[64] = {0};
+        for(;i < 65;i++){
+            test_data[i-1] = i;
+        }
+        RSCAN_RAM_Test_Perform(1,test_data,64);*/
+
+       //R_CAN_Receive_RxBuf0(&can_id,&dlc,msg);
        //R_CAN_Send_TxBuf0(3);
-       //CanMsgReceived(95,&can_id,&dlc,msg);
+       CanMsgReceived(0,&can_id,&dlc,msg);
        //CanTransmitBuffer(48);
        CanTransmit(48,can_id,dlc,msg);
-       while(Can_TxConfirmation(48) == FALSE);
+       //while(Can_TxConfirmation(48) == FALSE);
 
        //transmit successfully
        __RSCAN_SET_TRANSMIT_STAT(48,CAN_TMTRF_MASK,0);
+       while(1){};
 
 
     }

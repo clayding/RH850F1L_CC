@@ -1,6 +1,36 @@
 
 #include "can.h"
 
+
+typedef struct{
+    uint8_t error_index;
+    void (*CanErrorHandler)(void);
+}CAN_ERROR_TypeDef;
+
+
+static void Can_ErrorHandling(void);
+static void CanBusOff(void);
+static void CanBusOffRecover(void);
+
+CAN_ERROR_TypeDef can_error[] = {
+    { RSCAN_BUS_ERROR,Can_ErrorHandling},
+    { RSCAN_ERROR_WARNING,Can_ErrorHandling},
+    { RSCAN_ERROR_PASSIVE,Can_ErrorHandling},
+    { RSCAN_BUS_OFF_ENTRY,CanBusOff},
+    { RSCAN_BUS_OFF_RECOVERY,CanBusOffRecover},
+    { RSCAN_OVERLOAD_ERROR,Can_ErrorHandling},
+    { RSCAN_BUS_DOMINANT_LOCK,Can_ErrorHandling},
+    { RSCAN_ARBITRATION_LOST,Can_ErrorHandling},
+    { RSCAN_STUFF_ERROR,Can_ErrorHandling},
+    { RSCAN_FORM_ERROR,Can_ErrorHandling},
+    { RSCAN_ACK_ERROR,Can_ErrorHandling},
+    { RSCAN_CRC_ERROR,Can_ErrorHandling},
+    { RSCAN_R_BIT_ERROR,Can_ErrorHandling},
+    { RSCAN_D_BIT_ERROR,Can_ErrorHandling},
+    { RSCAN_ACK_DELIMITER_ERROR,Can_ErrorHandling},
+    { RSCAN_DLC_ERROR,Can_ErrorHandling},
+};
+
 void CanInit(void)
 {
     RSCAN_InitTypeDef rscan3;
@@ -13,10 +43,10 @@ void CanInit(void)
     {//for example
         rscan3.rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rscan3.rule[0].r_pointer.label_t = 0x891;
-        rscan3.rule[0].r_pointer.recv_buf_used = 1;
+        rscan3.rule[0].r_pointer.recv_buf = RSCAN_RECV_FIFO;
         rscan3.rule[0].r_pointer.recv_buf_index = 0;
-        rscan3.rule[0].r_pointer.k_index = -1;
-        rscan3.rule[0].r_pointer.x_index = -1;
+        rscan3.rule[0].r_pointer.k_index = 0;
+        rscan3.rule[0].r_pointer.x_index = 0;
 
         rscan3.rule[0].r_id_info.ide = RSCAN_RECV_IDE_STD;
         rscan3.rule[0].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
@@ -27,10 +57,10 @@ void CanInit(void)
 
         rscan3.rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rscan3.rule[1].r_pointer.label_t = 0x745;
-        rscan3.rule[1].r_pointer.recv_buf_used = 0;
+        rscan3.rule[1].r_pointer.recv_buf = RSCAN_RECV_FIFO;
         rscan3.rule[1].r_pointer.recv_buf_index = 1;
-        rscan3.rule[1].r_pointer.k_index = -1;
-        rscan3.rule[1].r_pointer.x_index = 0;
+        rscan3.rule[1].r_pointer.k_index = 0;
+        rscan3.rule[1].r_pointer.x_index = 1;
         rscan3.rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
         rscan3.rule[1].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
         rscan3.rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
@@ -81,7 +111,7 @@ void CanTransmitBuffer(uint8_t TxbufferId)
     CanTransmit(TxbufferId,0x123,date_len,data);
 }
 
-uint8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p)
+int8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p)
 {
     uint8_t sent_size;
     RSCAN_TRANSMIT_ID_INFO_TypeDef id_info;
@@ -126,4 +156,54 @@ void CanMsgReceived(uint8_t RxbufferId,uint32_t *p_can_id, uint8_t *p_dlc, uint8
 
     *p_can_id = id_info.id;
     *p_dlc = ret;
+}
+
+void Can_ErrorStatus(bool global_err,uint8_t channel)
+{
+    uint32_t err_ret = 0;
+    uint8_t err_index = 0,max_err_index = 0,err_index_offset = 0;
+
+    if(!global_err){
+        err_ret = RSCAN_Channel_Error(channel);
+        max_err_index = RSCAN_ACK_DELIMITER_ERROR + 1;
+    }else{
+        err_ret = RSCAN_Global_Error();
+        err_index_offset = RSCAN_ACK_DELIMITER_ERROR + 1;
+        max_err_index = ARRAY_SIZE(can_error);
+    }
+    for(err_index = err_index_offset;err_index < max_err_index &&
+        (err_ret >> (err_index - err_index_offset));err_index++){
+        if(err_index == can_error[err_index].error_index){
+            can_error[err_index].CanErrorHandler();
+            break;
+        }
+    }
+}
+
+void Can_ErrorHandling(void)
+{
+    //do nothing,just for test
+}
+
+void CanModeConfig(uint8_t channel,CAN_MODE_Type mode)
+{
+    if(mode > CAN_CHANNEL_STOP_MODE) return;//mode not supported
+
+    if(mode >= CAN_COMMUNICATION_MODE && mode <= CAN_CHANNEL_STOP_MODE){
+        mode -= CAN_COMMUNICATION_MODE;
+
+        RSCAN_Channel_Mode_Ctl(channel,(RSCAN_CHANNEL_MODE_Type)mode,1);
+    }else{
+        RSCAN_Global_Mode_Ctl((RSCAN_GLOBAL_MODE_Type)mode,1);
+    }
+}
+
+void CanBusOff(void)
+{
+
+}
+
+void CanBusOffRecover(void)
+{
+
 }

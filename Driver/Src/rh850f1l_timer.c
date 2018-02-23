@@ -63,6 +63,7 @@ static ErrorStatus TAUB_Set_Channel_Mode(TAUB_ChMode_TypeDef *mode );
 static void TAUB_Filter_Ctl_Operate(uint8_t channel_num);
 static ErrorStatus TAUD_Set_Channel_Mode(TAUD_ChMode_TypeDef *mode );
 static void TAUD_Filter_Ctl_Operate(uint8_t channel_num);
+static ErrorStatus TAUD_Simultaneous_Rewrite_Init(uint8_t channel_num,TAUD_SIMULREWR_CFG_TypeDef sim_cfg);
 
 /*************************************OS Timer defination start****************/
 static void OSTM_Start_Ctl_Set(void* unit,OSTM_OPERATE_MODE_Type opt_mode,
@@ -394,6 +395,8 @@ ErrorStatus TAUD_Simultaneous_Rewrite_Init(uint8_t channel_num,TAUD_SIMULREWR_CF
     if(ret) return ERROR;
 
     __ENABLE_RELOAD_DATA_TRIGGER(_TAUB0,channel_num);
+
+    return SUCCESS;
 
 }
 
