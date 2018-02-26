@@ -30,7 +30,10 @@ CAN_ERROR_TypeDef can_error[] = {
     { RSCAN_ACK_DELIMITER_ERROR,Can_ErrorHandling},
     { RSCAN_DLC_ERROR,Can_ErrorHandling},
 };
-
+/* @brief - Initialization of RsCAN module.
+ * @param none
+ * @reval none
+ */
 void CanInit(void)
 {
     RSCAN_InitTypeDef rscan3;
@@ -43,7 +46,7 @@ void CanInit(void)
     {//for example
         rscan3.rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rscan3.rule[0].r_pointer.label_t = 0x891;
-        rscan3.rule[0].r_pointer.recv_buf = RSCAN_RECV_FIFO;
+        rscan3.rule[0].r_pointer.recv_buf = RSCAN_RECV_BUF;
         rscan3.rule[0].r_pointer.recv_buf_index = 0;
         rscan3.rule[0].r_pointer.k_index = 0;
         rscan3.rule[0].r_pointer.x_index = 0;
@@ -57,10 +60,10 @@ void CanInit(void)
 
         rscan3.rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rscan3.rule[1].r_pointer.label_t = 0x745;
-        rscan3.rule[1].r_pointer.recv_buf = RSCAN_RECV_FIFO;
+        rscan3.rule[1].r_pointer.recv_buf = RSCAN_TrFIFO;
         rscan3.rule[1].r_pointer.recv_buf_index = 1;
-        rscan3.rule[1].r_pointer.k_index = 0;
-        rscan3.rule[1].r_pointer.x_index = 1;
+        rscan3.rule[1].r_pointer.k_index = 1;
+        rscan3.rule[1].r_pointer.x_index = 0;
         rscan3.rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
         rscan3.rule[1].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
         rscan3.rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
@@ -71,11 +74,19 @@ void CanInit(void)
     RSCAN_Init(&rscan3);
 }
 
+/* @brief - Reset RsCAN module,as same as the initialization.
+ * @param none
+ * @reval none
+ */
 void CanReset(void)
 {
     CanInit();
 }
 
+/* @brief - Select the communication speed .
+ * @param baudrate - the baudrate slected to set the speed
+ * @reval bit_time - return the RSCAN_BIT_TIMING_TypeDef
+ */
 RSCAN_BIT_TIMING_TypeDef CANbaudrateSet(CAN_BAUDRATE_Type baudrate)
 {
     RSCAN_BIT_TIMING_TypeDef bit_time;
@@ -103,6 +114,10 @@ RSCAN_BIT_TIMING_TypeDef CANbaudrateSet(CAN_BAUDRATE_Type baudrate)
     return bit_time;
 }
 
+/* @brief - Transmit data using the transmit buffer with the specified buffer id .
+ * @param TxbufferId - the transmit buffer id used to send the data
+ * @reval none
+ */
 void CanTransmitBuffer(uint8_t TxbufferId)
 {
     uint8_t data[8] = {0x45,0x56,0x78,0x89,0x90};
@@ -111,6 +126,14 @@ void CanTransmitBuffer(uint8_t TxbufferId)
     CanTransmit(TxbufferId,0x123,date_len,data);
 }
 
+/* @brief - Transmit data using the transmit buffer with the specified buffer id ,
+            ID, the length of data and the pointer to data array
+ * @param TxbufferId - the transmit buffer id used to send the data
+ * @param ID -  the ID of the message to be transmitted from the transmit buffer
+ * @param Length - the length of the message
+ * @param data_p - the pointer to data array contains the message
+ * @reval -1 - send failed, positive number - the size of data transmited successfully
+ */
 int8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p)
 {
     uint8_t sent_size;
@@ -129,6 +152,10 @@ int8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p
     return sent_size;
 }
 
+/* @brief - Get the state of the data transmission
+ * @param TxbufferId - the transmit buffer id used to send the data
+ * @reval TRUE - transmit successfully ,otherwise failed.
+ */
 bool Can_TxConfirmation(uint8_t TxbufferId)
 {
     __IO uint8_t ret = 0;
@@ -144,20 +171,32 @@ bool Can_TxConfirmation(uint8_t TxbufferId)
     return FALSE;
 }
 
-void CanMsgReceived(uint8_t RxbufferId,uint32_t *p_can_id, uint8_t *p_dlc, uint8_t msg[8])
+/* @brief - read the message received stored in receive buffer
+ * @param RxbufferId - the receive buffer id used to store the message
+ * @param p_can_id -  the ID of the message read from receive buffer
+ * @param p_dlc - the length of the message received by buffer
+ * @param msg_p - the pointer to used to stored the message
+ * @reval none
+ */
+void CanMsgReceived(uint8_t RxbufferId,uint32_t *p_can_id, uint8_t *p_dlc, uint8_t *msg_p)
 {
     int8_t ret = -1;
     RSCAN_RECV_ID_INFO_TypeDef id_info;
 
     id_info.index = RxbufferId;
     while(ret == -1){
-        ret  = RSCAN_Receive_Buffer_Read(&id_info,msg);
+        ret  = RSCAN_Receive_Buffer_Read(&id_info,msg_p);
     }
 
     *p_can_id = id_info.id;
     *p_dlc = ret;
 }
 
+/* @brief -  the error-handling functions according to different types of errors.
+ * @param global_err - 1: the gobal error , 0 : CAN m error
+ * @param channel - the specified channel on which the error occured.
+ * @reval none
+ */
 void Can_ErrorStatus(bool global_err,uint8_t channel)
 {
     uint32_t err_ret = 0;
@@ -185,6 +224,11 @@ void Can_ErrorHandling(void)
     //do nothing,just for test
 }
 
+/* @brief - Config the CAN mode, global mode or channel mode
+ * @param channel - the specified channel to set the mode
+ * @param mode - the specified mode indicated by CAN_MODE_Type
+ * @reval none
+ */
 void CanModeConfig(uint8_t channel,CAN_MODE_Type mode)
 {
     if(mode > CAN_CHANNEL_STOP_MODE) return;//mode not supported
@@ -206,4 +250,9 @@ void CanBusOff(void)
 void CanBusOffRecover(void)
 {
 
+}
+
+int8_t CAN_RAM_Test(uint8_t test_page,uint32_t *test_data,uint8_t size)
+{
+    return  RSCAN_RAM_Test_Perform(test_page,test_data,size);
 }

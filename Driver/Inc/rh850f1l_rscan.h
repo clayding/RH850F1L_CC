@@ -592,9 +592,9 @@ This register is read-only when receive mode*/
 /*Config the RSCAN0CFCCx  Transmit/receive FIFO Buffer Configuration and Control
 Register k (k = 0 to 17)*/
 #define __RSCAN_SET_TrRe_FIFO_BUF(_K_,_MASK_,_VALUE_)       MODIFY_REG(CAN_REG_ADDR(_K_,_CFCC0,0x04),_MASK_,_VALUE_)
-
+#define __RSCAN_GET_TrRe_FIFO_BUF(_K_,_MASK_)               (CAN_REG_VAL(_K_,_CFCC0,0x04) & (_MASK_))
 /*RSCAN0CFSTSk — Transmit/receive FIFO Buffer Status Register (k = 0 to 17)*/
-#define __RSCAN_GET_TrRe_FIFO_STAT(_K_,_MASK_)              CAN_REG_VAL(_K_,_CFSTS0,0x04) & (_MASK_)
+#define __RSCAN_GET_TrRe_FIFO_STAT(_K_,_MASK_)              (CAN_REG_VAL(_K_,_CFSTS0,0x04) & (_MASK_))
 /*Config RSCAN0CFPCTRk — Transmit/receive FIFO Buffer Pointer Control Register (k = 0 to 17)
 Writing FFH to these bits moves the read pointer to the next unread message or
 moves the write pointer to the next stage of the transmit/receive FIFO buffer*/
@@ -715,6 +715,11 @@ typedef enum{
     RSCAN_RECV_FIFO_NO_MSG,
 }RSCAN_RECV_FIFO_RESULT_Type;
 
+typedef enum{
+    RSCAN_TrFIFO_RECV_MODE,
+    RSCAN_TrFIFO_TRANSMIT_MODE,
+    RSCAN_TrFIFO_GATEWAY_MODE,
+}RSCAN_TrFIFO_MODE_Type;
 
 typedef enum{
     RSCAN_OPERATE_MODE,     //Global operating mode
