@@ -37,40 +37,54 @@ CAN_ERROR_TypeDef can_error[] = {
 void CanInit(void)
 {
     RSCAN_InitTypeDef rscan3;
-    rscan3.channel = 3;
+    RSCAN_RECV_RULE_TypeDef rule[2];
+    RSCAN_TrRe_FIFO_CONIFG_PARAM_TypeDef cfg_param[2];
+
+    rscan3.channel = 4;
     rscan3.sp.fcan_src = 1;
     rscan3.sp.bit_time = CANbaudrateSet(CAN_BAUDRATE_250K);
 
-    rscan3.rule_num = 2;
-
     {//for example
-        rscan3.rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
-        rscan3.rule[0].r_pointer.label_t = 0x891;
-        rscan3.rule[0].r_pointer.recv_buf = RSCAN_RECV_BUF;
-        rscan3.rule[0].r_pointer.recv_buf_index = 0;
-        rscan3.rule[0].r_pointer.k_index = 0;
-        rscan3.rule[0].r_pointer.x_index = 0;
+        rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
+        rule[0].r_pointer.label_t = 0x891;
+        rule[0].r_pointer.recv_buf = RSCAN_RECV_BUF;
+        rule[0].r_pointer.recv_buf_index = 0;
+        rule[0].r_pointer.k_index = 0;
+        rule[0].r_pointer.x_index = 0;
+        rule[0].r_id_info.ide = RSCAN_RECV_IDE_STD;
+        rule[0].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
+        rule[0].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
+        rule[0].r_id_info.id = 0x123;
+        rule[0].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
 
-        rscan3.rule[0].r_id_info.ide = RSCAN_RECV_IDE_STD;
-        rscan3.rule[0].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
-        rscan3.rule[0].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
-        rscan3.rule[0].r_id_info.id = 0x123;
-        rscan3.rule[0].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
 
-
-        rscan3.rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
-        rscan3.rule[1].r_pointer.label_t = 0x745;
-        rscan3.rule[1].r_pointer.recv_buf = RSCAN_TrFIFO;
-        rscan3.rule[1].r_pointer.recv_buf_index = 1;
-        rscan3.rule[1].r_pointer.k_index = 1;
-        rscan3.rule[1].r_pointer.x_index = 0;
-        rscan3.rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
-        rscan3.rule[1].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
-        rscan3.rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
-        rscan3.rule[1].r_id_info.id = 0x456;
-        rscan3.rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
+        rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
+        rule[1].r_pointer.label_t = 0x745;
+        rule[1].r_pointer.recv_buf = RSCAN_TrReFIFO;
+        rule[1].r_pointer.recv_buf_index = 1;
+        rule[1].r_pointer.k_index = 0;
+        rule[1].r_pointer.x_index = 0;
+        rule[1].r_id_info.ide = RSCAN_RECV_IDE_STD;
+        rule[1].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
+        rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
+        rule[1].r_id_info.id = 0x456;
+        rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
 
     }
+    {
+        cfg_param[0].k_index = 12;
+        cfg_param[0].param_un.param_bits.trans_buf_num_linked= 0;
+        cfg_param[0].param_un.param_bits.mode= 0x01;
+        cfg_param[0].param_un.param_bits.int_req_tm = 0x01;
+        cfg_param[0].param_un.param_bits.int_src_sel = 0;
+        cfg_param[0].param_un.param_bits.buf_depth = 0x01;
+
+
+    }
+    rscan3.rule_num = ARRAY_SIZE(rule);
+    rscan3.rule_p = rule;
+    rscan3.trans_buf_mask.buf_mask = RSCAN_TRANSMIT_BUF_0;
+    rscan3.trans_buf_mask. fifo_link_mask = RSCAN_TRANSMIT_BUF_1 | RSCAN_TRANSMIT_BUF_2 | RSCAN_TRANSMIT_BUF_3;
     RSCAN_Init(&rscan3);
 }
 

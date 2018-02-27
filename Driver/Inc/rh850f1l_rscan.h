@@ -706,6 +706,23 @@ Modify this register when no transmit request is present*/
 #define RSCAN_ACK_DELIMITER_ERROR               14  //ACK Delimiter Error
 #define RSCAN_DLC_ERROR                         15  //DLC Error Flag
 
+#define RSCAN_TRANSMIT_BUF_0                    ((uint16_t)0x01)
+#define RSCAN_TRANSMIT_BUF_1                    ((uint16_t)0x01 << 1)
+#define RSCAN_TRANSMIT_BUF_2                    ((uint16_t)0x01 << 2)
+#define RSCAN_TRANSMIT_BUF_3                    ((uint16_t)0x01 << 3)
+#define RSCAN_TRANSMIT_BUF_4                    ((uint16_t)0x01 << 4)
+#define RSCAN_TRANSMIT_BUF_5                    ((uint16_t)0x01 << 5)
+#define RSCAN_TRANSMIT_BUF_6                    ((uint16_t)0x01 << 6)
+#define RSCAN_TRANSMIT_BUF_7                    ((uint16_t)0x01 << 7)
+#define RSCAN_TRANSMIT_BUF_8                    ((uint16_t)0x01 << 8)
+#define RSCAN_TRANSMIT_BUF_9                    ((uint16_t)0x01 << 9)
+#define RSCAN_TRANSMIT_BUF_10                   ((uint16_t)0x01 << 10)
+#define RSCAN_TRANSMIT_BUF_11                   ((uint16_t)0x01 << 11)
+#define RSCAN_TRANSMIT_BUF_12                   ((uint16_t)0x01 << 12)
+#define RSCAN_TRANSMIT_BUF_13                   ((uint16_t)0x01 << 13)
+#define RSCAN_TRANSMIT_BUF_14                   ((uint16_t)0x01 << 14)
+#define RSCAN_TRANSMIT_BUF_15                   ((uint16_t)0x01 << 15)
+
 
 typedef enum{
     RSCAN_RECV_FIFO_EMPTY,
@@ -716,12 +733,6 @@ typedef enum{
 }RSCAN_RECV_FIFO_RESULT_Type;
 
 typedef enum{
-    RSCAN_TrFIFO_RECV_MODE,
-    RSCAN_TrFIFO_TRANSMIT_MODE,
-    RSCAN_TrFIFO_GATEWAY_MODE,
-}RSCAN_TrFIFO_MODE_Type;
-
-typedef enum{
     RSCAN_OPERATE_MODE,     //Global operating mode
     RSCAN_COMMUNICATION_MODE = RSCAN_OPERATE_MODE, //Channel communication mode
     RSCAN_RESET_MODE,       //Global reset mode or Channel reset mode or
@@ -729,7 +740,6 @@ typedef enum{
     RSCAN_HALT_MODE = RSCAN_TEST_MODE,//Channel halt mode
     RSCAN_STOP_MODE = 4,    //Global stop mode or Channel stop mode
 }RSCAN_GLOBAL_MODE_Type,RSCAN_CHANNEL_MODE_Type,RSCAN_MODE_Type;
-
 
 typedef struct{
     uint8_t sjw;    //Resynchronization Jump Width Control 1Tq(0b00)--4Tq(0b11)
@@ -769,17 +779,19 @@ typedef struct{
 }RSCAN_RECV_RULE_ID_INFO_TypeDef;
 
 typedef enum{
-    RSCAN_RECV_BUF,     //A receive buffer is used
-    RSCAN_TrFIFO,       //Transmit/receive FIFO buffer is selected.
-    RSCAN_RECV_FIFO,    //Receive FIFO buffer is selected
-}RSCAN_RECV_BUF_Sel_Type;
+    RSCAN_RECV_BUF,                         //A receive buffer is used
+    RSCAN_TRANSMIT_BUF = RSCAN_RECV_BUF,    //A transmit buffer is used
+    RSCAN_TrReFIFO,                         //transmit/receive FIFO buffer is selected.
+    RSCAN_RECV_FIFO,                        //receive FIFO buffer is selected
+    RSCAN_TRANSMIT_QUEUE = RSCAN_RECV_FIFO, //transmit queue is seletcd
+}RSCAN_RECV_BUF_Sel_Type,RSCAN_TRANSMIT_BUF_Sel_Type;
 
 typedef struct{
     RSCAN_DLC_CHECK_Type dlc_t; //Receive Rule DLC disable or 1-8 data bytes
     uint16_t label_t;           //the 12-bit label information.
     RSCAN_RECV_BUF_Sel_Type recv_buf; //RSCAN_RECV_BUF, RSCAN_TrFIFO or RSCAN_RECV_FIFO,
     uint8_t recv_buf_index;     //the receive buffer number to store received message
-    uint8_t k_index;            //transmit/receive FIFO buffer number k 0-17,  active in RSCAN_TrFIFO
+    uint8_t k_index;            //transmit/receive FIFO buffer number k 0-17,  active in RSCAN_TrFIFO, k_index = 3*m -3*m+2
     uint8_t x_index;            //receive FIFO buffer number x 0-7, active in RSCAN_RECV_FIFO
 }RSCAN_RECV_RULE_POINTER_TypeDef;
 
@@ -789,22 +801,73 @@ typedef struct{
 }RSCAN_RECV_RULE_TypeDef;
 
 typedef struct{
-    uint8_t index;//p:0--95
-    uint8_t ide;//Transmit Buffer IDE 0: Standard ID 1: Extended ID
-    uint8_t rtr;//Transmit Buffer RTR 0: Data frame 1: Remote frame
+    uint8_t index;  //p:0--95
+    uint8_t ide;    //Transmit Buffer IDE 0: Standard ID 1: Extended ID
+    uint8_t rtr;    //Transmit Buffer RTR 0: Data frame 1: Remote frame
     //Transmit History Data Store Enable 0: Transmit history data is not stored in the buffer.
     //1: Transmit history data is stored in the buffer.
-    bool his_en;//Transmit History Data Store Enable
-    uint32_t id;//Transmit/Receive FIFO Buffer ID Data
+    bool his_en;    //Transmit History Data Store Enable
+    uint32_t id;    //Transmit/Receive FIFO Buffer ID Data
     uint8_t label_t;
     uint16_t time_stamp;
 }RSCAN_TRANSMIT_ID_INFO_TypeDef,RSCAN_RECV_ID_INFO_TypeDef;
 
 typedef struct{
+    uint16_t buf_mask;
+    uint16_t fifo_link_mask;
+    uint8_t queue_num_used;
+}RSCAN_TRANSMIT_BUF_MASK_TypeDef;
+
+/*Transmit/Receive FIFO Mode Select*/
+typedef enum{
+    RSCAN_TrReFIFO_RECV_MODE,     //0 0: Receive mode
+    RSCAN_TrReFIFO_TRANSMIT_MODE, //0 1: Transmit mode
+    RSCAN_TrReFIFO_GATEWAY_MODE,  //1 0: Gateway mode
+}RSCAN_TrReFIFO_MODE_Type;
+
+/*All the parameters set to RSCAN0CFCCk — Transmit/receive FIFO Buffer Configuration and Control
+Register k (k = 0 to 17)*/
+typedef struct{
+    uint8_t k_index; //0-17
+    union{
+        uint32_t cfg_param;
+        struct{
+            uint32_t CFE        :1;     //Transmit/Receive FIFO Buffer Enable
+            uint32_t CFRXIE     :1;     //Transmit/Receive FIFO Receive Interrupt Enable
+            uint32_t CFTXIE     :1;     //Transmit/Receive FIFO Transmit Interrupt Enable
+            uint32_t reserved0  :5;     //Reserved
+            uint32_t CFDC       :3;     //Transmit/Receive FIFO Buffer Depth Configuration
+            uint32_t reserved1  :1;     //Reserved
+            uint32_t CFIM       :1;     //Transmit/Receive FIFO Interrupt Source Select
+            uint32_t CFIGCV     :3;     //Transmit/Receive FIFO Receive Interrupt Request Timing Select
+            uint32_t CFM        :2;
+            uint32_t CFITSS     :1;
+            uint32_t CFITR      :1;
+            uint32_t CFTML      :4;
+            uint32_t CFITT      :8;
+        }reg_bits;
+        struct{
+            uint32_t reserved0          :8;//Reserved
+            uint32_t buf_depth          :3;//Transmit/Receive FIFO Buffer Depth Configuration
+            uint32_t reserved1          :1;//Reserved
+            uint32_t int_src_sel        :1;//Transmit/Receive FIFO Interrupt Source Select
+            uint32_t int_req_tm         :3;//Transmit/Receive FIFO Receive Interrupt Request Timing Select
+            uint32_t mode               :2;//Transmit/Receive FIFO Mode Select
+            uint32_t invl_time_clk_src  :1;//Transmit/Receive FIFO Interval Timer Clock Source Select
+            uint32_t invl_time_res      :1;//Transmit/Receive FIFO Interval Timer Resolution
+            uint32_t trans_buf_num_linked :4;//Set the transmit buffer number to be linked to the transmit/receive FIFO buffer
+            uint32_t msg_send_invl      :8; //Set a message transmission interval.
+        }param_bits;
+    }param_un;
+}RSCAN_TrRe_FIFO_CONIFG_PARAM_TypeDef;
+
+typedef struct{
     uint8_t channel;
     RSCAN_COM_SPEED_PARAM_TypeDef sp;
     uint8_t rule_num;
-    RSCAN_RECV_RULE_TypeDef rule[MAX_RULE_NUM_PER_CHANNEL];
+    RSCAN_RECV_RULE_TypeDef *rule_p;
+    RSCAN_TRANSMIT_BUF_MASK_TypeDef trans_buf_mask;
+    RSCAN_TrRe_FIFO_CONIFG_PARAM_TypeDef *trre_fifo_cfg_param_p;
 }RSCAN_InitTypeDef;
 
 

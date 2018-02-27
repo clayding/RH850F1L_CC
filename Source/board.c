@@ -132,7 +132,8 @@ void Board_Port_Config(void)
     Port_Init(PortGroupNum9,&port);
 #endif
 #ifdef RSCAN_TEST
-    /*port.pin_mask = PORT_PIN_2;
+#if 1
+    port.pin_mask = PORT_PIN_12;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
     port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
@@ -140,23 +141,24 @@ void Board_Port_Config(void)
     port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum1,&port);
 
-    port.pin_mask = PORT_PIN_3;
+    port.pin_mask = PORT_PIN_13;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_OUTPUT_MODE;
     port.echar_t = OUTPUT_PP | OUTPUT_HDS;
-    //port.bmc_t = BIDIRECTION_MODE_ENABLED;
     port.alter_t = ALT_FUNC_1;
-    Port_Init(PortGroupNum1,&port);*/
-    PMC1 	|= 0x000C;	    //alternative function
-    PFC1 	&= ~(0x000C);  	//1'st alternative function
-    PM1 	&= ~(1<<3);  	//set to 0, P1_3 output
-    PM1 	|= (1<<2);  	    //set to 1, P1_2 input
-    /* TJA1041 EN(P1.1) - ON */
+    Port_Init(PortGroupNum1,&port);
+#else
+
+    PMC1 	|= 0x3000;	    //alternative function
+    PFC1 	&= ~(0x3000);  	//1'st alternative function
+    PM1 	&= ~(1<<13);  	//set to 0, P1_3 output
+    PM1 	|= (1<<12);  	    //set to 1, P1_2 input
+    /* TJA1041 EN(P1.1) - ON
     PMC1    &= ~(1U<<1);
     PM1     &= ~(1U<<1);
-    P1	 	|= (1U<<1);
+    P1	 	|= (1U<<1);*/
 
-
+#endif
 #endif
     {
         Eiint_InitTypeDef eiint;

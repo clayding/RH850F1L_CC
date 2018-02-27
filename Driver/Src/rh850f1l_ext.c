@@ -361,5 +361,4 @@ void TAUB0CH2IntHandler(unsigned long eiic)
 void RTCA01SIntHandler(unsigned long eiic)
 {
     Eiit_Handler_Ptr_2();
-
 }

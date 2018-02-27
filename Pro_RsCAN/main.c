@@ -40,12 +40,12 @@ void main(void)
        //R_CAN_Send_TxBuf0(3);
        CanMsgReceived(0,&can_id,&dlc,msg);
        //CanTransmitBuffer(48);
-       CanTransmit(48,can_id,dlc,msg);
+       CanTransmit(64,can_id,dlc,msg);
        //R_CAN_Send_TrFIFO(3);
-       //while(Can_TxConfirmation(48) == FALSE);
+       while(Can_TxConfirmation(64) == FALSE);
 
        //transmit successfully
-       __RSCAN_SET_TRANSMIT_STAT(48,CAN_TMTRF_MASK,0);
+       __RSCAN_SET_TRANSMIT_STAT(64,CAN_TMTRF_MASK,0);
 
     }
 }
