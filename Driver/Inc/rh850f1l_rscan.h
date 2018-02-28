@@ -464,8 +464,8 @@ Register k (k = 0 to 17)*/
 /******************************************************************************/
 
 #define TEST_FUNC(_BASE_REG_)                              (uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))
-#define CAN_REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)          ((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *_CNT_))
-#define CAN_REG_VAL(_CNT_,_BASE_REG_,_OFFSET_B_)           (*((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *_CNT_)))
+#define CAN_REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)          ((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *(_CNT_)))
+#define CAN_REG_VAL(_CNT_,_BASE_REG_,_OFFSET_B_)           (*((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *(_CNT_))))
 
 /*********************************19.3.2--19.3.5******************************/
 /*Config RSCAN0CmCFG — Channel Configuration Register (m = 0 to 5)
@@ -591,31 +591,31 @@ This register is read-only when receive mode*/
 /*********************************19.3.33--19.3.39*****************************/
 /*Config the RSCAN0CFCCx  Transmit/receive FIFO Buffer Configuration and Control
 Register k (k = 0 to 17)*/
-#define __RSCAN_SET_TrRe_FIFO_BUF(_K_,_MASK_,_VALUE_)       MODIFY_REG(CAN_REG_ADDR(_K_,_CFCC0,0x04),_MASK_,_VALUE_)
-#define __RSCAN_GET_TrRe_FIFO_BUF(_K_,_MASK_)               (CAN_REG_VAL(_K_,_CFCC0,0x04) & (_MASK_))
+#define __RSCAN_SET_TRFIFO_BUF(_K_,_MASK_,_VALUE_)       MODIFY_REG(CAN_REG_ADDR(_K_,_CFCC0,0x04),_MASK_,_VALUE_)
+#define __RSCAN_GET_TRFIFO_BUF(_K_,_MASK_)               (CAN_REG_VAL(_K_,_CFCC0,0x04) & (_MASK_))
 /*RSCAN0CFSTSk — Transmit/receive FIFO Buffer Status Register (k = 0 to 17)*/
-#define __RSCAN_GET_TrRe_FIFO_STAT(_K_,_MASK_)              (CAN_REG_VAL(_K_,_CFSTS0,0x04) & (_MASK_))
+#define __RSCAN_GET_TRFIFO_STAT(_K_,_MASK_)              (CAN_REG_VAL(_K_,_CFSTS0,0x04) & (_MASK_))
 /*Config RSCAN0CFPCTRk — Transmit/receive FIFO Buffer Pointer Control Register (k = 0 to 17)
 Writing FFH to these bits moves the read pointer to the next unread message or
 moves the write pointer to the next stage of the transmit/receive FIFO buffer*/
-#define _RSCAN_SET_TrRe_FIFO_POINTER(_K_)                   CAN_REG_VAL(_K_,_CFPCTR0,0x04) =  0xFF
+#define _RSCAN_SET_TRFIFO_POINTER(_K_)                   CAN_REG_VAL(_K_,_CFPCTR0,0x04) =  0xFF
 
 /*Config RSCAN0CFIDk — Transmit/receive FIFO Buffer Access ID Register (k = 0 to 17)
 This register is writable only when transmit mode, readable only when the CFM[1:0] value is 00B (receive mode)*/
-#define __RSCAN_SET_TrRe_FIFO_ID(_K_,_VALUE_)               CAN_REG_VAL(_K_,_CFID0,0x10) = _VALUE_ & 0xFFFFFFFF
-#define __RSCAN_GET_TrRe_FIFO_ID(_K_)                       CAN_REG_VAL(_K_,_CFID0,0x10)
+#define __RSCAN_SET_TRFIFO_ID(_K_,_VALUE_)               CAN_REG_VAL(_K_,_CFID0,0x10) = _VALUE_ & 0xFFFFFFFF
+#define __RSCAN_GET_TRFIFO_ID(_K_)                       CAN_REG_VAL(_K_,_CFID0,0x10)
 /*Config RSCAN0CFPTRk — Transmit/receive FIFO Buffer Access Pointer Register(k = 0 to 17)
 This register is writable only when transmit mode, readable only when the CFM[1:0] value is 00B (receive mode)*/
-#define __RSCAN_SET_TrRe_FIFO_POINTER(_K_,_VALUE_)          CAN_REG_VAL(_K_,_CFPTR0,0x10) = _VALUE_ & 0xFFFFFFFF
-#define __RSCAN_GET_TrRe_FIFO_POINTER(_K_)                  CAN_REG_VAL(_K_,_CFPTR0,0x10)
+#define __RSCAN_SET_TRFIFO_POINTER(_K_,_VALUE_)          CAN_REG_VAL(_K_,_CFPTR0,0x10) = _VALUE_ & 0xFFFFFFFF
+#define __RSCAN_GET_TRFIFO_POINTER(_K_)                  CAN_REG_VAL(_K_,_CFPTR0,0x10)
 /*Config RSCAN0CFDF0k — Transmit/receive FIFO Buffer Access Data Field 0 Register (k = 0 to 17)
 This register is writable only when transmit mode, readable only when the CFM[1:0] value is 00B (receive mode)*/
-#define __RSCAN_WRITE_TrRe_FIFO_DATA_L(_K_,_MSG_BASE_)      CAN_REG_VAL(_K_,_CFDF00,0x10) = *((uint32_t *)_MSG_BASE_)
-#define __RSCAN_READ_TrRe_FIFO_DATA_L(_K_)                  CAN_REG_VAL(_K_,_CFDF00,0x10)
+#define __RSCAN_WRITE_TRFIFO_DATA_L(_K_,_MSG_BASE_)      CAN_REG_VAL(_K_,_CFDF00,0x10) = *((uint32_t *)_MSG_BASE_)
+#define __RSCAN_READ_TRFIFO_DATA_L(_K_)                  CAN_REG_VAL(_K_,_CFDF00,0x10)
 /*Config RSCAN0CFDF1k — Transmit/receive FIFO Buffer Access Data Field 1 Register (k = 0 to 17)
 This register is writable only when transmit mode, readable only when the CFM[1:0] value is 00B (receive mode)*/
-#define __RSCAN_WRITE_TrRe_FIFO_DATA_H(_K_,_MSG_BASE_)      CAN_REG_VAL(_K_,_CFDF10,0x10) = *((uint32_t *)_MSG_BASE_)
-#define __RSCAN_READ_TrRe_FIFO_DATA_H(_K_)                  CAN_REG_VAL(_K_,_CFDF10,0x10)
+#define __RSCAN_WRITE_TRFIFO_DATA_H(_K_,_MSG_BASE_)      CAN_REG_VAL(_K_,_CFDF10,0x10) = *((uint32_t *)_MSG_BASE_)
+#define __RSCAN_READ_TRFIFO_DATA_H(_K_)                  CAN_REG_VAL(_K_,_CFDF10,0x10)
 
 /*********************************19.3.40--19.3.45*****************************/
 /*TODO Config or read the RSCAN0FESTS — FIFO Empty Status Register*/
@@ -781,10 +781,19 @@ typedef struct{
 typedef enum{
     RSCAN_RECV_BUF,                         //A receive buffer is used
     RSCAN_TRANSMIT_BUF = RSCAN_RECV_BUF,    //A transmit buffer is used
-    RSCAN_TrReFIFO,                         //transmit/receive FIFO buffer is selected.
+    RSCAN_TRFIFO,                         //transmit/receive FIFO buffer is selected.
     RSCAN_RECV_FIFO,                        //receive FIFO buffer is selected
     RSCAN_TRANSMIT_QUEUE = RSCAN_RECV_FIFO, //transmit queue is seletcd
 }RSCAN_RECV_BUF_Sel_Type,RSCAN_TRANSMIT_BUF_Sel_Type;
+
+typedef union{
+    uint32_t k_mask;
+    struct{
+        uint32_t recv_k_mask:18;
+        uint32_t trans_k_mask:3;
+        uint32_t :11;
+    }bits;
+}RSCAN_TRFIFO_INDEX_MASK_Union;
 
 typedef struct{
     RSCAN_DLC_CHECK_Type dlc_t; //Receive Rule DLC disable or 1-8 data bytes
@@ -814,16 +823,15 @@ typedef struct{
 
 typedef struct{
     uint16_t buf_mask;
-    uint16_t fifo_link_mask;
     uint8_t queue_num_used;
 }RSCAN_TRANSMIT_BUF_MASK_TypeDef;
 
 /*Transmit/Receive FIFO Mode Select*/
 typedef enum{
-    RSCAN_TrReFIFO_RECV_MODE,     //0 0: Receive mode
-    RSCAN_TrReFIFO_TRANSMIT_MODE, //0 1: Transmit mode
-    RSCAN_TrReFIFO_GATEWAY_MODE,  //1 0: Gateway mode
-}RSCAN_TrReFIFO_MODE_Type;
+    RSCAN_TRFIFO_RECV_MODE,     //0 0: Receive mode
+    RSCAN_TRFIFO_TRANSMIT_MODE, //0 1: Transmit mode
+    RSCAN_TRFIFO_GATEWAY_MODE,  //1 0: Gateway mode
+}RSCAN_TRFIFO_MODE_Type;
 
 /*All the parameters set to RSCAN0CFCCk — Transmit/receive FIFO Buffer Configuration and Control
 Register k (k = 0 to 17)*/
@@ -859,7 +867,7 @@ typedef struct{
             uint32_t msg_send_invl      :8; //Set a message transmission interval.
         }param_bits;
     }param_un;
-}RSCAN_TrRe_FIFO_CONIFG_PARAM_TypeDef;
+}RSCAN_TRFIFO_CFG_TypeDef;
 
 typedef struct{
     uint8_t channel;
@@ -867,9 +875,14 @@ typedef struct{
     uint8_t rule_num;
     RSCAN_RECV_RULE_TypeDef *rule_p;
     RSCAN_TRANSMIT_BUF_MASK_TypeDef trans_buf_mask;
-    RSCAN_TrRe_FIFO_CONIFG_PARAM_TypeDef *trre_fifo_cfg_param_p;
+    uint8_t cfg_param_num;
+    RSCAN_TRFIFO_CFG_TypeDef *cfg_param_p;
 }RSCAN_InitTypeDef;
 
+typedef struct{
+    uint8_t x_masked;//receive fifo buffer masked bits
+    uint32_t k_masked;// transmit/receive fifo buffer masked bits
+}RSCAN_BUF_MASKED_TypeDef;
 
 uint32_t  RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
 int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uint8_t ctl);

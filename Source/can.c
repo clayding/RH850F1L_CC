@@ -37,10 +37,10 @@ CAN_ERROR_TypeDef can_error[] = {
 void CanInit(void)
 {
     RSCAN_InitTypeDef rscan3;
-    RSCAN_RECV_RULE_TypeDef rule[2];
-    RSCAN_TrRe_FIFO_CONIFG_PARAM_TypeDef cfg_param[2];
+    RSCAN_RECV_RULE_TypeDef rule[2] = {0};
+    RSCAN_TRFIFO_CFG_TypeDef cfg_param[18] = {0};
 
-    rscan3.channel = 4;
+    rscan3.channel = 3;
     rscan3.sp.fcan_src = 1;
     rscan3.sp.bit_time = CANbaudrateSet(CAN_BAUDRATE_250K);
 
@@ -60,7 +60,7 @@ void CanInit(void)
 
         rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rule[1].r_pointer.label_t = 0x745;
-        rule[1].r_pointer.recv_buf = RSCAN_TrReFIFO;
+        rule[1].r_pointer.recv_buf = RSCAN_TRFIFO;
         rule[1].r_pointer.recv_buf_index = 1;
         rule[1].r_pointer.k_index = 0;
         rule[1].r_pointer.x_index = 0;
@@ -71,20 +71,30 @@ void CanInit(void)
         rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
 
     }
+
     {
-        cfg_param[0].k_index = 12;
-        cfg_param[0].param_un.param_bits.trans_buf_num_linked= 0;
-        cfg_param[0].param_un.param_bits.mode= 0x01;
-        cfg_param[0].param_un.param_bits.int_req_tm = 0x01;
-        cfg_param[0].param_un.param_bits.int_src_sel = 0;
-        cfg_param[0].param_un.param_bits.buf_depth = 0x01;
+        uint8_t i = 0;
+        for(;i < 18; i++){
+            cfg_param[i].k_index = i;
+            cfg_param[i].param_un.param_bits.trans_buf_num_linked= 0;
+            if(i == (3*rscan3.channel) || i == (3*rscan3.channel + 1) || i == (3*rscan3.channel + 2))
+                cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_TRANSMIT_MODE;//transmit mode
+            else
+                cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_RECV_MODE;//transmit mode
+            cfg_param[i].param_un.param_bits.int_req_tm = 0x01;
+            cfg_param[i].param_un.param_bits.int_src_sel = 0;
+            cfg_param[i].param_un.param_bits.buf_depth = 0x01;
+        }
 
 
     }
     rscan3.rule_num = ARRAY_SIZE(rule);
     rscan3.rule_p = rule;
+
+    rscan3.cfg_param_num = ARRAY_SIZE(cfg_param);
+    rscan3.cfg_param_p = cfg_param;
+
     rscan3.trans_buf_mask.buf_mask = RSCAN_TRANSMIT_BUF_0;
-    rscan3.trans_buf_mask. fifo_link_mask = RSCAN_TRANSMIT_BUF_1 | RSCAN_TRANSMIT_BUF_2 | RSCAN_TRANSMIT_BUF_3;
     RSCAN_Init(&rscan3);
 }
 
