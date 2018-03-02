@@ -114,7 +114,7 @@ __IO uint8_t *filter_ctl_reg[] = {
 void Inp12Handler(unsigned long eiic);
 void (*Eiit_Handler_Ptr)(void);
 void (*Eiit_Handler_Ptr_2)(void);
-static uintptr_t Eiit_Get_Address_By_Channel(uint8_t channel_no);
+static uintptr_t Eiit_Get_Address_By_Channel(uint16_t channel_no);//max 288 , can not be uint8_t
 
 void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
 {
@@ -158,13 +158,13 @@ void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
 }
 
 
-uintptr_t Eiit_Get_Address_By_Channel(uint8_t channel_no)
+uintptr_t Eiit_Get_Address_By_Channel(uint16_t channel_no)
 {
 
     static uintptr_t int_base_addr = 0xFFFF9000;
     static uintptr_t int_addr =(uintptr_t)&int_base_addr;
     uintptr_t offset_addr = 0;// prevent from invalid operate
-
+    __IO ch = channel_no;
     int_base_addr = 0xFFFF9000;
     if(channel_no >> 5)
         int_base_addr += 0x1000;//to be 0xFFFFA000

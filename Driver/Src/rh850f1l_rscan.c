@@ -435,6 +435,7 @@ void RSCAN_Enable_Buf_Int(uint8_t m, RSCAN_TRANSMIT_BUF_MASK_TypeDef q_mask, uin
     }
 
 
+
     /*********Transmit/Receive FIFO Receive Interrupt Enable********/
     for(bit_pos = 0;bit_pos < 18 && (k_mask_un.bits.recv_k_mask >> bit_pos);bit_pos++){
         if((k_mask_un.bits.recv_k_mask & (0x01 << bit_pos)) == 0) continue;
@@ -508,6 +509,12 @@ void RSCAN_Eiint_Init(void)
     eiint.eiint_ch = 214;//CAN3 transmit interrupt
     Eiit_Init(&eiint);
 
+    eiint.eiint_ch = 264; //CAN4 error interrupt
+    Eiit_Init(&eiint);
+
+    eiint.eiint_ch = 266;//CAN4 transmit interrupt
+    Eiit_Init(&eiint);
+
 }
 
 int8_t RSCAN_Transmit_Buffer_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
@@ -559,7 +566,7 @@ int8_t RSCAN_Transmit_Recv_FIFO_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, ui
         uint8_t* data_p)
 {
     uint8_t k = 0, size = 0;
-    uint8_t len = 0, data[8] = {0};
+    uint8_t len = 0,sent_len = 0, data[8] = {0};
     uint32_t val = 0;
 
     if(id_info.index > 17) return -1;// max 17
@@ -567,40 +574,42 @@ int8_t RSCAN_Transmit_Recv_FIFO_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, ui
 
     // Is transmit/receive FIFO buffer full?
     // (Is CFFLL flag in the RSCAN0CFSTSk register 1?)
-    if(__RSCAN_GET_TRFIFO_STAT(k,CAN_CFFLL_MASK))
-        return -1;//if full, return
+    if(__RSCAN_GET_TRFIFO_STAT(k,CAN_CFFLL_MASK) == 0 ){//if not full
 
-    val = (uint32_t)(((id_info.ide << CAN_CFIDE_OFFSET) & CAN_CFIDE_MASK) |
-        ((id_info.rtr << CAN_CFRTR_OFFSET) & CAN_CFRTR_MASK) |
-        ((id_info.his_en << CAN_THLEN_OFFSET) & CAN_THLEN_MASK));
+        val = (uint32_t)(((id_info.ide << CAN_CFIDE_OFFSET) & CAN_CFIDE_MASK) |
+            ((id_info.rtr << CAN_CFRTR_OFFSET) & CAN_CFRTR_MASK) |
+            ((id_info.his_en << CAN_THLEN_OFFSET) & CAN_THLEN_MASK));
 
-    /*Set the ID of the receive rule.For the standard ID, set the ID in bits
-    b10 to b0 and set bits b28 to b11 to 0.*/
-    if(id_info.ide == 0)
-        val |= id_info.id & (CAN_CFID_MASK >> 18);
-    else
-        val |= id_info.id & CAN_CFID_MASK;
+        /*Set the ID of the receive rule.For the standard ID, set the ID in bits
+        b10 to b0 and set bits b28 to b11 to 0.*/
+        if(id_info.ide == 0)
+            val |= id_info.id & (CAN_CFID_MASK >> 18);
+        else
+            val |= id_info.id & CAN_CFID_MASK;
 
-    __RSCAN_SET_TRFIFO_ID(k,val);
+        __RSCAN_SET_TRFIFO_ID(k,val);
 
-    val = (uint32_t)(((data_len << CAN_CFDLC_OFFSET) & CAN_TMDLC_MASK) |
-        ((id_info.label_t << CAN_CFPTR_OFFSET) & CAN_CFPTR_MASK));
+        len = (data_len > 8) ? 8: data_len;
 
-    __RSCAN_SET_TRFIFO_POINTER(k,val);
+        val = (uint32_t)(((len << CAN_CFDLC_OFFSET) & CAN_TMDLC_MASK) |
+            ((id_info.label_t << CAN_CFPTR_OFFSET) & CAN_CFPTR_MASK));
 
-    len = (data_len > 8) ? 8: data_len;
+        __RSCAN_SET_TRFIFO_POINTER(k,val);
 
-    for(size = 0; len && size < len; size++){
-        data[size] = data_p[size];
+        for(size = 0; len && size < len; size++){
+            data[size] = data_p[size];
+        }
+
+        __RSCAN_WRITE_TRFIFO_DATA_L(k,&data[0]);
+        __RSCAN_WRITE_TRFIFO_DATA_H(k,&data_p[4]);
     }
 
-    __RSCAN_WRITE_TRFIFO_DATA_H(k,&data[0]);
-    __RSCAN_WRITE_TRFIFO_DATA_L(k,&data_p[4]);
+    sent_len += len;
 
     //Set the RSCAN0CFPCTRk register to 0xFF
     _RSCAN_SET_TRFIFO_POINTER(k);
 
-    return size;
+    return sent_len;
 }
 
 int8_t RSCAN_Transmit_Queue_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
@@ -774,6 +783,46 @@ RSCAN_RECV_FIFO_RESULT_Type RSCAN_Receive_FIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *
     return RSCAN_RECV_FIFO_EMPTY;
 }
 
+void RSCAN_Transmit_Confirm(uint8_t m,uint8_t k_mask,uint8_t p_mask)
+{
+    __IO uint8_t ret = 0;
+    __IO uint8_t id1_l = 0 ,id2_l = 0;
+    __IO uint8_t id1_h = 95 ,id2_h = 17;
+
+    if(*tx_buf_id_p >= 0 && *tx_buf_id* < 96){
+            id1_l == id1_h = tx_buf_id;
+    }
+
+    if(tr_fifo_id >= 0 && tr_fifo_id < 18){
+            id2_l == id2_h = tr_fifo_id;
+    }
+
+    for(;ch_l <= ch_h;ch_l++){
+
+        for(;id1_l <= id1_h;id1_l++){
+
+        }
+
+        for(;id2_l <= id2_h;id2_l++){
+
+        }
+    }
+
+
+    ret = __RSCAN_GET_TRANSMIT_STAT(tx_buf_id,CAN_TMTRF_MASK);
+
+    if(ret == RSCAN_TRANSMIT_COMPLETED_WITHOUT_ABORT ||
+        ret == RSCAN_TRANSMIT_COMPLETED_WITH_ABORT){
+        ret = 0;
+        return TRUE;
+    }
+
+    return FALSE;
+
+
+
+}
+
 bool R_CAN_Send_TxBuf0(uint8_t channel)
 {
     uint8_t data[8] = {0x45,0x56,0x78,0x89,0x90};
@@ -803,7 +852,7 @@ bool R_CAN_Send_TrFIFO(uint8_t channel)
     uint8_t p = 0;
     RSCAN_TRANSMIT_ID_INFO_TypeDef id_info;
     {
-        id_info.index = 1;
+        id_info.index = 12;
         id_info.ide = 0;
         id_info.rtr = 0;
         id_info.id = 0x21;

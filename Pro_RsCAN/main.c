@@ -38,10 +38,10 @@ void main(void)
 
        //R_CAN_Receive_RxBuf0(&can_id,&dlc,msg);
        //R_CAN_Send_TxBuf0(3);
-       CanMsgReceived(0,&can_id,&dlc,msg);
+       //CanMsgReceived(0,&can_id,&dlc,msg);
        //CanTransmitBuffer(48);
-       CanTransmit(64,can_id,dlc,msg);
-       //R_CAN_Send_TrFIFO(3);
+       //CanTransmit(64,can_id,dlc,msg);
+       R_CAN_Send_TrFIFO(3);
        while(Can_TxConfirmation(64) == FALSE);
 
        //transmit successfully

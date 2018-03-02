@@ -40,7 +40,7 @@ void CanInit(void)
     RSCAN_RECV_RULE_TypeDef rule[2] = {0};
     RSCAN_TRFIFO_CFG_TypeDef cfg_param[18] = {0};
 
-    rscan3.channel = 3;
+    rscan3.channel = 4;
     rscan3.sp.fcan_src = 1;
     rscan3.sp.bit_time = CANbaudrateSet(CAN_BAUDRATE_250K);
 
@@ -76,13 +76,14 @@ void CanInit(void)
         uint8_t i = 0;
         for(;i < 18; i++){
             cfg_param[i].k_index = i;
-            cfg_param[i].param_un.param_bits.trans_buf_num_linked= 0;
-            if(i == (3*rscan3.channel) || i == (3*rscan3.channel + 1) || i == (3*rscan3.channel + 2))
+            if(i == (3*rscan3.channel) || i == (3*rscan3.channel + 1) || i == (3*rscan3.channel + 2)){
+                cfg_param[i].param_un.param_bits.trans_buf_num_linked= i;
                 cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_TRANSMIT_MODE;//transmit mode
-            else
+            }else{
                 cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_RECV_MODE;//transmit mode
+            }
             cfg_param[i].param_un.param_bits.int_req_tm = 0x01;
-            cfg_param[i].param_un.param_bits.int_src_sel = 0;
+            cfg_param[i].param_un.param_bits.int_src_sel = 1;
             cfg_param[i].param_un.param_bits.buf_depth = 0x01;
         }
 
