@@ -37,14 +37,40 @@ CAN_ERROR_TypeDef can_error[] = {
 void CanInit(void)
 {
     RSCAN_InitTypeDef rscan3;
-    RSCAN_RECV_RULE_TypeDef rule[2] = {0};
-    RSCAN_TRFIFO_CFG_TypeDef cfg_param[18] = {0};
+    RSCAN_RECV_RULE_TypeDef rule[11];
+    RSCAN_TRFIFO_CFG_TypeDef tf_cfg_param[18];
+    RSCAN_RXFIFO_CFG_TypeDef rf_cfg_param[8];
 
-    rscan3.channel = 4;
+    memset(rule,0,ARRAY_SIZE(rule) * sizeof(RSCAN_RECV_RULE_TypeDef));
+    memset(tf_cfg_param,0,ARRAY_SIZE(tf_cfg_param) * sizeof(RSCAN_TRFIFO_CFG_TypeDef));
+    memset(rf_cfg_param,0,ARRAY_SIZE(rf_cfg_param) * sizeof(RSCAN_RXFIFO_CFG_TypeDef));
+    {
+        uint8_t kc = 0;
+        for(;kc < 6;kc++){
+
+    rscan3.channel = kc;
     rscan3.sp.fcan_src = 1;
     rscan3.sp.bit_time = CANbaudrateSet(CAN_BAUDRATE_250K);
 
     {//for example
+#if 1
+    uint8_t kj = 0;
+    for(;kj < 11;kj++){
+        rule[kj].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
+        rule[kj].r_pointer.label_t =kc;
+        rule[kj].r_pointer.recv_buf = RSCAN_RECV_BUF;
+        rule[kj].r_pointer.recv_buf_index = kj;
+        rule[kj].r_pointer.k_index = 0;
+        rule[kj].r_pointer.x_index = 0;
+        rule[kj].r_id_info.ide = RSCAN_RECV_IDE_STD;
+        rule[kj].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
+        rule[kj].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
+        rule[kj].r_id_info.id = kj;
+        rule[kj].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
+    }
+
+#else
+
         rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rule[0].r_pointer.label_t = 0x891;
         rule[0].r_pointer.recv_buf = RSCAN_RECV_BUF;
@@ -69,34 +95,58 @@ void CanInit(void)
         rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
         rule[1].r_id_info.id = 0x456;
         rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
-
+#endif;
     }
 
     {
         uint8_t i = 0;
         for(;i < 18; i++){
-            cfg_param[i].k_index = i;
+            tf_cfg_param[i].k_index = i;
             if(i == (3*rscan3.channel) || i == (3*rscan3.channel + 1) || i == (3*rscan3.channel + 2)){
-                cfg_param[i].param_un.param_bits.trans_buf_num_linked= i;
-                cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_TRANSMIT_MODE;//transmit mode
+                tf_cfg_param[i].param_un.param_bits.txbuf_num_linked= i;
+                tf_cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_TRANSMIT_MODE;//transmit mode
             }else{
-                cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_RECV_MODE;//transmit mode
+                tf_cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_RECV_MODE;//transmit mode
             }
-            cfg_param[i].param_un.param_bits.int_req_tm = 0x01;
-            cfg_param[i].param_un.param_bits.int_src_sel = 1;
-            cfg_param[i].param_un.param_bits.buf_depth = 0x01;
+            tf_cfg_param[i].param_un.param_bits.int_req_tm = 0x01;
+            tf_cfg_param[i].param_un.param_bits.int_src_sel = 1;
+            tf_cfg_param[i].param_un.param_bits.buf_depth = 0x01;
         }
 
-
+        for(i = 0;i < 8;i++){
+            rf_cfg_param[i].x_index = i;
+            rf_cfg_param[i].param_un.param_bits.int_req_tm = 0x01;
+            rf_cfg_param[i].param_un.param_bits.int_src_sel = 1;
+            rf_cfg_param[i].param_un.param_bits.buf_depth = 0x01;
+        }
     }
     rscan3.rule_num = ARRAY_SIZE(rule);
     rscan3.rule_p = rule;
 
-    rscan3.cfg_param_num = ARRAY_SIZE(cfg_param);
-    rscan3.cfg_param_p = cfg_param;
+    rscan3.fifo_cfg.trfifo_cfg_num = ARRAY_SIZE(tf_cfg_param);
+    rscan3.fifo_cfg.trfifo_cfg_p = tf_cfg_param;
 
-    rscan3.trans_buf_mask.buf_mask = RSCAN_TRANSMIT_BUF_0;
+    rscan3.fifo_cfg.rxfifo_cfg_num = ARRAY_SIZE(rf_cfg_param);
+    rscan3.fifo_cfg.rxfifo_cfg_p = rf_cfg_param;
+
+    rscan3.txbuf_mask_st.txbuf_mask = RSCAN_TRANSMIT_BUF_0 | RSCAN_TRANSMIT_BUF_1 |
+        RSCAN_TRANSMIT_BUF_13;
+
     RSCAN_Init(&rscan3);
+    }}
+    {
+        uint8_t j = 0;
+        for(;j < 23;j++){
+	    __IO uint8_t x = 0;
+            __RSCAN_ENABLE_RECV_TABLE_WRITE(1);
+	    
+	    __RSCAN_RECV_TABLE_PAGE_NUM_CFG(j);
+	    
+	    x = j;
+	    
+	    __RSCAN_ENABLE_RECV_TABLE_WRITE(0);
+        }
+    }
 }
 
 /* @brief - Reset RsCAN module,as same as the initialization.
@@ -172,7 +222,7 @@ int8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p
     if(__RSCAN_GET_TRANSMIT_STAT(id_info.index,CAN_TMTRM_MASK))
         return -1;
 
-    sent_size = RSCAN_Transmit_Buffer_Write(id_info,Length,data_p);
+    sent_size = RSCAN_TxBuffer_Write(id_info,Length,data_p);
 
     return sent_size;
 }
@@ -210,7 +260,7 @@ void CanMsgReceived(uint8_t RxbufferId,uint32_t *p_can_id, uint8_t *p_dlc, uint8
 
     id_info.index = RxbufferId;
     while(ret == -1){
-        ret  = RSCAN_Receive_Buffer_Read(&id_info,msg_p);
+        ret  = RSCAN_RxBuffer_Read(&id_info,msg_p);
     }
 
     *p_can_id = id_info.id;

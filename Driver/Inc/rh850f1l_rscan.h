@@ -789,8 +789,8 @@ typedef enum{
 typedef union{
     uint32_t k_mask;
     struct{
-        uint32_t recv_k_mask:18;
-        uint32_t trans_k_mask:3;
+        uint32_t rx_k_mask:18;
+        uint32_t tx_k_mask:3;
         uint32_t :11;
     }bits;
 }RSCAN_TRFIFO_INDEX_MASK_Union;
@@ -822,9 +822,10 @@ typedef struct{
 }RSCAN_TRANSMIT_ID_INFO_TypeDef,RSCAN_RECV_ID_INFO_TypeDef;
 
 typedef struct{
-    uint16_t buf_mask;
-    uint8_t queue_num_used;
-}RSCAN_TRANSMIT_BUF_MASK_TypeDef;
+    uint16_t txbuf_mask;    //tx buffer index used, 0-15 corresponds to the bits
+    uint8_t  txque_num;     //the number of tx queue used
+    RSCAN_TRFIFO_INDEX_MASK_Union tf_mask_un; //tx fifo mask union
+}RSCAN_TXBUF_MASK_TypeDef;
 
 /*Transmit/Receive FIFO Mode Select*/
 typedef enum{
@@ -843,9 +844,9 @@ typedef struct{
             uint32_t CFE        :1;     //Transmit/Receive FIFO Buffer Enable
             uint32_t CFRXIE     :1;     //Transmit/Receive FIFO Receive Interrupt Enable
             uint32_t CFTXIE     :1;     //Transmit/Receive FIFO Transmit Interrupt Enable
-            uint32_t reserved0  :5;     //Reserved
+            uint32_t            :5;     //Reserved
             uint32_t CFDC       :3;     //Transmit/Receive FIFO Buffer Depth Configuration
-            uint32_t reserved1  :1;     //Reserved
+            uint32_t            :1;     //Reserved
             uint32_t CFIM       :1;     //Transmit/Receive FIFO Interrupt Source Select
             uint32_t CFIGCV     :3;     //Transmit/Receive FIFO Receive Interrupt Request Timing Select
             uint32_t CFM        :2;
@@ -855,36 +856,70 @@ typedef struct{
             uint32_t CFITT      :8;
         }reg_bits;
         struct{
-            uint32_t reserved0          :8;//Reserved
+            uint32_t                    :8;//Reserved
             uint32_t buf_depth          :3;//Transmit/Receive FIFO Buffer Depth Configuration
-            uint32_t reserved1          :1;//Reserved
+            uint32_t                    :1;//Reserved
             uint32_t int_src_sel        :1;//Transmit/Receive FIFO Interrupt Source Select
             uint32_t int_req_tm         :3;//Transmit/Receive FIFO Receive Interrupt Request Timing Select
             uint32_t mode               :2;//Transmit/Receive FIFO Mode Select
             uint32_t invl_time_clk_src  :1;//Transmit/Receive FIFO Interval Timer Clock Source Select
             uint32_t invl_time_res      :1;//Transmit/Receive FIFO Interval Timer Resolution
-            uint32_t trans_buf_num_linked :4;//Set the transmit buffer number to be linked to the transmit/receive FIFO buffer
+            uint32_t txbuf_num_linked   :4;//Set the transmit buffer number to be linked to the transmit/receive FIFO buffer
             uint32_t msg_send_invl      :8; //Set a message transmission interval.
         }param_bits;
     }param_un;
 }RSCAN_TRFIFO_CFG_TypeDef;
 
 typedef struct{
+    uint8_t x_index; //0-7
+    union{
+        uint32_t cfg_param;
+        struct{
+            uint32_t RFE        :1;     //Receive FIFO Buffer Enable
+            uint32_t RFIE       :1;     //Receive FIFO Interrupt Enable
+            uint32_t            :6;     //Reserved
+            uint32_t RFDC       :3;     //Receive FIFO Buffer Depth Configuration
+            uint32_t            :1;     //Reserved
+            uint32_t RFIM       :1;     //Receive FIFO Interrupt Source Select
+            uint32_t RFIGCV     :3;     //Receive FIFO Interrupt Request Timing Select
+            uint32_t            :16;    //Reserved
+        }reg_bits;
+        struct{
+            uint32_t                    :1;     //Receive FIFO Buffer Enable
+            uint32_t                    :1;     //Receive FIFO Interrupt Enable
+            uint32_t                    :6;     //Reserved
+            uint32_t buf_depth          :3;     //Receive FIFO Buffer Depth Configuration
+            uint32_t                    :1;     //Reserved
+            uint32_t int_src_sel        :1;     //Receive FIFO Interrupt Source Select
+            uint32_t int_req_tm         :3;     //Receive FIFO Interrupt Request Timing Select
+            uint32_t                    :16;    //Reserved
+        }param_bits;
+    }param_un;
+}RSCAN_RXFIFO_CFG_TypeDef;
+
+typedef struct{
+    uint8_t trfifo_cfg_num;
+    RSCAN_TRFIFO_CFG_TypeDef *trfifo_cfg_p;
+    uint8_t rxfifo_cfg_num;
+    RSCAN_RXFIFO_CFG_TypeDef *rxfifo_cfg_p;
+}RSCAN_FIFO_CFG_TypeDef;
+
+typedef struct{
     uint8_t channel;
     RSCAN_COM_SPEED_PARAM_TypeDef sp;
     uint8_t rule_num;
     RSCAN_RECV_RULE_TypeDef *rule_p;
-    RSCAN_TRANSMIT_BUF_MASK_TypeDef trans_buf_mask;
-    uint8_t cfg_param_num;
-    RSCAN_TRFIFO_CFG_TypeDef *cfg_param_p;
+    RSCAN_TXBUF_MASK_TypeDef txbuf_mask_st;
+    RSCAN_FIFO_CFG_TypeDef fifo_cfg;
 }RSCAN_InitTypeDef;
 
 typedef struct{
-    uint8_t x_masked;//receive fifo buffer masked bits
-    uint32_t k_masked;// transmit/receive fifo buffer masked bits
-}RSCAN_BUF_MASKED_TypeDef;
+    uint8_t x_masked;//receive fifo buffer masked(available) bits
+    uint32_t k_masked;//transmit/receive fifo buffer masked(available) bits
+    uint16_t p_masked;//trasmit buffer masked(available) bits
+}RSCAN_BUF_MASKED_TypeDef,RSCAN_BUF_AVAILABLE_TypeDef;
 
-uint32_t  RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
+uint32_t RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
 int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uint8_t ctl);
 uint32_t RSCAN_Channel_Error(uint8_t channel);
 uint32_t RSCAN_Global_Error(void);
