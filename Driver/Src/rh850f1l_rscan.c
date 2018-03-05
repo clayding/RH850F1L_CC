@@ -14,7 +14,6 @@
 #include "rh850f1l_rscan.h"
 #include "rh850f1l_ext.h"
 
-#define MAX_CHANNEL_NUM             6   // 0-3 channel
 #define TOTAL_RECV_BUF_NUM          10  // Receive Buffer Number Configuration - set to 1, max 96
 #define MAX_RULE_NUM_PER_PAGE       16
 
@@ -289,7 +288,7 @@ void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *pointer_p
     val = (uint32_t)(((pointer_p->dlc_t << CAN_GAFLDLC_OFFSET) & CAN_GAFLDLC_MASK) |
         ((pointer_p->label_t << CAN_GAFLPTR_OFFSET) & CAN_GAFLPTR_MASK));
 
-    if(pointer_p->recv_buf == RSCAN_RECV_BUF){
+    if(pointer_p->recv_buf == RSCAN_RX_BUF){
         val |= ((0x01 << CAN_GAFLRMV_OFFSET) & CAN_GAFLRMV_MASK) |
             ((pointer_p->recv_buf_index << CAN_GAFLRMDP_OFFSET) & CAN_GAFLRMDP_MASK);
     }
@@ -305,7 +304,7 @@ void RSCAN_Rule_Pointer_Set(uint8_t j,RSCAN_RECV_RULE_POINTER_TypeDef *pointer_p
     val  = 0;
     if(pointer_p->recv_buf == RSCAN_TRFIFO && pointer_p->k_index <= 17)
         val = 0x01 << (pointer_p->k_index + 8);
-    if(pointer_p->recv_buf == RSCAN_RECV_FIFO && pointer_p->x_index <= 7)
+    if(pointer_p->recv_buf == RSCAN_RX_FIFO && pointer_p->x_index <= 7)
         val |= 0x01 << pointer_p->x_index;
 
     __RSCAN_SET_RULE_POINTER1(j,val);
@@ -518,10 +517,16 @@ void RSCAN_Eiint_Init(void)
     eiint.eiint_ch = 212; //CAN3 error interrupt
     Eiit_Init(&eiint);
 
+    eiint.eiint_ch = 213; //CAN3  transmit/receive FIFO receive complete interrupt
+    Eiit_Init(&eiint);
+
     eiint.eiint_ch = 214;//CAN3 transmit interrupt
     Eiit_Init(&eiint);
 
     eiint.eiint_ch = 264; //CAN4 error interrupt
+    Eiit_Init(&eiint);
+
+    eiint.eiint_ch = 265; //CAN4  transmit/receive FIFO receive complete interrupt
     Eiit_Init(&eiint);
 
     eiint.eiint_ch = 266;//CAN4 transmit interrupt
@@ -529,7 +534,7 @@ void RSCAN_Eiint_Init(void)
 
 }
 
-int8_t RSCAN_TxBuffer_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+int8_t RSCAN_TxBuffer_Write(RSCAN_TXID_INFO_TypeDef id_info, uint8_t data_len,
         uint8_t* data_p)
 {
     uint8_t p = 0, size = 0;
@@ -574,7 +579,7 @@ int8_t RSCAN_TxBuffer_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data
     return size;//return the actual data size to be transmited
 }
 
-int8_t RSCAN_TRFIFO_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+int8_t RSCAN_TRFIFO_Write(RSCAN_TXID_INFO_TypeDef id_info, uint8_t data_len,
         uint8_t* data_p)
 {
     uint8_t k = 0, size = 0;
@@ -624,7 +629,7 @@ int8_t RSCAN_TRFIFO_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_l
     return sent_len;
 }
 
-int8_t RSCAN_TxQueue_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_len,
+int8_t RSCAN_TxQueue_Write(RSCAN_TXID_INFO_TypeDef id_info, uint8_t data_len,
         uint8_t* data_p)
 {
     uint8_t p = 0, m = 0, size = 0;
@@ -675,7 +680,7 @@ int8_t RSCAN_TxQueue_Write(RSCAN_TRANSMIT_ID_INFO_TypeDef id_info, uint8_t data_
 }
 
 
-int8_t RSCAN_RxBuffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
+int8_t RSCAN_RxBuffer_Read(RSCAN_RXID_INFO_TypeDef *id_info_p,uint8_t* data_p)
 {
     __IO uint8_t q = 0,y = 0,bit_pos = 0,i = 0;
     __IO uint8_t recv_size = 0,*p = NULL;
@@ -705,7 +710,7 @@ int8_t RSCAN_RxBuffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p
     recv_size = (val & CAN_RMDLC_MASK)  >> CAN_RMDLC_OFFSET;
     id_info_p->time_stamp = (val & CAN_RMTS_MASK);
 
-    p =(uint8_t*)__RSCAN_READ_RECV_BUF_DATA_L(q);
+    p =(uint8_t*)__RSCAN_READ_RECV_BUF_ADDR(q);
 
     for( i = 0; recv_size && i <recv_size;i++){
         data_p[i] = p[i];
@@ -715,49 +720,57 @@ int8_t RSCAN_RxBuffer_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p
     return recv_size;
 }
 
-int8_t RSCAN_TRFIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t* data_p)
+RSCAN_TRFIFO_RESULT_Type RSCAN_TRFIFO_Read(RSCAN_RXID_INFO_TypeDef *id_info_p,uint8_t *len_p,uint8_t* data_p)
 {
     uint8_t k = 0, i = 0;
     uint8_t recv_size = 0,*p = NULL;
     uint32_t val = 0;
 
-    if(id_info_p->index > 17) return -1;// max 17
+    if(id_info_p->index > 17)
+        return RSCAN_RXFIFO_ERR;// max 17
     k = id_info_p->index;
 
-    if(__RSCAN_GET_TRFIFO_STAT(k,CAN_CFEMP_MASK))
-        return -1;//if empty, return
+    if(__RSCAN_GET_TRFIFO_STAT(k,CAN_CFEMP_MASK) == 0){
 
-    val = __RSCAN_GET_TRFIFO_ID(k);
+        val = __RSCAN_GET_TRFIFO_ID(k);
 
-    id_info_p->ide = (val & CAN_CFIDE_MASK) >> CAN_CFIDE_OFFSET;
-    id_info_p->rtr = (val & CAN_CFRTR_MASK) >> CAN_CFRTR_OFFSET;
-    id_info_p->id  = (val & CAN_CFID_MASK);
+        id_info_p->ide = (val & CAN_CFIDE_MASK) >> CAN_CFIDE_OFFSET;
+        id_info_p->rtr = (val & CAN_CFRTR_MASK) >> CAN_CFRTR_OFFSET;
+        id_info_p->id  = (val & CAN_CFID_MASK);
 
-    val = __RSCAN_GET_TRFIFO_POINTER(k);
+        val = __RSCAN_GET_TRFIFO_POINTER(k);
 
-    id_info_p->label_t = (val & CAN_CFPTR_MASK)  >> CAN_CFPTR_OFFSET;
-    recv_size = (val & CAN_CFDLC_MASK)  >> CAN_CFDLC_OFFSET;
-    id_info_p->time_stamp = (val & CAN_CFTS_MASK);
+        id_info_p->label_t = (val & CAN_CFPTR_MASK)  >> CAN_CFPTR_OFFSET;
+        recv_size = (val & CAN_CFDLC_MASK)  >> CAN_CFDLC_OFFSET;
+        id_info_p->time_stamp = (val & CAN_CFTS_MASK);
 
-    p =(uint8_t*)__RSCAN_READ_RECV_BUF_DATA_L(k);
+        p =(uint8_t*)__RSCAN_READ_TRFIFO_ADDR(k);
 
-    for( i = 0; recv_size && i <recv_size;i++){
-        data_p[i] = p[i];
+        for( i = 0; recv_size && i <recv_size;i++){
+            data_p[i] = p[i];
+        }
+        *len_p = recv_size;
+        //Set the RSCAN0CFPCTRk register to 0xFF
+        _RSCAN_SET_TRFIFO_POINTER(k);
+
+        if(__RSCAN_GET_TRFIFO_STAT(k,CAN_CFEMP_MASK) == 0)
+            return  RSCAN_RXFIFO_NOT_EMPTY;
     }
-    //Set the RSCAN0CFPCTRk register to 0xFF
-    _RSCAN_SET_TRFIFO_POINTER(k);
 
-    return recv_size;
+    //clear transmit/receive FIFO receive interrupt request flag
+    __RSCAN_SET_TRFIFO_STAT(k,CAN_CFRXIF_MASK,0);
+    return RSCAN_RXFIFO_EMPTY;
+
 }
 
-RSCAN_RECV_FIFO_RESULT_Type RSCAN_RxFIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_info_p,uint8_t *len_p,uint8_t* data_p)
+RSCAN_RXFIFO_RESULT_Type RSCAN_RxFIFO_Read(RSCAN_RXID_INFO_TypeDef *id_info_p,uint8_t *len_p,uint8_t* data_p)
 {
-    uint8_t x = 0, i = 0;
-    uint8_t recv_size = 0,*p = NULL;
-    uint32_t val = 0;
+    __IO uint8_t x = 0, i = 0;
+    __IO uint8_t recv_size = 0,*p = NULL;
+    __IO uint32_t val = 0;
 
     if(id_info_p->index > 7)
-        return RSCAN_RECV_FIFO_ERR;// max 7
+        return RSCAN_RXFIFO_ERR;// max 7
 
     x = id_info_p->index;
 
@@ -776,30 +789,29 @@ RSCAN_RECV_FIFO_RESULT_Type RSCAN_RxFIFO_Read(RSCAN_RECV_ID_INFO_TypeDef *id_inf
         recv_size = (val & CAN_RFDLC_MASK)  >> CAN_RFDLC_OFFSET;
         id_info_p->time_stamp = (val & CAN_RFTS_MASK);
 
-        p =(uint8_t*)__RSCAN_READ_RECV_BUF_DATA_L(x);
+        p =(uint8_t*)__RSCAN_READ_RECV_FIFO_ADDR(x);
 
         for( i = 0; recv_size && i <recv_size;i++){
             data_p[i] = p[i];
         }
+	    *len_p = recv_size;
+	 //Set the RSCAN0RFPCTRx register to 0xFF
+         _RSCAN_SET_RECV_FIFO_POINTER(x);
 
         if(__RSCAN_GET_RECV_FIFO_STAT(x,CAN_RFEMP_MASK) == 0){
-
-            //Set the RSCAN0RFPCTRx register to 0xFF
-            _RSCAN_SET_RECV_FIFO_POINTER(x);
-
-            return  RSCAN_RECV_FIFO_NOT_EMPTY;
+            return  RSCAN_RXFIFO_NOT_EMPTY;
         }
     }
 
     __RSCAN_SET_RECV_FIFO_STAT(x,CAN_RFIF_MASK,0);
-    return RSCAN_RECV_FIFO_EMPTY;
+    return RSCAN_RXFIFO_EMPTY;
 }
 
-int8_t RSCAN_Transmit_Confirm(RSCAN_TRANSMIT_BUF_Sel_Type tx_type,int8_t txbuf_id)
+int8_t RSCAN_Transmit_Confirm(RSCAN_TX_BUF_Sel_Type tx_type,int8_t txbuf_id)
 {
     __IO uint8_t ret = 0;
 
-    if( tx_type == RSCAN_TRANSMIT_BUF && txbuf_id >= 0 && txbuf_id < 96){
+    if( tx_type == RSCAN_TX_BUF && txbuf_id >= 0 && txbuf_id < 96){
         ret = __RSCAN_GET_TRANSMIT_STAT(txbuf_id,CAN_TMTRF_MASK) >> CAN_TMTRF_OFFSET;
 
         if(ret == RSCAN_TRANSMIT_COMPLETED_WITHOUT_ABORT ||
@@ -824,7 +836,7 @@ bool R_CAN_Send_TxBuf0(uint8_t channel)
 {
     uint8_t data[8] = {0x45,0x56,0x78,0x89,0x90};
     uint8_t p = 0;
-    RSCAN_TRANSMIT_ID_INFO_TypeDef id_info;
+    RSCAN_TXID_INFO_TypeDef id_info;
     {
         id_info.index = channel * 16 + 0;
         id_info.ide = 0;
@@ -847,9 +859,9 @@ bool R_CAN_Send_TrFIFO(uint8_t channel)
 {
     uint8_t data[8] = {0x45,0x56,0x78,0x89,0x90};
     uint8_t p = 0;
-    RSCAN_TRANSMIT_ID_INFO_TypeDef id_info;
+    RSCAN_TXID_INFO_TypeDef id_info;
     {
-        id_info.index = 12;
+        id_info.index = 9;
         id_info.ide = 0;
         id_info.rtr = 0;
         id_info.id = 0x21;
@@ -869,7 +881,7 @@ bool R_CAN_Send_TrFIFO(uint8_t channel)
 bool R_CAN_Receive_RxBuf0(uint32_t *p_can_id, uint8_t *p_dlc, uint8_t msg[8])
 {
     int8_t ret = -1;
-    RSCAN_RECV_ID_INFO_TypeDef id_info;
+    RSCAN_RXID_INFO_TypeDef id_info;
 
     id_info.index = 0;
     while(ret == -1){
@@ -936,6 +948,40 @@ RSCAN_BUF_AVAILABLE_TypeDef RSCAN_All_Buf_Available(void)
     return buf_masked;
 }
 
+
+void RSCAN_Ecc_Init(bool err_1bit_corr_en, bool err_2bit_detect_int)
+{
+    __IO uint16_t mask = 0,val = 0;
+
+    if(err_1bit_corr_en){
+        mask |= CAN_EC1ECP_MASK;
+        val  &= ~CAN_EC1ECP_MASK; //to enable,clear this bit
+    }
+
+    if(err_2bit_detect_int){
+        mask |= CAN_EC2EDIC_MASK;
+        val  |= CAN_EC2EDIC_MASK; //to enable,set this bit
+    }
+
+    //(0, 1) must be written to (EMCA1, EMCA0) at the same time
+    //before setting the ECTHM  to
+    mask |= CAN_EMCA1_MASK | CAN_EMCA0_MASK;
+    val |= 0x01 << CAN_EMCA0_OFFSET;
+
+    //clear the ECEMF bit that error determination is enabled
+    mask |= CAN_ECEMF_MASK;
+
+    __RSCAN_SET_ECC_CTL_REG(mask,val);
+}
+
+bool RSCAN_Ecc_Err_Checked(void)
+{
+    if(__RSCAN_GET_ECC_CTL_REG(CAN_ECEMF_MASK)){
+        return TRUE;
+    }
+    return FALSE;
+}
+
 /***************************Global interrupt handler***************************/
 #pragma interrupt RSCAN0GlobalErrorIntHandler(channel = 14, enable = false, callt = false, fpu = false)
 void RSCAN0GlobalErrorIntHandler(unsigned long eiic)
@@ -947,11 +993,11 @@ void RSCAN0GlobalErrorIntHandler(unsigned long eiic)
 void RSCAN0RecvFIFOIntHandler(unsigned long eiic)
 {
     uint8_t msg[8] = {0},len = 0;
-    RSCAN_RECV_ID_INFO_TypeDef id_info;
+    RSCAN_RXID_INFO_TypeDef id_info;
 
-    id_info.index = 1;
+    id_info.index = 0;
 
-    while(RSCAN_RxFIFO_Read(&id_info,&len,msg) == RSCAN_RECV_FIFO_NOT_EMPTY){};
+    while(RSCAN_RxFIFO_Read(&id_info,&len,msg) == RSCAN_RXFIFO_NOT_EMPTY);
 
 }
 
@@ -1022,7 +1068,11 @@ void RSCAN0CH3ErrorIntHandler(unsigned long eiic)
 #pragma interrupt RSCAN0CH3TrFIFORecvCompletionIntHandler(channel = 213, enable = false, callt = false, fpu = false)
 void RSCAN0CH3TrFIFORecvCompletionIntHandler(unsigned long eiic)
 {
-    while(1){};
+    uint8_t msg[8] = {0},len = 0;
+    RSCAN_RXID_INFO_TypeDef id_info;
+    id_info.index = 9;
+
+    while(RSCAN_TRFIFO_Read(&id_info,&len,msg) == RSCAN_RXFIFO_NOT_EMPTY);
 }
 
 #pragma interrupt RSCAN0CH3SendCompleteIntHandler(channel = 214, enable = false, callt = false, fpu = false)

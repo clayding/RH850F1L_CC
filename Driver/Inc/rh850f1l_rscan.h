@@ -11,6 +11,7 @@
 #define RH850F1L_RSCAN_H
 #include "rh850f1l.h"
 
+#define MAX_CHANNEL_NUM             6   // 0-5 channel,the max number of channel
 #define MAX_RULE_NUM_PER_CHANNEL    128//
 /*Clock Supply Setting*/
 #define RSCAN_CLK_XINCAN        1 //select the clk_xincan as clock source of the RS-CAN module
@@ -138,6 +139,7 @@
 
 
 /*RSCAN0CmSTS — Channel Status Register (m = 0 to 5) bits mask Read-only*/
+#define CAN_BOSTS_MASK          ((uint32_t)0x01 << 4)
 #define CAN_EPSTS_MASK          ((uint32_t)0x01 << 3) //Error Passive Status Flag
 #define CAN_CSLPSTS_MASK        ((uint32_t)0x01 << 2) //Channel Stop Status Flag
 #define CAN_CHLTSTS_MASK        ((uint32_t)0x01 << 1) //Channel Test Status Flag
@@ -460,13 +462,34 @@ Register k (k = 0 to 17)*/
 #define CAN_RTME_MASK           ((uint32_t)0x01 << CAN_RTME_OFFSET)
 #define CAN_ICBCTME_MASK        ((uint32_t)0x01)
 
+/*ECCRCAN0CTL — RSCAN0 ECC Control Register*/
+#define CAN_EMCA1_OFFSET        15
+#define CAN_EMCA0_OFFSET        14
+#define CAN_ECER2C_OFFSET       10
+#define CAN_ECER1C_OFFSET       9
+#define CAN_ECTHM_OFFSET        7
+#define CAN_EC1ECP_OFFSET       5
+#define CAN_EC2EDIC_OFFSET      4
+#define CAN_ECER2F_OFFSET       2
+#define CAN_ECER1F_OFFSET       1
+
+#define CAN_EMCA1_MASK          ((uint16_t)0x01 << CAN_EMCA1_OFFSET)
+#define CAN_EMCA0_MASK          ((uint16_t)0x01 << CAN_EMCA0_OFFSET)
+#define CAN_ECER2C_MASK         ((uint16_t)0x01 << CAN_ECER2C_OFFSET)
+#define CAN_ECER1C_MASK         ((uint16_t)0x01 << CAN_ECER1C_OFFSET)
+#define CAN_ECTHM_MASK          ((uint16_t)0x01 << CAN_ECTHM_OFFSET)
+#define CAN_EC1ECP_MASK         ((uint16_t)0x01 << CAN_EC1ECP_OFFSET)
+#define CAN_EC2EDIC_MASK        ((uint16_t)0x01 << CAN_EC2EDIC_OFFSET)
+#define CAN_ECER2F_MASK         ((uint16_t)0x01 << CAN_ECER2F_OFFSET)
+#define CAN_ECER1F_MASK         ((uint16_t)0x01 << CAN_ECER1F_OFFSET)
+#define CAN_ECEMF_MASK          ((uint16_t)0x01)
 
 /******************************************************************************/
 
 #define TEST_FUNC(_BASE_REG_)                              (uint32_t*)(&(RSCAN0_BASE.##_BASE_REG_))
 #define CAN_REG_ADDR(_CNT_,_BASE_REG_,_OFFSET_B_)          ((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *(_CNT_)))
 #define CAN_REG_VAL(_CNT_,_BASE_REG_,_OFFSET_B_)           (*((uint32_t*)(((uint8_t*)(&(RSCAN0_BASE.##_BASE_REG_)))+ _OFFSET_B_ *(_CNT_))))
-
+#define CAN_CLEAR_ALL()                                     (memset(((volatile struct __tag32 *)0xFFD00000),0,sizeof(struct __tag32)))
 /*********************************19.3.2--19.3.5******************************/
 /*Config RSCAN0CmCFG — Channel Configuration Register (m = 0 to 5)
 Modify the RSCAN0CmCFG register in channel reset mode or channel halt mode. */
@@ -560,9 +583,11 @@ Modify the RSCAN0GAFLCFG1 register only in global reset mode.*/
 #define __RSCAN_GET_RECV_BUF_POINTER(_Q_)                   (CAN_REG_VAL(_Q_,_RMPTR0,0x10))
 
 /*Read the RSCAN0RMDF0q — Receive Buffer Data Field 0 Register (q = 0 to 95)*/
-#define __RSCAN_READ_RECV_BUF_DATA_L(_Q_)                   (CAN_REG_ADDR(_Q_,_RMDF00,0x10))
+#define __RSCAN_READ_RECV_BUF_DATA_L(_Q_)                   (CAN_REG_VAL(_Q_,_RMDF00,0x10))
 /*Read the RSCAN0RMDF1q — Receive Buffer Data Field 1 Register (q = 0 to 95)*/
-#define __RSCAN_READ_RECV_BUF_DATA_H(_Q_)                   (CAN_REG_ADDR(_Q_,_RMDF10,0x10))
+#define __RSCAN_READ_RECV_BUF_DATA_H(_Q_)                   (CAN_REG_VAL(_Q_,_RMDF10,0x10))
+
+#define __RSCAN_READ_RECV_BUF_ADDR(_Q_)                     (CAN_REG_ADDR(_Q_,_RMDF00,0x10))
 
 /*********************************19.3.26--19.3.32*****************************/
 /*Config the RSCAN0RFCCx Receive FIFO Buffer Configuration and Control Register (x = 0 to 7)*/
@@ -583,10 +608,12 @@ This register is read-only when receive mode*/
 #define __RSCAN_GET_RECV_FIFO_POINTER(_X_)                  CAN_REG_VAL(_X_,_RFPTR0,0x10)
 /*Read the RSCAN0RFDF0x — Receive FIFO Buffer Access Data Field 0 Register (k = 0 to 7)
 This register is read-only when receive mode*/
-#define __RSCAN_READ_RECV_FIFO_DATA_L(_X_)                  CAN_REG_VAL(_X_,_RFDF00,0x10)
+#define __RSCAN_READ_RECV_FIFO_DATA_L(_X_)                  (CAN_REG_VAL(_X_,_RFDF00,0x10))
 /*Read the RSCAN0RFDF1x — Receive FIFO Buffer Access Data Field 1 Register (k = 0 to 7)
 This register is read-only when receive mode*/
 #define __RSCAN_READ_RECV_FIFO_DATA_H(_X_)                  CAN_REG_VAL(_X_,_RFDF10,0x10)
+
+#define __RSCAN_READ_RECV_FIFO_ADDR(_X_)                    (CAN_REG_ADDR(_X_,_RFDF00,0x10))
 
 /*********************************19.3.33--19.3.39*****************************/
 /*Config the RSCAN0CFCCx  Transmit/receive FIFO Buffer Configuration and Control
@@ -594,6 +621,7 @@ Register k (k = 0 to 17)*/
 #define __RSCAN_SET_TRFIFO_BUF(_K_,_MASK_,_VALUE_)       MODIFY_REG(CAN_REG_ADDR(_K_,_CFCC0,0x04),_MASK_,_VALUE_)
 #define __RSCAN_GET_TRFIFO_BUF(_K_,_MASK_)               (CAN_REG_VAL(_K_,_CFCC0,0x04) & (_MASK_))
 /*RSCAN0CFSTSk — Transmit/receive FIFO Buffer Status Register (k = 0 to 17)*/
+#define __RSCAN_SET_TRFIFO_STAT(_K_,_MASK_,_VALUE_)      MODIFY_REG(CAN_REG_ADDR(_K_,_CFSTS0,0x04),_MASK_,_VALUE_)
 #define __RSCAN_GET_TRFIFO_STAT(_K_,_MASK_)              (CAN_REG_VAL(_K_,_CFSTS0,0x04) & (_MASK_))
 /*Config RSCAN0CFPCTRk — Transmit/receive FIFO Buffer Pointer Control Register (k = 0 to 17)
 Writing FFH to these bits moves the read pointer to the next unread message or
@@ -616,6 +644,9 @@ This register is writable only when transmit mode, readable only when the CFM[1:
 This register is writable only when transmit mode, readable only when the CFM[1:0] value is 00B (receive mode)*/
 #define __RSCAN_WRITE_TRFIFO_DATA_H(_K_,_MSG_BASE_)      CAN_REG_VAL(_K_,_CFDF10,0x10) = *((uint32_t *)_MSG_BASE_)
 #define __RSCAN_READ_TRFIFO_DATA_H(_K_)                  CAN_REG_VAL(_K_,_CFDF10,0x10)
+
+#define __RSCAN_READ_TRFIFO_ADDR(_K_)                  CAN_REG_ADDR(_K_,_CFDF00,0x10)
+
 
 /*********************************19.3.40--19.3.45*****************************/
 /*TODO Config or read the RSCAN0FESTS — FIFO Empty Status Register*/
@@ -656,7 +687,8 @@ Modify this register when no transmit request is present*/
 /*Config RSCAN0TXQCCm — Transmit Queue Configuration and Control Register(m = 0 to 5)*/
 #define __RSCAN_SET_TRANSMIT_QUEUE(_M_,_MASK_,_VALUE_)          MODIFY_REG(CAN_REG_ADDR(_M_,_TXQCC0,0x04),_MASK_,_VALUE_)
 /*Config RSCAN0TXQSTSm — Transmit Queue Status Register (m = 0 to 5)*/
-#define __RSCAN_GET_TRANSMIT_QUEUE_STAT(_M_,_MASK_)             CAN_REG_VAL(_M_,_TXQSTS0,0x04) & (_MASK_)
+#define __RSCAN_GET_TRANSMIT_QUEUE_STAT(_M_,_MASK_)             (CAN_REG_VAL(_M_,_TXQSTS0,0x04) & (_MASK_))
+#define __RSCAN_SET_TRANSMIT_QUEUE_STAT(_M_,_MASK_,_VALUE_)     MODIFY_REG(CAN_REG_ADDR(_M_,_TXQSTS0,0x04),_MASK_,_VALUE_)
 /*Config RSCAN0TXQPCTRm — Transmit Queue Pointer Control Register (m = 0 to 5) -- write-only*/
 #define __RSCAN_SET_TRANSMIT_QUEUE_POINTER(_M_)                 CAN_REG_VAL(_M_,_TXQPCTR0,0x04) =  0xFF
 
@@ -681,6 +713,15 @@ Modify this register when no transmit request is present*/
 /*Config or read the RSCAN0RPGACCr — RAM Test Page Access Register (r = 0 to 63)*/
 #define __RSCAN_WRITE_RAM_TEST_PAGE(_R_,_VALUE_)            (CAN_REG_VAL(_R_,_RPGACC0,0x04) =  _VALUE_ & 0xFFFFFFFF)
 #define __RSCAN_READ_RAM_TEST_PAGE(_R_)                     CAN_REG_VAL(_R_,_RPGACC0,0x04)
+
+/*********************************19.11*****************************/
+/*Config the ECCRCAN0CTL — RSCAN0 ECC Control Register*/
+#define __RSCAN_SET_ECC_CTL_REG(_MASK_,_VALUE_)              do{ \
+                                                                MODIFY_REG(&ECCRCAN0CTL,_MASK_,_VALUE_);\
+                                                            }while(0)
+
+#define __RSCAN_GET_ECC_CTL_REG(_MASK_)                     (ECCRCAN0CTL & (_MASK_))
+
 
 
 #define RSCAN_TRANSMIT_IN_PROCESS               0   //Transmission is in progress or no transmit request is present
@@ -725,12 +766,12 @@ Modify this register when no transmit request is present*/
 
 
 typedef enum{
-    RSCAN_RECV_FIFO_EMPTY,
-    RSCAN_RECV_FIFO_NOT_EMPTY,
-    RSCAN_RECV_FIFO_FULL,
-    RSCAN_RECV_FIFO_ERR,
-    RSCAN_RECV_FIFO_NO_MSG,
-}RSCAN_RECV_FIFO_RESULT_Type;
+    RSCAN_RXFIFO_EMPTY,
+    RSCAN_RXFIFO_NOT_EMPTY,
+    RSCAN_RXFIFO_FULL,
+    RSCAN_RXFIFO_ERR,
+    RSCAN_RXFIFO_NO_MSG,
+}RSCAN_RXFIFO_RESULT_Type,RSCAN_TRFIFO_RESULT_Type;
 
 typedef enum{
     RSCAN_OPERATE_MODE,     //Global operating mode
@@ -779,12 +820,12 @@ typedef struct{
 }RSCAN_RECV_RULE_ID_INFO_TypeDef;
 
 typedef enum{
-    RSCAN_RECV_BUF,                         //A receive buffer is used
-    RSCAN_TRANSMIT_BUF = RSCAN_RECV_BUF,    //A transmit buffer is used
-    RSCAN_TRFIFO,                         //transmit/receive FIFO buffer is selected.
-    RSCAN_RECV_FIFO,                        //receive FIFO buffer is selected
-    RSCAN_TRANSMIT_QUEUE = RSCAN_RECV_FIFO, //transmit queue is seletcd
-}RSCAN_RECV_BUF_Sel_Type,RSCAN_TRANSMIT_BUF_Sel_Type;
+    RSCAN_RX_BUF,                   //A receive buffer is used
+    RSCAN_TX_BUF = RSCAN_RX_BUF,    //A transmit buffer is used
+    RSCAN_TRFIFO,                   //transmit/receive FIFO buffer is selected.
+    RSCAN_RX_FIFO,                  //receive FIFO buffer is selected
+    RSCAN_TX_QUEUE = RSCAN_RX_FIFO, //transmit queue is seletcd
+}RSCAN_RECV_BUF_Sel_Type,RSCAN_TX_BUF_Sel_Type;
 
 typedef union{
     uint32_t k_mask;
@@ -819,7 +860,7 @@ typedef struct{
     uint32_t id;    //Transmit/Receive FIFO Buffer ID Data
     uint8_t label_t;
     uint16_t time_stamp;
-}RSCAN_TRANSMIT_ID_INFO_TypeDef,RSCAN_RECV_ID_INFO_TypeDef;
+}RSCAN_TXID_INFO_TypeDef,RSCAN_RXID_INFO_TypeDef;
 
 typedef struct{
     uint16_t txbuf_mask;    //tx buffer index used, 0-15 corresponds to the bits
@@ -918,6 +959,13 @@ typedef struct{
     uint32_t k_masked;//transmit/receive fifo buffer masked(available) bits
     uint16_t p_masked;//trasmit buffer masked(available) bits
 }RSCAN_BUF_MASKED_TypeDef,RSCAN_BUF_AVAILABLE_TypeDef;
+
+typedef enum{
+    RSCAN_NO_ECC_ERR,
+    RSCAN_1BIT_ERR,
+    RSCAN_2BIT_ERR,
+}RSCAN_ECC_ERR_Type;
+
 
 uint32_t RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
 int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uint8_t ctl);

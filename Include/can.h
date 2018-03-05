@@ -36,5 +36,9 @@ int8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p
 bool Can_TxConfirmation(uint8_t TxbufferId);
 void CanMsgReceived(uint8_t RxbufferId,uint32_t *p_can_id, uint8_t *p_dlc, uint8_t *msg_p);
 
+void CanStart(void);
+
+void CanStop(void);
+
 
 #endif //CAN_H

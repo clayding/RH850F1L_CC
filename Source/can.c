@@ -2,6 +2,8 @@
 #include "can.h"
 
 
+//#define RULE_PAGE_SET_TEST
+
 typedef struct{
     uint8_t error_index;
     void (*CanErrorHandler)(void);
@@ -37,45 +39,24 @@ CAN_ERROR_TypeDef can_error[] = {
 void CanInit(void)
 {
     RSCAN_InitTypeDef rscan3;
-    RSCAN_RECV_RULE_TypeDef rule[11];
+    RSCAN_RECV_RULE_TypeDef rule[2];
     RSCAN_TRFIFO_CFG_TypeDef tf_cfg_param[18];
     RSCAN_RXFIFO_CFG_TypeDef rf_cfg_param[8];
 
     memset(rule,0,ARRAY_SIZE(rule) * sizeof(RSCAN_RECV_RULE_TypeDef));
     memset(tf_cfg_param,0,ARRAY_SIZE(tf_cfg_param) * sizeof(RSCAN_TRFIFO_CFG_TypeDef));
     memset(rf_cfg_param,0,ARRAY_SIZE(rf_cfg_param) * sizeof(RSCAN_RXFIFO_CFG_TypeDef));
-    {
-        uint8_t kc = 0;
-        for(;kc < 6;kc++){
 
-    rscan3.channel = kc;
+    rscan3.channel = 3;
     rscan3.sp.fcan_src = 1;
     rscan3.sp.bit_time = CANbaudrateSet(CAN_BAUDRATE_250K);
 
     {//for example
-#if 1
-    uint8_t kj = 0;
-    for(;kj < 11;kj++){
-        rule[kj].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
-        rule[kj].r_pointer.label_t =kc;
-        rule[kj].r_pointer.recv_buf = RSCAN_RECV_BUF;
-        rule[kj].r_pointer.recv_buf_index = kj;
-        rule[kj].r_pointer.k_index = 0;
-        rule[kj].r_pointer.x_index = 0;
-        rule[kj].r_id_info.ide = RSCAN_RECV_IDE_STD;
-        rule[kj].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
-        rule[kj].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
-        rule[kj].r_id_info.id = kj;
-        rule[kj].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
-    }
-
-#else
-
         rule[0].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rule[0].r_pointer.label_t = 0x891;
-        rule[0].r_pointer.recv_buf = RSCAN_RECV_BUF;
+        rule[0].r_pointer.recv_buf = RSCAN_TRFIFO;
         rule[0].r_pointer.recv_buf_index = 0;
-        rule[0].r_pointer.k_index = 0;
+        rule[0].r_pointer.k_index = 9;
         rule[0].r_pointer.x_index = 0;
         rule[0].r_id_info.ide = RSCAN_RECV_IDE_STD;
         rule[0].r_id_info.rtr = RSCAN_RECV_DATA_FRM;
@@ -86,7 +67,7 @@ void CanInit(void)
 
         rule[1].r_pointer.dlc_t = RSCAN_DLC_CHECK_DISABLED;
         rule[1].r_pointer.label_t = 0x745;
-        rule[1].r_pointer.recv_buf = RSCAN_TRFIFO;
+        rule[1].r_pointer.recv_buf = RSCAN_RX_FIFO;
         rule[1].r_pointer.recv_buf_index = 1;
         rule[1].r_pointer.k_index = 0;
         rule[1].r_pointer.x_index = 0;
@@ -95,14 +76,13 @@ void CanInit(void)
         rule[1].r_id_info.target_msg = RSCAN_RECV_FROM_OTHER;
         rule[1].r_id_info.id = 0x456;
         rule[1].r_id_info.mask = CAN_GAFLIDEM_MASK|CAN_GAFLRTRM_MASK |CAN_GAFLIDM_MASK;
-#endif;
     }
 
     {
         uint8_t i = 0;
         for(;i < 18; i++){
             tf_cfg_param[i].k_index = i;
-            if(i == (3*rscan3.channel) || i == (3*rscan3.channel + 1) || i == (3*rscan3.channel + 2)){
+            if(i == (3*rscan3.channel + 1) || i == (3*rscan3.channel + 2)){
                 tf_cfg_param[i].param_un.param_bits.txbuf_num_linked= i;
                 tf_cfg_param[i].param_un.param_bits.mode= RSCAN_TRFIFO_TRANSMIT_MODE;//transmit mode
             }else{
@@ -133,20 +113,6 @@ void CanInit(void)
         RSCAN_TRANSMIT_BUF_13;
 
     RSCAN_Init(&rscan3);
-    }}
-    {
-        uint8_t j = 0;
-        for(;j < 23;j++){
-	    __IO uint8_t x = 0;
-            __RSCAN_ENABLE_RECV_TABLE_WRITE(1);
-	    
-	    __RSCAN_RECV_TABLE_PAGE_NUM_CFG(j);
-	    
-	    x = j;
-	    
-	    __RSCAN_ENABLE_RECV_TABLE_WRITE(0);
-        }
-    }
 }
 
 /* @brief - Reset RsCAN module,as same as the initialization.
@@ -158,8 +124,38 @@ void CanReset(void)
     CanInit();
 }
 
+void CanStart(void)
+{
+    CanInit();
+}
+
+void CanStop(void)
+{
+    uint8_t i = 0;
+
+    CAN_CLEAR_ALL();//clear all regiters
+    //Transition to global reset mode
+    RSCAN_Global_Mode_Ctl(RSCAN_RESET_MODE,1);
+    //guarantee not in global stop mode
+    while(__RSCAN_GET_GLOBAL_STAT(CAN_GSLPSTS_MASK));
+
+    for(i = 0;i < MAX_CHANNEL_NUM;i++){
+        //transition to channel reset mode
+        RSCAN_Channel_Mode_Ctl(i,RSCAN_RESET_MODE,1);
+        //guarantee not in channel stop mode
+        while(__RSCAN_GET_CHANNEL_STAT(i,CAN_CSLPSTS_MASK));
+    }
+
+    for(i = 0; i < 8;i++)
+        __RSCAN_SET_RECV_FIFO_STAT(i,CAN_RFEMP_MASK,0x01);
+    for(i = 0; i < 18;i++)
+        __RSCAN_SET_TRFIFO_STAT(i,CAN_CFEMP_MASK,0x01);
+    for(i = 0; i < MAX_CHANNEL_NUM;i++)
+        __RSCAN_SET_TRANSMIT_QUEUE_STAT(i,CAN_TXQEMP_MASK,0x01);
+}
+
 /* @brief - Select the communication speed .
- * @param baudrate - the baudrate slected to set the speed
+ * @param baudrate - the baudrate selected to set the speed
  * @reval bit_time - return the RSCAN_BIT_TIMING_TypeDef
  */
 RSCAN_BIT_TIMING_TypeDef CANbaudrateSet(CAN_BAUDRATE_Type baudrate)
@@ -212,7 +208,7 @@ void CanTransmitBuffer(uint8_t TxbufferId)
 int8_t CanTransmit(uint8_t TxbufferId,uint32_t ID,uint8_t Length,uint8_t *data_p)
 {
     uint8_t sent_size;
-    RSCAN_TRANSMIT_ID_INFO_TypeDef id_info;
+    RSCAN_TXID_INFO_TypeDef id_info;
 
     id_info.index = TxbufferId;
     id_info.ide = 0;
@@ -256,7 +252,7 @@ bool Can_TxConfirmation(uint8_t TxbufferId)
 void CanMsgReceived(uint8_t RxbufferId,uint32_t *p_can_id, uint8_t *p_dlc, uint8_t *msg_p)
 {
     int8_t ret = -1;
-    RSCAN_RECV_ID_INFO_TypeDef id_info;
+    RSCAN_RXID_INFO_TypeDef id_info;
 
     id_info.index = RxbufferId;
     while(ret == -1){
@@ -325,6 +321,31 @@ void CanBusOff(void)
 void CanBusOffRecover(void)
 {
 
+}
+
+/* @brief - Check that the channel m whether in bus-off or not.
+ * @param channel - the channel number selected to check
+ * @reval TRUE - in bus-off state, FALSE - not in bus-off state
+ */
+bool CanBusOffState(uint8_t channel)
+{
+    if(__RSCAN_GET_CHANNEL_STAT(channel,CAN_BOSTS_MASK))
+        return TRUE; //in bus-off state
+    return FALSE;//not in bus-off state
+}
+/* @brief - Select bus-off recovery mode.
+ * @param channel - the channel number selected to set
+ * @param mode - 4 modes could be selected,0-3
+ * @reval none
+ */
+void CanBusOffRecoverModeSelect(uint8_t channel,uint8_t mode)
+{
+/*      b22 b21
+        0 0: ISO11898-1 compliant
+        0 1: Entry to channel halt mode automatically at bus-off entry
+        1 0: Entry to channel halt mode automatically at bus-off end
+        1 1: Entry to channel halt mode (in bus-off state) by program request*/
+    __RSCAN_SET_CHANNEL_CTL(channel,CAN_BOM_MASK,mode << CAN_BOM_OFFSET);
 }
 
 int8_t CAN_RAM_Test(uint8_t test_page,uint32_t *test_data,uint8_t size)

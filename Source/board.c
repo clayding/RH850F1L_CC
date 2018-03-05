@@ -133,7 +133,7 @@ void Board_Port_Config(void)
 #endif
 #ifdef RSCAN_TEST
 #if 1
-    port.pin_mask = PORT_PIN_12;
+    port.pin_mask = PORT_PIN_2;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
     port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
@@ -141,7 +141,7 @@ void Board_Port_Config(void)
     port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum1,&port);
 
-    port.pin_mask = PORT_PIN_13;
+    port.pin_mask = PORT_PIN_3;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_OUTPUT_MODE;
     port.echar_t = OUTPUT_PP | OUTPUT_HDS;
@@ -408,16 +408,6 @@ void Board_Port_Config(void)
 
 #ifdef RSCAN_TEST
     {
-        /*RSCAN_InitTypeDef rscan3;
-        rscan3.channel = 3;
-        rscan3.sp.fcan_src = 1;
-        rscan3.sp.bit_time.sjw = 0x0;// 1Tq
-        rscan3.sp.bit_time.tseg2 = 0x3;// 4Tq
-        rscan3.sp.bit_time.tseg1 = 0x0a;// 11Tq
-        rscan3.sp.bit_time.brp = 4-1;
-
-        RSCAN_Init(&rscan3);*/
-
         CanInit();
     }
 
