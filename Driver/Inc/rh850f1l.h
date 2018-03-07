@@ -17,6 +17,7 @@
 #include <io.h>
 #include <reg.h>
 #include <ctype.h>
+#include <debug.h>
 /**
 * @}
 */

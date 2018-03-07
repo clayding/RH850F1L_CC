@@ -13,6 +13,9 @@
 
 #define MAX_CHANNEL_NUM             6   // 0-5 channel,the max number of channel
 #define MAX_RULE_NUM_PER_CHANNEL    128//
+#define TOTAL_RECV_BUF_NUM          10  // Receive Buffer Number Configuration - set to 1, max 96
+#define MAX_RULE_NUM_PER_PAGE       16
+
 /*Clock Supply Setting*/
 #define RSCAN_CLK_XINCAN        1 //select the clk_xincan as clock source of the RS-CAN module
 #define RSCAN_CLKC              !RSCAN_CLK_XINCAN //select the clkc as clock source of the RS-CAN module
@@ -658,11 +661,11 @@ This register is writable only when transmit mode, readable only when the CFM[1:
 
 /*********************************19.3.46--19.3.56*****************************/
 /*Config RSCAN0TMCp — Transmit Buffer Control Register (p = 0 to 95)*/
-#define __RSCAN_SET_TRANSMIT_BUF_CTL(_P_,_MASK_,_VALUE_)        MODIFY_REG(CAN_REG_ADDR(_P_,_TMC0,0x01),_MASK_,_VALUE_ & 0xFFFFFFFF)
+#define __RSCAN_SET_TRANSMIT_BUF_CTL(_P_,_MASK_,_VALUE_)        MODIFY_REG(((uint8_t*)(&RSCAN0_BASE._TMC0 + _P_)),_MASK_,_VALUE_ & 0xFF)
 
 /*Config or read the RSCAN0TMSTSp — Transmit Buffer Status Register (p = 0 to 95)*/
-#define __RSCAN_GET_TRANSMIT_STAT(_P_,_MASK_)                   (CAN_REG_VAL(_P_,_TMSTS0,0x01) & (_MASK_))
-#define __RSCAN_SET_TRANSMIT_STAT(_P_,_MASK_,_VALUE_)           MODIFY_REG(CAN_REG_ADDR(_P_,_TMSTS0,0x01),_MASK_,_VALUE_)
+#define __RSCAN_GET_TRANSMIT_STAT(_P_,_MASK_)                   (*((uint8_t*)(&RSCAN0_BASE._TMSTS0 + _P_)) & (_MASK_))
+#define __RSCAN_SET_TRANSMIT_STAT(_P_,_MASK_,_VALUE_)           MODIFY_REG(((uint8_t*)(&RSCAN0_BASE._TMSTS0 + _P_)),_MASK_,_VALUE_)
 
 /*TODO Config or read the RSCAN0TMTRSTSy — Transmit Buffer Transmit Request Status Register (y = 0 to 2)*/
 /*TODO Config or read the RSCAN0TMTARSTSy — Transmit Buffer Transmit Abort Request Status Register (y = 0 to 2)*/
@@ -812,10 +815,10 @@ typedef enum{
 }RSCAN_DLC_CHECK_Type;
 
 typedef struct{
-    uint8_t ide;    //RSCAN_RECV_IDE_STD or RSCAN_RECV_IDE_EXT
-    uint8_t rtr;    //RSCAN_RECV_DATA_FRM or RSCAN_RECV_REMOTE_FRM
-    uint8_t target_msg;//RSCAN_RECV_FROM_OTHER or RSCAN_RECV_FROM_OWN
-    uint32_t id;   //up to [28:0] bits id,For the standard ID, set the ID in bits b10 to b0 and set bits b28 to b11 to 0
+    uint8_t ide;    //IDE select:RSCAN_RECV_IDE_STD or RSCAN_RECV_IDE_EXT
+    uint8_t rtr;    //RTR select RSCAN_RECV_DATA_FRM or RSCAN_RECV_REMOTE_FRM
+    uint8_t target_msg;//Receive Rule Target Message Select:RSCAN_RECV_FROM_OTHER or RSCAN_RECV_FROM_OWN
+    uint32_t id;   //Set the ID of the receive rule,up to [28:0] bits id,For the standard ID, set the ID in bits b10 to b0 and set bits b28 to b11 to 0
     uint32_t mask; //the combination of CAN_GAFLIDEM_MASK, CAN_GAFLRTRM_MASK and CAN_GAFLIDM_MASK
 }RSCAN_RECV_RULE_ID_INFO_TypeDef;
 
@@ -827,14 +830,10 @@ typedef enum{
     RSCAN_TX_QUEUE = RSCAN_RX_FIFO, //transmit queue is seletcd
 }RSCAN_RECV_BUF_Sel_Type,RSCAN_TX_BUF_Sel_Type;
 
-typedef union{
-    uint32_t k_mask;
-    struct{
-        uint32_t rx_k_mask:18;
-        uint32_t tx_k_mask:3;
-        uint32_t :11;
-    }bits;
-}RSCAN_TRFIFO_INDEX_MASK_Union;
+typedef struct{
+    uint32_t k_mask;//bit position of k_mask indicate the index of trasmit/receive fifo available
+    uint32_t k_stat;//the bit position of k_stat indicate it's used for receive(bit: 0) or transmit(bit:1)
+}RSCAN_TRFIFO_INDEX_MASK_TypeDef;
 
 typedef struct{
     RSCAN_DLC_CHECK_Type dlc_t; //Receive Rule DLC disable or 1-8 data bytes
@@ -865,7 +864,7 @@ typedef struct{
 typedef struct{
     uint16_t txbuf_mask;    //tx buffer index used, 0-15 corresponds to the bits
     uint8_t  txque_num;     //the number of tx queue used
-    RSCAN_TRFIFO_INDEX_MASK_Union tf_mask_un; //tx fifo mask union
+    RSCAN_TRFIFO_INDEX_MASK_TypeDef tf_mask; //tx fifo mask union
 }RSCAN_TXBUF_MASK_TypeDef;
 
 /*Transmit/Receive FIFO Mode Select*/
@@ -890,11 +889,11 @@ typedef struct{
             uint32_t            :1;     //Reserved
             uint32_t CFIM       :1;     //Transmit/Receive FIFO Interrupt Source Select
             uint32_t CFIGCV     :3;     //Transmit/Receive FIFO Receive Interrupt Request Timing Select
-            uint32_t CFM        :2;
-            uint32_t CFITSS     :1;
-            uint32_t CFITR      :1;
-            uint32_t CFTML      :4;
-            uint32_t CFITT      :8;
+            uint32_t CFM        :2;     //Transmit/Receive FIFO Mode Select
+            uint32_t CFITSS     :1;     //Transmit/Receive FIFO Interval Timer Clock Source Select
+            uint32_t CFITR      :1;     //Transmit/Receive FIFO Interval Timer Resolution
+            uint32_t CFTML      :4;     //Set the transmit buffer number to be linked to the transmit/receive FIFO buffer
+            uint32_t CFITT      :8;     //Set a message transmission interval.
         }reg_bits;
         struct{
             uint32_t                    :8;//Reserved
@@ -911,6 +910,8 @@ typedef struct{
     }param_un;
 }RSCAN_TRFIFO_CFG_TypeDef;
 
+/*Configurable parameters to set the RSCAN0RFCCx — Receive FIFO Buffer Configuration and Control Register
+(x = 0 to 7)*/
 typedef struct{
     uint8_t x_index; //0-7
     union{
@@ -938,6 +939,7 @@ typedef struct{
     }param_un;
 }RSCAN_RXFIFO_CFG_TypeDef;
 
+/*Configurable parameter contains the above two structures*/
 typedef struct{
     uint8_t trfifo_cfg_num;
     RSCAN_TRFIFO_CFG_TypeDef *trfifo_cfg_p;
@@ -945,6 +947,7 @@ typedef struct{
     RSCAN_RXFIFO_CFG_TypeDef *rxfifo_cfg_p;
 }RSCAN_FIFO_CFG_TypeDef;
 
+/**/
 typedef struct{
     uint8_t channel;
     RSCAN_COM_SPEED_PARAM_TypeDef sp;
@@ -957,21 +960,17 @@ typedef struct{
 typedef struct{
     uint8_t x_masked;//receive fifo buffer masked(available) bits
     uint32_t k_masked;//transmit/receive fifo buffer masked(available) bits
+    uint32_t k_state; //the bit position of k_stat indicate it's used for receive(bit: 0) or transmit(bit:1)
     uint16_t p_masked;//trasmit buffer masked(available) bits
-}RSCAN_BUF_MASKED_TypeDef,RSCAN_BUF_AVAILABLE_TypeDef;
-
-typedef enum{
-    RSCAN_NO_ECC_ERR,
-    RSCAN_1BIT_ERR,
-    RSCAN_2BIT_ERR,
-}RSCAN_ECC_ERR_Type;
+    uint32_t q_masked[3];//receive buffer masked(available)bits
+}RSCAN_BUF_MASKED_TypeDef,RSCAN_BUF_AVAIL_TypeDef;
 
 
 uint32_t RSCAN_Global_Mode_Ctl(RSCAN_GLOBAL_MODE_Type mode, uint8_t ctl);
 int32_t  RSCAN_Channel_Mode_Ctl(uint8_t channel,RSCAN_CHANNEL_MODE_Type mode,uint8_t ctl);
 uint32_t RSCAN_Channel_Error(uint8_t channel);
 uint32_t RSCAN_Global_Error(void);
-bool R_CAN_Send_TxBuf0(uint8_t);
 int8_t RSCAN_RAM_Test_Perform(uint8_t test_page,uint32_t *test_data,uint8_t size);
 
+void RSCAN_All_Buf_Avail(RSCAN_BUF_AVAIL_TypeDef *buf_used);
 #endif //RH850F1L_RSCAN_H

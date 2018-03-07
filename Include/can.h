@@ -40,5 +40,7 @@ void CanStart(void);
 
 void CanStop(void);
 
+void R_CAN_Send_TxBuf(uint8_t channel);
+
 
 #endif //CAN_H

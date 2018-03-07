@@ -292,6 +292,13 @@
       <TreeImageGuid>03cad1e8-2eb3-4cde-a8a3-982423631122</TreeImageGuid>
       <ParentItem>bbeace03-2f8d-48be-a66d-aa50471497ab</ParentItem>
     </Instance>
+    <Instance Guid="49ea770d-5067-4815-b173-54bb3849279c">
+      <Name>debug.h</Name>
+      <Type>File</Type>
+      <RelativePath>..\Include\debug.h</RelativePath>
+      <TreeImageGuid>03cad1e8-2eb3-4cde-a8a3-982423631122</TreeImageGuid>
+      <ParentItem>bbeace03-2f8d-48be-a66d-aa50471497ab</ParentItem>
+    </Instance>
     <Instance Guid="a6229f21-280f-443a-99b0-3074424d20e0">
       <Name>board.c</Name>
       <Type>File</Type>
@@ -1189,6 +1196,10 @@
     </Instance>
     <Instance Guid="67232110-8154-4dbc-8358-6bf459403ee8">
       <ItemAddTime>636548967595596316</ItemAddTime>
+      <ItemAddTimeCount>0</ItemAddTimeCount>
+    </Instance>
+    <Instance Guid="49ea770d-5067-4815-b173-54bb3849279c">
+      <ItemAddTime>636559339692145926</ItemAddTime>
       <ItemAddTimeCount>0</ItemAddTimeCount>
     </Instance>
     <Instance Guid="149baf2a-1b8c-4f78-9702-3ac495e87f5a">

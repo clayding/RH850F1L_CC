@@ -21,31 +21,17 @@ extern void (*Eiit_Handler_Ptr_2)(void);
 
 void main(void)
 {
-    uint32_t can_id;
-    uint8_t  dlc;
-    uint8_t  msg[8];
+    __IO uint32_t can_id;
+    __IO uint8_t  dlc,msg[8];
 
     Board_MCU_Init();
 
+    R_CAN_RxBuf(&can_id,&dlc,msg);
+    //R_CAN_Send_TxBuf(3);
+    R_CAN_Send_TrFIFO();
     while (1)
     {
-        /*uint8_t i = 1;
-        uint32_t test_data[64] = {0};
-        for(;i < 65;i++){
-            test_data[i-1] = i;
-        }
-        CAN_RAM_Test_Perform(1,test_data,64);*/
-
-       //R_CAN_Receive_RxBuf0(&can_id,&dlc,msg);
-       //R_CAN_Send_TxBuf0(3);
-       CanMsgReceived(0,&can_id,&dlc,msg);
-       //CanTransmitBuffer(48);
-       //CanTransmit(64,can_id,dlc,msg);
-       R_CAN_Send_TrFIFO(3);
-       while(Can_TxConfirmation(64) == FALSE);
-
-       //transmit successfully
-       __RSCAN_SET_TRANSMIT_STAT(64,CAN_TMTRF_MASK,0);
 
     }
+
 }
