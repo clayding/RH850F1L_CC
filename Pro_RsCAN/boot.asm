@@ -162,7 +162,7 @@
 	.dw #_Dummy_EI ; INT23
 	.dw #_Dummy_EI ; INT24
 	.dw #_Dummy_EI ; INT25
-	.dw #_Dummy_EI ; INT26
+	.dw #_RLIN30SendIntHandler ; INT26
 	.dw #_Dummy_EI ; INT27
 	.dw #_Dummy_EI ; INT28
 	.dw #_Dummy_EI ; INT29

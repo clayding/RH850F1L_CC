@@ -71,6 +71,7 @@ SET_DOMAIN_AWO_FUNC_DECLARE(AFOUT);
 SET_DOMAIN_ISO_FUNC_DECLARE(CPUCLK);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI1);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI2);
+SET_DOMAIN_ISO_FUNC_DECLARE(ILIN);
 SET_DOMAIN_ISO_FUNC_DECLARE(ICAN);
 SET_DOMAIN_ISO_FUNC_DECLARE(ICANOSC);
 
@@ -82,6 +83,7 @@ DOMAIN_SET_Ref dsf[] = {
     {CPUCLK,C_ISO_CPUCLK_Domain_Set},
     {IPERI1,C_ISO_IPERI1_Domain_Set},
     {IPERI2,C_ISO_IPERI2_Domain_Set},
+    {ILIN,C_ISO_ILIN_Domain_Set},
     {ICAN,  C_ISO_ICAN_Domain_Set},
     {ICANOSC,C_ISO_ICANOSC_Domain_Set},
 };
@@ -266,6 +268,32 @@ SET_CLK_DOMAIN_RET_Type C_ISO_IPERI2_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(IPERI2,S_CTL_MASK))) != ERROR);//Select a source clock
     if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,IPERI2,S_ACT) & STR_CONCAT2(IPERI2,S_ACT_MASK))) { //Confirm completion of selection
         return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+
+}
+
+
+SET_CLK_DOMAIN_RET_Type C_ISO_ILIN_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Step 1 Source Clock Setting for C_ISO_LIN*/
+    val_.src_clk_ctl_val = ILIN_SRC_CPUCLK2;//Source Clock Setting for C_ISO_LIN
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ILIN,S_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ILIN,S_CTL_MASK))) != ERROR);//Select a source clock
+    while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ILIN,S_ACT) & STR_CONCAT2(ILIN,S_ACT_MASK))) { //Confirm completion of selection
+        //return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+
+    /*Step 2 Set up a clock divider The setting of this register is only applicable to RLIN30*/
+    val_.clk_divider_val = ILIN_CTL_DIVI_1;//CKSC_ILINS_CTL selection /1 (default)
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,CPUCLK,D_CTL);
+    while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(CPUCLK,D_CTL_MASK))) != ERROR);//Select a clock divider
+
+    if(val_.clk_divider_val != (STR_CONCAT3(CKSC_,CPUCLK,D_ACT) & STR_CONCAT2(CPUCLK,D_ACT_MASK))) { //Confirm completion of selection
+        return SET_CLK_DIVIDER_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
 

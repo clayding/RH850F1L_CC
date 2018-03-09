@@ -28,8 +28,10 @@
 //#define RTCA0_TEST
 
 /************************RSCAN Config *****************************************/
-#define RSCAN_TEST
+//#define RSCAN_TEST
 
+/************************RLIN3/UART Config *****************************************/
+#define RSLIN3_UART_MODE_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized
@@ -64,7 +66,7 @@ void System_Clock_Config(void)
     Clock_Domain_Set(ARTCA);
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
-
+	Clock_Domain_Set(ILIN);
     //rscan clock domain Setting
     Clock_Domain_Set(ICAN);
     Clock_Domain_Set(ICANOSC);
@@ -132,7 +134,6 @@ void Board_Port_Config(void)
     Port_Init(PortGroupNum9,&port);
 #endif
 #ifdef RSCAN_TEST
-#if 1
     port.pin_mask = PORT_PIN_12;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
@@ -147,20 +148,36 @@ void Board_Port_Config(void)
     port.echar_t = OUTPUT_PP | OUTPUT_HDS;
     port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum1,&port);
-#else
 
+    /*
     PMC1 	|= 0x3000;	    //alternative function
     PFC1 	&= ~(0x3000);  	//1'st alternative function
     PM1 	&= ~(1<<13);  	//set to 0, P1_3 output
     PM1 	|= (1<<12);  	    //set to 1, P1_2 input
-    /* TJA1041 EN(P1.1) - ON
+     TJA1041 EN(P1.1) - ON
     PMC1    &= ~(1U<<1);
     PM1     &= ~(1U<<1);
     P1	 	|= (1U<<1);*/
+#endif
+#ifdef RSLIN3_UART_MODE_TEST
 
+    port.pin_mask = PORT_PIN_3;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
+
+    port.pin_mask = PORT_PIN_2;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
 #endif
-#endif
-    {
+
+    {//Eiint Init start
         Eiint_InitTypeDef eiint;
         eiint.eiint_ch = P_12;
         eiint.eiint_ext_int = 1;
@@ -200,7 +217,42 @@ void Board_Port_Config(void)
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);
 #endif
+#ifdef RSLIN3_UART_MODE_TEST
+        eiint.eiint_ch = 26;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
 
+        eiint.eiint_ch = 27;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 28;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef WDTA0_TEST
+        eiint.eiint_ch = 32;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+#endif
+#ifdef WDTA1_TEST
+        eiint.eiint_ch = 33;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RTCA0_TEST
+        eiint.eiint_ch = 201;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+}//Eiint Init start
 #ifdef WDTA0_TEST //Make sure that the OPBT0 has been set before testing this funtion
 	{
         WDTA_MODE_TypeDef wdta_mode;
@@ -211,11 +263,6 @@ void Board_Port_Config(void)
         WDTA_Init(_WDTA0,&wdta_mode);
         WDTA_Start(_WDTA0);
 	}
-
-        eiint.eiint_ch = 32;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
 #endif
 
 #ifdef WDTA1_TEST
@@ -228,14 +275,8 @@ void Board_Port_Config(void)
         WDTA_Init(_WDTA1,&wdta_mode);
         WDTA_Start(_WDTA1);
 	}
-
-        eiint.eiint_ch = 33;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
 #endif
 #ifdef RTCA0_TEST
-
     {
         RTCA_INIT_TypeDef rtca_init;
         rtca_init.time_cal.time.second = 0;
@@ -248,171 +289,179 @@ void Board_Port_Config(void)
 
         RTCA_Init(rtca_init);
     }
-
-        eiint.eiint_ch = 201;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
 #endif
         //OSTM_Init();
-        {
 #ifdef TAUB0_INTERVAL_MODE_TEST
-            TAUB_ChMode_TypeDef ch_mode;
-            ch_mode.ch_no = 0;
-            ch_mode.clk_sel = TAU_CK0;
-            ch_mode.clk_div =10;// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
-            ch_mode.cdr = 0x9896;//0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
-            ch_mode.cnt_clk4cnt_counter = 0;
-            ch_mode.mas = 1;
-            ch_mode.sts = 0;
-            ch_mode.cos = 0;
-            ch_mode.md_un.md_bits.high7bit = 0;
-            ch_mode.md_un.md_bits.low1bit = 0;
-            TAUB_Independent_Init(&ch_mode);
+    {
+        TAUB_ChMode_TypeDef ch_mode;
+        ch_mode.ch_no = 0;
+        ch_mode.clk_sel = TAU_CK0;
+        ch_mode.clk_div =10;// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
+        ch_mode.cdr = 0x9896;//0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
+        ch_mode.cnt_clk4cnt_counter = 0;
+        ch_mode.mas = 1;
+        ch_mode.sts = 0;
+        ch_mode.cos = 0;
+        ch_mode.md_un.md_bits.high7bit = 0;
+        ch_mode.md_un.md_bits.low1bit = 0;
+        TAUB_Independent_Init(&ch_mode);
+    }
 #endif
 #ifdef TAUB0_PWM_OUTPUT_MODE_TEST
-        {
-            TAUB_ChMode_TypeDef ch_mode[2];
-            ch_mode[0].ch_no = 0;
-            ch_mode[0].clk_sel = TAU_CK0;
-            ch_mode[0].cnt_clk4cnt_counter = 0;
-            ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
-            ch_mode[0].cdr = 2500 -1;//1ms
-            ch_mode[0].mas = 1;
-            ch_mode[0].sts = TAU_STS_SW_TRIG;
-            ch_mode[0].cos = 0;
-            ch_mode[0].md_un.md_bits.high7bit = TAUB_INTERVAL_MODE;
-            ch_mode[0].md_un.md_bits.low1bit = 1;
+    {
+        TAUB_ChMode_TypeDef ch_mode[2];
+        ch_mode[0].ch_no = 0;
+        ch_mode[0].clk_sel = TAU_CK0;
+        ch_mode[0].cnt_clk4cnt_counter = 0;
+        ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
+        ch_mode[0].cdr = 2500 -1;//1ms
+        ch_mode[0].mas = 1;
+        ch_mode[0].sts = TAU_STS_SW_TRIG;
+        ch_mode[0].cos = 0;
+        ch_mode[0].md_un.md_bits.high7bit = TAUB_INTERVAL_MODE;
+        ch_mode[0].md_un.md_bits.low1bit = 1;
 
-            ch_mode[0].enable_sim_cfg = 1;//Enables simultaneous rewrite
-            ch_mode[0].sim_cfg.ch_ctl = 0;
-            ch_mode[0].sim_cfg.sig_gen = 0;
-            ch_mode[0].sim_cfg.is_trig_ch = 0;
+        ch_mode[0].enable_sim_cfg = 1;//Enables simultaneous rewrite
+        ch_mode[0].sim_cfg.ch_ctl = 0;
+        ch_mode[0].sim_cfg.sig_gen = 0;
+        ch_mode[0].sim_cfg.is_trig_ch = 0;
 
-            ch_mode[0].ch_output_mode.taub_mode = TAUB_SYNCHRONOUS_OUTPUT_MODE_1;
+        ch_mode[0].ch_output_mode.taub_mode = TAUB_SYNCHRONOUS_OUTPUT_MODE_1;
 
-            ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
-            ch_mode[1].ch_no = 1;
-            ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
-            ch_mode[1].mas = 0;
-            ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
-            ch_mode[1].md_un.md_bits.high7bit = TAUB_ONE_CNT_MODE;
+        ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
+        ch_mode[1].ch_no = 1;
+        ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
+        ch_mode[1].mas = 0;
+        ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
+        ch_mode[1].md_un.md_bits.high7bit = TAUB_ONE_CNT_MODE;
 
-            TAUB_Batch_Init(ch_mode,2);
-        }
+        TAUB_Batch_Init(ch_mode,2);
+    }
 #endif
 #ifdef TAUD0_INTERVAL_MODE_TEST
-            TAUD_ChMode_TypeDef ch_mode;
-            ch_mode.ch_no = 0;
-            ch_mode.clk_sel = TAU_CK0;
-            ch_mode.clk_div =10;// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
-            ch_mode.cdr = 0x9896;//0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
-            ch_mode.cnt_clk4cnt_counter = 0;
-            ch_mode.mas = 1;
-            ch_mode.sts = 0;
-            ch_mode.cos = 0;
-            ch_mode.md_un.md_bits.high7bit = 0;
-            ch_mode.md_un.md_bits.low1bit = 0;
-            TAUD_Independent_Init(&ch_mode);
+    {
+        TAUD_ChMode_TypeDef ch_mode;
+        ch_mode.ch_no = 0;
+        ch_mode.clk_sel = TAU_CK0;
+        ch_mode.clk_div =10;// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
+        ch_mode.cdr = 0x9896;//0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
+        ch_mode.cnt_clk4cnt_counter = 0;
+        ch_mode.mas = 1;
+        ch_mode.sts = 0;
+        ch_mode.cos = 0;
+        ch_mode.md_un.md_bits.high7bit = 0;
+        ch_mode.md_un.md_bits.low1bit = 0;
+        TAUD_Independent_Init(&ch_mode);
+    }
 #endif
 #ifdef TAUD0_PWM_OUTPUT_MODE_TEST
-        {
-            TAUD_ChMode_TypeDef ch_mode[2];
-            ch_mode[0].ch_no = 0;
-            ch_mode[0].clk_sel = TAU_CK0;
-            ch_mode[0].cnt_clk4cnt_counter = 0;
-            ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
-            ch_mode[0].cdr = 2500 -1;//1ms
-            ch_mode[0].mas = 1;
-            ch_mode[0].sts = TAU_STS_SW_TRIG;
-            ch_mode[0].cos = 0;
-            ch_mode[0].md_un.md_bits.high7bit = TAUD_INTERVAL_MODE;
-            ch_mode[0].md_un.md_bits.low1bit = 1;
+    {
+        TAUD_ChMode_TypeDef ch_mode[2];
+        ch_mode[0].ch_no = 0;
+        ch_mode[0].clk_sel = TAU_CK0;
+        ch_mode[0].cnt_clk4cnt_counter = 0;
+        ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
+        ch_mode[0].cdr = 2500 -1;//1ms
+        ch_mode[0].mas = 1;
+        ch_mode[0].sts = TAU_STS_SW_TRIG;
+        ch_mode[0].cos = 0;
+        ch_mode[0].md_un.md_bits.high7bit = TAUD_INTERVAL_MODE;
+        ch_mode[0].md_un.md_bits.low1bit = 1;
 
-            ch_mode[0].enable_sim_cfg = 1;//enables simultaneous rewrite
-            ch_mode[0].sim_cfg.ch_ctl = 0;
-            ch_mode[0].sim_cfg.sig_gen = 0;
-            ch_mode[0].sim_cfg.is_trig_ch = 0;
+        ch_mode[0].enable_sim_cfg = 1;//enables simultaneous rewrite
+        ch_mode[0].sim_cfg.ch_ctl = 0;
+        ch_mode[0].sim_cfg.sig_gen = 0;
+        ch_mode[0].sim_cfg.is_trig_ch = 0;
 
-            ch_mode[0].ch_output_mode.taub_mode = TAUD_SYNCHRONOUS_OUTPUT_MODE_1;
+        ch_mode[0].ch_output_mode.taub_mode = TAUD_SYNCHRONOUS_OUTPUT_MODE_1;
 
-            ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
-            ch_mode[1].ch_no = 1;
-            ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
-            ch_mode[1].mas = 0;
-            ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
-            ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
-            TAUD_Batch_Init(ch_mode,2);
-        }
+        ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
+        ch_mode[1].ch_no = 1;
+        ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
+        ch_mode[1].mas = 0;
+        ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
+        ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
+        TAUD_Batch_Init(ch_mode,2);
+    }
 #endif
 
 #ifdef TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST
-        {
-            TAUD_ChMode_TypeDef ch_mode[2];
-            ch_mode[0].ch_no = 0;
-            ch_mode[0].clk_sel = TAU_CK0;
-            ch_mode[0].cnt_clk4cnt_counter = 0;
-            ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
-            ch_mode[0].cdr = 2500 -1;//1ms
-            ch_mode[0].mas = 0;
-            ch_mode[0].sts = TAU_STS_SW_TRIG;
-            ch_mode[0].cos = 0;
-            ch_mode[0].md_un.md_bits.high7bit = TAUD_INTERVAL_MODE;
-            ch_mode[0].md_un.md_bits.low1bit = 1;
+    {
+        TAUD_ChMode_TypeDef ch_mode[2];
+        ch_mode[0].ch_no = 0;
+        ch_mode[0].clk_sel = TAU_CK0;
+        ch_mode[0].cnt_clk4cnt_counter = 0;
+        ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
+        ch_mode[0].cdr = 2500 -1;//1ms
+        ch_mode[0].mas = 0;
+        ch_mode[0].sts = TAU_STS_SW_TRIG;
+        ch_mode[0].cos = 0;
+        ch_mode[0].md_un.md_bits.high7bit = TAUD_INTERVAL_MODE;
+        ch_mode[0].md_un.md_bits.low1bit = 1;
 
-            ch_mode[0].enable_sim_cfg = 0;//diables simultaneous rewrite
-            ch_mode[0].sim_cfg.ch_ctl = 0;
-            ch_mode[0].sim_cfg.sig_gen = 0;
-            ch_mode[0].sim_cfg.is_trig_ch = 0;
+        ch_mode[0].enable_sim_cfg = 0;//diables simultaneous rewrite
+        ch_mode[0].sim_cfg.ch_ctl = 0;
+        ch_mode[0].sim_cfg.sig_gen = 0;
+        ch_mode[0].sim_cfg.is_trig_ch = 0;
 
-            ch_mode[0].ch_output_mode.taud_mode = TAUD_INDEPENDENT_OUTPUT_MODE_1_WITH_REAL_TIME;
+        ch_mode[0].ch_output_mode.taud_mode = TAUD_INDEPENDENT_OUTPUT_MODE_1_WITH_REAL_TIME;
 
-            ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
-            ch_mode[1].ch_no = 1;
-            ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
-            ch_mode[1].mas = 0;
-            ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
-            ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
-            TAUD_Batch_Init(ch_mode,2);
-        }
+        ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
+        ch_mode[1].ch_no = 1;
+        ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
+        ch_mode[1].mas = 0;
+        ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
+        ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
+        TAUD_Batch_Init(ch_mode,2);
+    }
 #endif
 
 #ifdef TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST
-        {
-            TAUD_ChMode_TypeDef ch_mode[2];
-            ch_mode[0].ch_no = 0;
-            ch_mode[0].clk_sel = TAU_CK0;
-            ch_mode[0].cnt_clk4cnt_counter = 0;
-            ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
-            ch_mode[0].cdr = 2500 -1;//1ms
-            ch_mode[0].mas = 0;
-            ch_mode[0].sts = TAU_STS_EDGE_TIN_TRIG;
-            ch_mode[0].cos = 0;
-            ch_mode[0].md_un.md_bits.high7bit = TAUD_CAP_MODE;
-            ch_mode[0].md_un.md_bits.low1bit = 1;
-            ch_mode[0].tin_detect = TAU_TIS_RISE_EDGE;
-            ch_mode[0].enable_sim_cfg = 0;//diables simultaneous rewrite
+    {
+        TAUD_ChMode_TypeDef ch_mode[2];
+        ch_mode[0].ch_no = 0;
+        ch_mode[0].clk_sel = TAU_CK0;
+        ch_mode[0].cnt_clk4cnt_counter = 0;
+        ch_mode[0].clk_div = 4;// 2^4 = 16 ==> PLCLK/16 = 40M/16 = 2500K
+        ch_mode[0].cdr = 2500 -1;//1ms
+        ch_mode[0].mas = 0;
+        ch_mode[0].sts = TAU_STS_EDGE_TIN_TRIG;
+        ch_mode[0].cos = 0;
+        ch_mode[0].md_un.md_bits.high7bit = TAUD_CAP_MODE;
+        ch_mode[0].md_un.md_bits.low1bit = 1;
+        ch_mode[0].tin_detect = TAU_TIS_RISE_EDGE;
+        ch_mode[0].enable_sim_cfg = 0;//diables simultaneous rewrite
 
-            ch_mode[0].ch_output_mode.taud_mode = TAUD_INDEPENDENT_OUTPUT_MODE_1_WITH_REAL_TIME;
+        ch_mode[0].ch_output_mode.taud_mode = TAUD_INDEPENDENT_OUTPUT_MODE_1_WITH_REAL_TIME;
 
-            ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
-            ch_mode[1].ch_no = 1;
-            ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
-            ch_mode[1].mas = 0;
-            ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
-            ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
-            TAUD_Batch_Init(ch_mode,2);
-        }
+        ch_mode[1] = ch_mode[0];//copy config from ch_mode[0]
+        ch_mode[1].ch_no = 1;
+        ch_mode[1].cdr = 1250;//1250/2500 = 50% duty cycle
+        ch_mode[1].mas = 0;
+        ch_mode[1].sts = TAU_STS_INT_TRIG_MASTER;
+        ch_mode[1].md_un.md_bits.high7bit = TAUD_ONE_CNT_MODE;
+        TAUD_Batch_Init(ch_mode,2);
+    }
 #endif
 
 #ifdef RSCAN_TEST
     {
         CanInit();
     }
-
 #endif
-        }
+
+#ifdef RSLIN3_UART_MODE_TEST
+    {
+        UART_InitTypeDef uart;
+        uart.uartn      = 0;
+        uart.baudrate   = 115200;
+        uart.stop_bits  = 0;
+        uart.parity     = 0;
+        //Transmission interrupt is generated at the completion of transmission.
+        uart.opt_un.param_bits.tx_int_timing = 1;
+
+        UART_Init(&uart);
     }
+#endif
 
 }

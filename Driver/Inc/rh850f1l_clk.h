@@ -75,10 +75,15 @@
 #define IPERI2S_CTL_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_CTL Bit Mask
 #define IPERI2S_ACT_MASK    ((uint32_t)0x03) //CKSC_CPUCLKS_ACT Bit Mask
 
-#define ICAN_SRC_
+/* ILIN_CTL_DIVI_4 and ILIN_CTL_DIVI_8 are only available in UART mode.*/
+#define ILINS_CTL_MASK      ((uint32_t)0x03) //CKSC_ILINS_CTL Bit Mask
+#define ILINS_ACT_MASK      ((uint32_t)0x03) //CKSC_ILINS_ACT Bit Mask
+#define ILIN_CTL_DIVI_1     ((uint32_t)0x01) //01B: CKSC_ILINS_CTL selection /1 (Default)
+#define ILIN_CTL_DIVI_4     ((uint32_t)0x02) //10B: CKSC_ILINS_CTL selection /4
+#define ILIN_CTL_DIVI_8     ((uint32_t)0x03) //11B: CKSC_ILINS_CTL selection /8
 
-#define ICANS_CTL_MASK      ((uint32_t)0x03) //CKSC_CANS_CTL Bit Mask
-#define ICANS_ACT_MASK      ((uint32_t)0x03) //CKSC_CANS_ACT Bit Mask
+#define ICANS_CTL_MASK      ((uint32_t)0x03) //CKSC_ICANS_CTL Bit Mask
+#define ICANS_ACT_MASK      ((uint32_t)0x03) //CKSC_ICANS_ACT Bit Mask
 #define ICANOSCD_CTL_MASK   ((uint32_t)0x03) //CKSC_ICANOSCD_CTL Bit Mask
 #define ICANOSCD_ACT_MASK   ((uint32_t)0x03) //CKSC_ICANOSCD_ACT  Bit Mask
 
@@ -166,6 +171,13 @@ typedef enum{
     ARTCA_MAINOSC,//10B: MainOSC*2
     ARTCA_LSINTOSC,//11B: LS IntOSC
 }ARTCA_SRC_SEL_Type;
+
+typedef enum{
+    ILIN_SRC_DISABLED,//00B:Disabled
+    ILIN_SRC_CPUCLK2, //01B: CPUCLK2 (default)
+    ILIN_SRC_MAINOSC, //10B: MainOSC
+    ILIN_SRC_PPLLCLK2,//11B:PPLLCLK2
+}ILIN_SRC_CLK_Type;
 
 typedef enum{
     ICAN_SRC_DISABLED, //00B:Disabled
