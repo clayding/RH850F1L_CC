@@ -24,7 +24,7 @@
 #define __DEBUG_H
 
 #include <assert.h>
-//#include <stdarg.h>
+#include <stdarg.h>
 //#include <compiler.h>
 //#include <sys/types.h>
 //#include <platform/debug.h>
@@ -37,16 +37,18 @@ extern "C" {
 #if defined(DEBUG)
 #define DEBUGLEVEL DEBUG
 #else
-#define DEBUGLEVEL 2
+#define DEBUGLEVEL 3
 #endif
 
 /* debug levels */
 #define CRITICAL 0
-#define ALWAYS 0
-#define INFO 1
-#define SPEW 2
+#define ALWAYS   0
+#define INFO     1
+#define WARN     2
+#define ERR      3
+#define SPEW     4
 
-#if 0
+
 /* output */
 void _dputc(char c); // XXX for now, platform implements
 int _dputs(const char *str);
@@ -55,9 +57,10 @@ int _dvprintf(const char *fmt, va_list ap);
 
 #define dputc(level, str) do { if ((level) <= DEBUGLEVEL) { _dputc(str); } } while (0)
 #define dputs(level, str) do { if ((level) <= DEBUGLEVEL) { _dputs(str); } } while (0)
-#define dprintf(level, x...) do { if ((level) <= DEBUGLEVEL) { _dprintf(x); } } while (0)
-#define dvprintf(level, x...) do { if ((level) <= DEBUGLEVEL) { _dvprintf(x); } } while (0)
+//#define dprintf(level, x...) do { if ((level) <= DEBUGLEVEL) { _dprintf(x); } } while (0)
+//#define dvprintf(level, x...) do { if ((level) <= DEBUGLEVEL) { _dvprintf(x); } } while (0)
 
+#if 0
 /* input */
 int dgetc(char *c, bool wait);
 
@@ -90,7 +93,28 @@ void hexdump8(const void *ptr, size_t len);
 #define LTRACE do { if (LOCAL_TRACE) { TRACE; } } while (0)
 #define LTRACEF(x...) do { if (LOCAL_TRACE) { TRACEF(x); } } while (0)
 #endif
-#define ERROR(_STR_)     while(1){}
+
+#if DEBUGLEVEL >= ERR
+/* Show all kind of errors e.g. when passing invalid payload length */
+#define ERROR(...)      do{printf("Error:");printf(__VA_ARGS__);}while(0)
+#else
+#define ERROR(...)
+#endif
+
+#if DEBUGLEVEL >= WARN
+/* Show warnings e.g. for FIFO errors */
+#define WARNING(...)    do{printf("Warning:");printf(__VA_ARGS__);}while(0)
+#else
+#define WARNING(...)
+#endif
+
+#if DEBUGLEVEL >= INFO
+/* Show warnings e.g. for FIFO errors */
+#define INFOR(...)    do{printf("Infor:");printf(__VA_ARGS__);}while(0)
+#else
+#define INFOR(...)
+#endif
+
 
 #if defined(__cplusplus)
 

@@ -100,7 +100,8 @@ RTCA_TIME_CAL_TypeDef RTCA_Read_Count(void)
 {
     int16_t  pre_count = 0, cur_count = 1;
     RTCA_TIME_CAL_TypeDef timer;
-
+	
+	memset(&timer,0,sizeof(RTCA_TIME_CAL_TypeDef));
     /*Check that the previous write or read operation is complete.*/
     while(__RTCA_GET_ALL_COUNTER_STAT());
 
@@ -128,7 +129,9 @@ RTCA_TIME_CAL_TypeDef RTCA_Read_Count(void)
 RTCA_TIME_CAL_TypeDef RTCA_Read_Count_Buffer(void)
 {
     RTCA_TIME_CAL_TypeDef timer;
-
+	
+	memset(&timer,0,sizeof(RTCA_TIME_CAL_TypeDef));
+	
     __RTCA_RW_BUFFER_BEGIN();
 
     /*Read the clock counters*/
@@ -175,7 +178,9 @@ RTCA_TIME_TypeDef RTCA_Read_Time_Count(void)
 {
     int16_t  pre_count = 0, cur_count = 1;
     RTCA_TIME_TypeDef timer;
-
+	
+	memset(&timer,0,sizeof(RTCA_TIME_TypeDef));
+	
     while(pre_count != cur_count){
         pre_count = _RTCA0_BASE.SECC & 0x7F;//Read RTCAnSECC 1st time
         timer.second = _RTCA0_BASE.TIMEC & 0x7F;
@@ -191,7 +196,9 @@ RTCA_TIME_TypeDef RTCA_Read_Time_Count(void)
 RTCA_TIME_TypeDef RTCA_Read_Time_Count_Buffer(void)
 {
     RTCA_TIME_TypeDef timer;
-
+	
+	memset(&timer,0,sizeof(RTCA_TIME_TypeDef));
+	
     __RTCA_RW_BUFFER_BEGIN();
 
     timer.second = _RTCA0_BASE.TIME & 0x7F;
@@ -221,6 +228,8 @@ RTCA_CALENDAR_TypeDef RTCA_Read_Calendar_Count(void)
 {
     int16_t  pre_count = 0, cur_count = 1;
     RTCA_CALENDAR_TypeDef calr;
+	
+	memset(&calr,0,sizeof(RTCA_CALENDAR_TypeDef));
 
     while(pre_count !=cur_count){
         pre_count = _RTCA0_BASE.SECC & 0x7F;//Read RTCAnSECC 1st time
@@ -239,7 +248,9 @@ RTCA_CALENDAR_TypeDef RTCA_Read_Calendar_Count(void)
 RTCA_CALENDAR_TypeDef RTCA_Read_Calendar_Count_Buffer(void)
 {
     RTCA_CALENDAR_TypeDef calr;
-
+	
+	memset(&calr,0,sizeof(RTCA_CALENDAR_TypeDef));
+	
     __RTCA_RW_BUFFER_BEGIN();
 
     calr.weekday = _RTCA0_BASE.CAL & 0x03;

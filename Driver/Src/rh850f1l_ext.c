@@ -164,7 +164,7 @@ uintptr_t Eiit_Get_Address_By_Channel(uint16_t channel_no)
     static uintptr_t int_base_addr = 0xFFFF9000;
     static uintptr_t int_addr =(uintptr_t)&int_base_addr;
     uintptr_t offset_addr = 0;// prevent from invalid operate
-    __IO ch = channel_no;
+
     int_base_addr = 0xFFFF9000;
     if(channel_no >> 5)
         int_base_addr += 0x1000;//to be 0xFFFFA000

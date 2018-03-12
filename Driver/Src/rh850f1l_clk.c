@@ -285,8 +285,7 @@ SET_CLK_DOMAIN_RET_Type C_ISO_ILIN_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ILIN,S_ACT) & STR_CONCAT2(ILIN,S_ACT_MASK))) { //Confirm completion of selection
         //return SET_SRC_CLK_FAIL;
     }
-    return SET_CLK_DOMAIN_SUCCESS;
-
+	
     /*Step 2 Set up a clock divider The setting of this register is only applicable to RLIN30*/
     val_.clk_divider_val = ILIN_CTL_DIVI_1;//CKSC_ILINS_CTL selection /1 (default)
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,CPUCLK,D_CTL);

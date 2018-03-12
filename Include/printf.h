@@ -30,24 +30,15 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-/*
+
 int printf(const char *fmt, ...);
-int sprintf(char *str, const char *fmt, ...) __PRINTFLIKE(2, 3);
-int snprintf(char *str, size_t len, const char *fmt, ...) __PRINTFLIKE(3, 4);
-int vsprintf(char *str, const char *fmt, va_list ap);
-int vsnprintf(char *str, size_t len, const char *fmt, va_list ap);*/
+//int sprintf(char *str, const char *fmt, ...) __PRINTFLIKE(2, 3);
+//int snprintf(char *str, size_t len, const char *fmt, ...) __PRINTFLIKE(3, 4);
+//int vsprintf(char *str, const char *fmt, va_list ap);
+int vsnprintf(char *str, size_t len, const char *fmt, va_list ap);
 
-void    print(char* fmt, ...);  
-void    printch(char ch);  
-void    printdec(int dec);  
-void    printflt(double flt);  
-void    printbin(int bin);  
-void    printhex(int hex);  
-void    printstr(char* str);  
 
-void(*fputc)(uint8_t ch);
-
-#define console_print(ch)    fputc(ch)  
+#define console_print(ch)    {}
 
 #if defined(__cplusplus)
 }

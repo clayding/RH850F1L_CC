@@ -98,7 +98,7 @@
 #define LIN3_MDL_OFFSET     0
 
 #define LIN3_UTSW_MASK      ((uint8_t)(0x01 << LIN3_UTSW_OFFSET))
-#define LIN3_MDL_MASK       ((uint8_t)0x01)
+#define LIN3_MDL_MASK       ((uint8_t)0x0F)
 
 /*RLN3nLUOER — UART Operation Enable Register*/
 #define LIN3_UROE_OFFSET    1
@@ -181,8 +181,8 @@
 #define __RLIN3_READ_DATA_BUF0(_N_)                         (LIN3N_VAL(_N_).LUDB0 & 0xFF)
 
 /*LN3nLDBRb — UART Data Buffer b Register (b = 1 to 8)*/
-#define __RLIN3_WRITE_DATA_BUF(_N_,_B_,_VALUE_)             (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR0) + _B_) = _VALUE_ & 0xFF)
-#define __RLIN3_READ_DATA_BUF(_N_,_B_)                      (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR0) + _B_) & 0xFF)
+#define __RLIN3_WRITE_DATA_BUF(_N_,_B_,_VALUE_)             (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + _B_ - 1) = _VALUE_ & 0xFF)
+#define __RLIN3_READ_DATA_BUF(_N_,_B_)                      (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + _B_ - 1) & 0xFF)
 
 /*RLN3nLUOER — UART Operation Enable Register*/
 #define __RLIN3_ENABEL_OPERATION(_N_,_MASK_,_VALUE_)        MODIFY_REG(&LIN3N_VAL(_N_).LUOER,_MASK_,_VALUE_)
@@ -277,4 +277,11 @@ typedef struct{
     UART_OptionUnion opt_un;
 }UART_InitTypeDef;
 
+
+
+uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len);
+
+uint8_t UART_Recv_Data(uint8_t uartn,uint16_t* data);
+
+bool UART_Get_Rx_State(void);
 #endif//RH850F1L_RLIN_H

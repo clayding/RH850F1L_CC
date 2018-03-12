@@ -1,7 +1,6 @@
 #ifndef __IO_H
 #define __IO_H
 
-
 #ifdef __cplusplus
 #define   __I     volatile             /*!< Defines 'read only' permissions */
 #else
@@ -14,5 +13,6 @@
 #define     __IM     volatile const      /*! Defines 'read only' structure member permissions */
 #define     __OM     volatile            /*! Defines 'write only' structure member permissions */
 #define     __IOM    volatile            /*! Defines 'read / write' structure member permissions */
+
 
 #endif

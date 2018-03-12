@@ -12,6 +12,7 @@
 
 #include "board.h"
 #include "can.h"
+#include "uart.h"
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
@@ -452,15 +453,7 @@ void Board_Port_Config(void)
 
 #ifdef RSLIN3_UART_MODE_TEST
     {
-        UART_InitTypeDef uart;
-        uart.uartn      = 0;
-        uart.baudrate   = 115200;
-        uart.stop_bits  = 0;
-        uart.parity     = 0;
-        //Transmission interrupt is generated at the completion of transmission.
-        uart.opt_un.param_bits.tx_int_timing = 1;
-
-        UART_Init(&uart);
+        uart_init();
     }
 #endif
 

@@ -52,9 +52,10 @@ typedef uint64_t uint_fast64_t;
 
 typedef long intptr_t;
 typedef unsigned long uintptr_t;
+typedef long ssize_t;
+typedef unsigned long size_t;
 
 typedef long long intmax_t;
 typedef unsigned long long uintmax_t;
 
 #endif
-
