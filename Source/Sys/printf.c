@@ -82,15 +82,15 @@ static char *longlong_to_hexstring(char *buf, unsigned long long u, int len, uin
 
 int vsnprintf(char *str, size_t len, const char *fmt, va_list ap)
 {
-	volatile char c;
-	volatile unsigned char uc;
-	volatile const char *s;
-	volatile unsigned long long n;
-	volatile void *ptr;
-	volatile int flags;
-	volatile unsigned int format_num;
-	volatile size_t chars_written = 0;
-	volatile char num_buffer[32];
+	char c;
+	unsigned char uc;
+	const char *s;
+	unsigned long long n;
+	void *ptr;
+	int flags;
+	unsigned int format_num;
+	size_t chars_written = 0;
+	char num_buffer[32];
 
 #define OUTPUT_CHAR(c) do { (*str++ = c); chars_written++; if (chars_written + 1 == len) goto done; } while(0)
 #define OUTPUT_CHAR_NOLENCHECK(c) do { (*str++ = c); chars_written++; } while(0)

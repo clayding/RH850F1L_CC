@@ -23,13 +23,7 @@ void main(void)
     __IO uint16_t msg;
 
     Board_MCU_Init();
-
-    //R_CAN_RxBuf(&can_id,&dlc,msg);
-    //R_CAN_Send_TxBuf(3);
-    //R_CAN_Send_TrFIFO();
-    //UART_Send(0,"123456789",9);
-	//printf("Staring wait\n");
-    UART_Send_Data_Buf(0,"012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",120);
+	printf("MCU Started\n");
     while (1)
     {
 

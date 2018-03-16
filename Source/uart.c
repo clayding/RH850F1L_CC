@@ -22,5 +22,5 @@ void uart_init(void)
 void putc(char c)
 {
     char ch = c;
-    UART_Send_Data(0,&ch,1);
+    UART_Send_Data(0,(uint8_t*)&ch,1);
 }

@@ -51,7 +51,7 @@
 	jr32	_Dummy ; MIP/MDP
 
 	.align	16
-	jr32	_PIE_ISR ; PIE
+	jr32	_Dummy ; PIE
 
 	.align	16
 	jr32	_Dummy

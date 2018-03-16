@@ -26,13 +26,13 @@
 //#define WDTA1_TEST
 
 /************************RTCA Config ******************************************/
-//#define RTCA0_TEST
+#define RTCA0_TEST
 
 /************************RSCAN Config *****************************************/
 //#define RSCAN_TEST
 
 /************************RLIN3/UART Config *****************************************/
-#define RSLIN3_UART_MODE_TEST
+//#define RSLIN3_UART_MODE_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized

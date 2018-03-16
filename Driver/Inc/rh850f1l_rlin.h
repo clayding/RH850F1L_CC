@@ -21,84 +21,175 @@
 /*RLN3nLWBR — LIN Wake-Up Baud Rate Select Register*/
 #define LIN3_NSPB_OFFSET     4
 #define LIN3_LPRS_OFFSET     1
-#define LIN3_NSPB_MASK       0xf0
-#define LIN3_LPRS_MASK     0x0e
+#define LIN3_NSPB_MASK       ((uint8_t)(0x0F << LIN3_NSPB_OFFSET))   //Bit Sampling Count Select
+#define LIN3_LPRS_MASK       ((uint8_t)(0x07 << LIN3_LPRS_OFFSET))   //Prescaler Clock Select
+#define LIN3_LWBR0_MASK      0x01   //Wake-up Baud Rate Select
 
 /*RLN3nLMD — UART Mode Register*/
 #define LIN3_LRDNFS_OFFSET   5
+#define LIN3_LIOS_OFFSET     4
+#define LIN3_LCKS_OFFSET     2
 #define LIN3_LMD_OFFSET      0
 
-#define LIN3_LRDNFS_MASK     0x20
-#define LIN3_LMD_MASK        0x03
+#define LIN3_LRDNFS_MASK     ((uint8_t)(0x01 << LIN3_LRDNFS_OFFSET))    //LIN/uart Reception Data Noise Filter Disable
+#define LIN3_LIOS_MASK       ((uint8_t)(0x01 << LIN3_LIOS_OFFSET))      //LIN Interrupt Output Select
+#define LIN3_LCKS_MASK       ((uint8_t)(0x03 << LIN3_LCKS_OFFSET))      //LIN System Clock Select
+#define LIN3_LMD_MASK        ((uint8_t)0x03)                            //LIN/UART Mode Select
 
 /*RLN3nLBFC — UART Configuration Register*/
+
 #define LIN3_UTPS_OFFSET     6
 #define LIN3_URPS_OFFSET     5
 #define LIN3_UPS_OFFSET      3
 #define LIN3_USBLS_OFFSET    2
 #define LIN3_UBOS_OFFSET     1
 #define LIN3_UBLS_OFFSET     0
+#define LIN3_LBLT_OFFSET     0
 
-#define LIN3_UTPS_MASK       ((uint8_t)(0x01 << LIN3_UTPS_OFFSET))
-#define LIN3_URPS_MASK       ((uint8_t)(0x01 << LIN3_URPS_OFFSET))
-#define LIN3_UPS_MASK        ((uint8_t)(0x03 << LIN3_UPS_OFFSET))
-#define LIN3_USBLS_MASK      ((uint8_t)(0x01 << LIN3_USBLS_OFFSET))
-#define LIN3_UBOS_MASK       ((uint8_t)(0x01 << LIN3_UBOS_OFFSET))
-#define LIN3_UBLS_MASK       ((uint8_t)0x01)
+#define LIN3_UTPS_MASK       ((uint8_t)(0x01 << LIN3_UTPS_OFFSET)) //UART Output Polarity Switch
+#define LIN3_URPS_MASK       ((uint8_t)(0x01 << LIN3_URPS_OFFSET)) //UART Input Polarity Switch
+#define LIN3_UPS_MASK        ((uint8_t)(0x03 << LIN3_UPS_OFFSET))  //UART Parity Select
+#define LIN3_USBLS_MASK      ((uint8_t)(0x01 << LIN3_USBLS_OFFSET))//UART Stop Bit length Select
+#define LIN3_UBOS_MASK       ((uint8_t)(0x01 << LIN3_UBOS_OFFSET)) //UART Transfer Format Order Select
+#define LIN3_UBLS_MASK       ((uint8_t)0x01) //UART Character Length Select
+#define LIN3_LBLT_MASK       ((uint8_t)0x01) //Reception Break (Low-Level) Detection Width Setting
 
-/*LN3nLSC — UART Space Configuration Register*/
+/*RLN3nLBFC — LIN Break Field Configuration Register*/
+#define LIN3_BDT_OFFSET      4
+#define LIN3_BDT_MASK        ((uint8_t)(0x03 << LIN3_BDT_OFFSET)) //Transmission Break Delimiter (High Level) Width Select
+#define LIN3_BLT_MASK        ((uint8_t)0x0F) //Transmission Break (Low Level) Width Select
+
+/*LN3nLSC — LIN/UART Space Configuration Register*/
 #define LIN3_IBS_OFFSET      4
-#define LIN3_IBS_MASK        ((uint8_t)(0x03 << LIN3_IBS_OFFSET))
+#define LIN3_IBS_MASK        ((uint8_t)(0x03 << LIN3_IBS_OFFSET)) //Inter-Byte Space Select
+#define LIN3_IBHS_MASK       ((uint8_t)0x07) //Inter-Byte Space (Header)/Response Space Select
 
-/*RLN3nLEDE —UART Error Detection Enable Register*/
+/*RLN3nLWUP — LIN Wake-Up Configuration Register*/
+#define LIN3_WUTL_OFFSET     4
+#define LIN3_WUTL_MASK       ((uint8_t)(0x0F << LIN3_WUTL_OFFSET)) //Wake-up Transmission Low Level Width Select
+
+/*RLN3nLIE — LIN Interrupt Enable Register*/
+#define LIN3_SHIE_OFFSET     3
+#define LIN3_ERRIE_OFFSET    2
+#define LIN3_FRCIE_OFFSET    1
+#define LIN3_FTCIE_OFFSET    0
+
+#define LIN3_SHIE_MASK       ((uint8_t)(0x01 << LIN3_SHIE_OFFSET)) //Successful Header Transmission Interrupt Request Enable
+#define LIN3_ERRIE_MASK      ((uint8_t)(0x01 << LIN3_ERRIE_OFFSET)) //Error Detection Interrupt Request Enable
+#define LIN3_FRCIE_MASK      ((uint8_t)(0x01 << LIN3_FRCIE_OFFSET)) //Successful Frame/Wake-up Reception Interrupt Request Enable
+#define LIN3_FTCIE_MASK      ((uint8_t)0x01) //Successful Frame/Wake-up Transmission Interrupt Request Enable
+
+/*RLN3nLEDE — LIN/UART Error Detection Enable Register*/
+#define LIN3_LTES_OFFSET     7
+#define LIN3_PERE_OFFSET     6
+#define LIn3_SFERE_OFFSET    4
 #define LIN3_FERE_OFFSET     3
 #define LIN3_OERE_OFFSET     2
-#define LIN3_FERE_MASK       ((uint8_t)(0x01 << LIN3_FERE_OFFSET))
-#define LIN3_OERE_MASK       ((uint8_t)(0x01 << LIN3_OERE_OFFSET))
-#define LIN3_BERE_MASK       ((uint8_t)0x01)
+#define LIN3_FTERE_OFFSET    2
+#define LIN3_TERE_OFFSET     2
+#define LIN3_PBERE_OFFSET    1
 
-/*RLN3nLCUC — UART Control Register*/
-#define LIN3_OM0_MASK        0x01
+#define LIN3_LTES_MASK      ((uint8_t)(0x01 << LIN3_LTES_OFFSET)) //Timeout Error Select
+#define LIN3_PERE_MASK      ((uint8_t)(0x01 << LIN3_PERE_OFFSET)) //ID Parity Error Detection Enable
+#define LIn3_SFERE_MASK     ((uint8_t)(0x01 << LIn3_SFERE_OFFSET))//Sync Field Error Detection Enable
+#define LIN3_FERE_MASK      ((uint8_t)(0x01 << LIN3_FERE_OFFSET)) //Framing Error Detection Enable
+#define LIN3_OERE_MASK      ((uint8_t)(0x01 << LIN3_OERE_OFFSET)) //Overrun Error Detection Enable
+#define LIN3_FTERE_MASK     ((uint8_t)(0x01 << LIN3_FTERE_OFFSET))//Timeout Error Detection Enable
+#define LIN3_TERE_MASK      ((uint8_t)(0x01 << LIN3_TERE_OFFSET)) //Timeout Error Detection Enable
+#define LIN3_PBERE_MASK     ((uint8_t)(0x01 << LIN3_PBERE_OFFSET))//Physical Bus Error Detection Enable
+#define LIN3_BERE_MASK      ((uint8_t)0x01) //Bit Error Detection Enable
 
-/*RLN3nLTRC — UART Transmission Control Register*/
+/*RLN3nLCUC — LIN/UART Control Register*/
+#define LIN3_OM1_OFFSET      1
+#define LIN3_OM1_MASK        ((uint8_t)(0x01 << LIN3_OM1_OFFSET))//LIN Mode Select
+#define LIN3_OM0_MASK        0x01 //LIN Reset
+
+/*RLN3nLTRC — LIN/UART Transmission Control Register*/
 #define LIN3_RTS_OFFSET      1
-#define LIN3_RTS_MASK        ((uint8_t)(0x01 << LIN3_RTS_OFFSET))
+#define LIN3_RTS_MASK        ((uint8_t)(0x01 << LIN3_RTS_OFFSET)) //Response Transmission/Reception Start
+#define LIN3_FTS_MASK        ((uint8_t)0x01))   //Frame Transmission/Wake-up Transmission/Reception Start
 
+/*RLN3nLMST — LIN/UART Mode Status Register read-only register*/
+#define LIN3_OMM1_OFFSET    1
+#define LIN3_OMM1_MASK      ((uint8_t)(0x01 << LIN3_OMM1_OFFSET))//LIN Mode Status Monitor
+#define LIN3_OMM0_MASK      0x01 //LIN Reset Status Monitor
 
-/*RLN3nLMST — UART Mode Status Register read-only register*/
-#define LIN3_OMM0_MASK      0x01
-
-/*RLN3nLST — UART Status Register*/
+/*RLN3nLST — LIN/UART Status Register*/
+#define LIN3_HTRC_OFFSET     7
+#define LIN3_D1RC_OFFSET     6
 #define LIN3_URS_OFFSET      5
 #define LIN3_UTS_OFFSET      4
 #define LIN3_ERR_OFFSET      3
+#define LIN3_FRC_OFFSET      1
 #define LIN3_FTC_OFFSET      0
 
+#define LIN3_HTRC_MASK       ((uint8_t)(0x01 << LIN3_HTRC_OFFSET)) //Successful Header Transmission Flag
+#define LIN3_D1RC_MASK       ((uint8_t)(0x01 << LIN3_D1RC_OFFSET)) //Successful Data 1 Reception Flag
 #define LIN3_URS_MASK        ((uint8_t)(0x01 << LIN3_URS_OFFSET))  //Reception Status Flag
 #define LIN3_UTS_MASK        ((uint8_t)(0x01 << LIN3_UTS_OFFSET))  //Transmission Status Flag
 #define LIN3_ERR_MASK        ((uint8_t)(0x01 << LIN3_ERR_OFFSET))  //Error Detection Flag
+#define LIN3_FRC_MASK        ((uint8_t)(0x01 << LIN3_FRC_OFFSET))  //Successful Frame/Wake-up Reception Flag
 #define LIN3_FTC_MASK        ((uint8_t)0x01)                      //Successful UART Buffer Transmission Flag
 
-/*RLN3nLEST — UART Error Status Register*/
+/*RLN3nLEST — LIN/UART Error Status Register*/
+#define LIN3_RPER_OFFSET    7
 #define LIN3_UPER_OFFSET    6
 #define LIN3_IDMT_OFFSET    5
+#define LIN3_CSER_OFFSET    5
 #define LIN3_EXBT_OFFSET    4
+#define LIN3_SFER_OFFSET    4
 #define LIN3_FER_OFFSET     3
 #define LIN3_OER_OFFSET     2
+#define LIN3_FTER_OFFSET    2
+#define LIN3_TER_OFFSET     2
+#define LIN3_PBER_OFFSET    1
+#define LIN3_BER_OFFSET     0
 
+#define LIN3_RPER_MASK      ((uint8_t)(0x01 << LIN3_RPER_OFFSET)) //Response Preparation Error Flag
 #define LIN3_UPER_MASK      ((uint8_t)(0x01 << LIN3_UPER_OFFSET)) //Parity Error Flag
 #define LIN3_IDMT_MASK      ((uint8_t)(0x01 << LIN3_IDMT_OFFSET)) //ID Match Flag
+#define LIN3_CSER_MASK      ((uint8_t)(0x01 << LIN3_CSER_OFFSET)) //Checksum Error Flag
 #define LIN3_EXBT_MASK      ((uint8_t)(0x01 << LIN3_EXBT_OFFSET)) //Expansion Bit Detection Flag
+#define LIN3_SFER_MASK      ((uint8_t)(0x01 << LIN3_SFER_OFFSET)) //Sync Field Error Flag
 #define LIN3_FER_MASK       ((uint8_t)(0x01 << LIN3_FER_OFFSET))  //Framing Error Flag
 #define LIN3_OER_MASK       ((uint8_t)(0x01 << LIN3_OER_OFFSET))  //Overrun Error Flag
+#define LIN3_FTER_MASK      ((uint8_t)(0x01 << LIN3_FTER_OFFSET)) //Timeout Error Flag
+#define LIN3_TER_MASK       ((uint8_t)(0x01 << LIN3_TER_OFFSET)) //Timeout Error Flag
+#define LIN3_PBER_MASK      ((uint8_t)(0x01 << LIN3_PBER_OFFSET)) //Physical Bus Error Flag
 #define LIN3_BER_MASK       ((uint8_t)0x01)                       //Bit Error Flag
 
-/*RLN3nLDFC — UART Data Field Configuration Register*/
+/*RLN3nLDFC — LIN/UART Data Field Configuration Register*/
+#define LIN3_LSS_OFFSET     7
+#define LIN3_FSM_OFFSET     6
 #define LIN3_UTSW_OFFSET    5
+#define LIN3_CSM_OFFSET     5
+#define LIN3_LCS_OFFSET     5
+#define LIN3_RFT_OFFSET     4
+#define LIN3_RCDS_OFFSET    4
 #define LIN3_MDL_OFFSET     0
+#define LIN3_RFDL_OFFSET    0
 
-#define LIN3_UTSW_MASK      ((uint8_t)(0x01 << LIN3_UTSW_OFFSET))
-#define LIN3_MDL_MASK       ((uint8_t)0x0F)
+#define LIN3_LSS_MASK       ((uint8_t)(0x01 << LIN3_LSS_OFFSET)) //Transmission/Reception Continuation Select
+#define LIN3_FSM_MASK       ((uint8_t)(0x01 << LIN3_FSM_OFFSET)) //Frame Separate Mode Select
+#define LIN3_CSM_MASK       ((uint8_t)(0x01 << LIN3_CSM_OFFSET)) //Checksum Select
+#define LIN3_LCS_MASK       ((uint8_t)(0x01 << LIN3_LCS_OFFSET)) //Checksum Select
+#define LIN3_UTSW_MASK      ((uint8_t)(0x01 << LIN3_UTSW_OFFSET)) //Transmission Start Wait
+#define LIN3_RFT_MASK       ((uint8_t)(0x01 << LIN3_RFT_OFFSET)) //Response Field Communication Direction Select
+#define LIN3_RCDS_MASK      ((uint8_t)(0x01 << LIN3_RCDS_OFFSET))//Response Field Communication Direction Select
+#define LIN3_MDL_MASK       ((uint8_t)0x0F) //UART Buffer Data Length Select
+#define LIN3_RFDL_MASK      ((uint8_t)0x0F) //Response Field Length Select
+
+/*RLN3nLIDB — LIN/UART ID Buffer Register*/
+#define LIN3_IDP1_OFFSET    7
+#define LIN3_IDP0_OFFSET    6
+#define LIN3_IDP_OFFSET     6
+
+#define LIN3_IDP1_MASK      ((uint8_t)(0x01 << LIN3_IDP1_OFFSET)) //Parity Setting (P1)
+#define LIN3_IDP0_MASK      ((uint8_t)(0x01 << LIN3_IDP0_OFFSET)) //Parity Setting (P0)
+#define LIN3_IDP_MASK       ((uint8_t)(0x03 << LIN3_IDP_OFFSET)) //Parity Setting
+#define LIN3_LIN_ID_MASK    0x3F    //LIN ID Setting
+#define LIN3_UART_ID_MASK   0xFF    //Specifies the ID value that is referred in expansion bit data comparison
+
 
 /*RLN3nLUOER — UART Operation Enable Register*/
 #define LIN3_UROE_OFFSET    1
@@ -129,58 +220,96 @@
 #define __RLIN3_SELECT_WAKEUP_BAUDRATE(_N_,_MASK_,_VALUE_)    MODIFY_REG(&LIN3N_VAL(_N_).LWBR,_MASK_,_VALUE_)
 #define __RLIN3_GET_WAKEUP_BAUDRATE(_N_,_MASK_)               (LIN3N_VAL(_N_).LWBR & _MASK_)
 
-/*RLN3nLBRP01 — UART Baud Rate Prescaler 01 Register*/
+/*RLN3nLBRP01 — LIN/UART Baud Rate Prescaler 01/0/1 Register*/
 #define __RLIN3_SET_BAUDRATE_PRE01(_N_,_VALUE_)             (LIN3N_VAL(_N_).LBRP01.UINT16 = _VALUE_ & 0xFFFF)
 #define __RLIN3_GET_BAUDRATE_PRE01(_N_)                     (LIN3N_VAL(_N_).LBRP01.UINT16 & 0xFFFF)
+#define __RLIN3_SET_BAUDRATE_PRE0(_N_,_VALUE_)              (LIN3N_VAL(_N_).LBRP01.UINT8[0] = _VALUE_ & 0xFF)
+#define __RLIN3_GET_BAUDRATE_PRE0(_N_)                      (LIN3N_VAL(_N_).LBRP01.UINT8[0] & 0xFF)
+#define __RLIN3_SET_BAUDRATE_PRE1(_N_,_VALUE_)              (LIN3N_VAL(_N_).LBRP01.UINT8[1] = _VALUE_ & 0xFF)
+#define __RLIN3_GET_BAUDRATE_PRE1(_N_)                      (LIN3N_VAL(_N_).LBRP01.UINT8[1] & 0xFF)
 
-/*RLN3nLMD — UART Mode Register*/
+/*RLN3nLSTC — LIN Self-Test Control Register*/
+#define __RLIN3_ENTER_SELF_TEST(_N_)                        do{ \
+                                                                LIN3N_VAL(_N_).LSTC = 0xA7; \
+                                                                LIN3N_VAL(_N_).LSTC = 0x58; \
+                                                                LIN3N_VAL(_N_).LSTC = 0x01; \
+                                                            }while(0)
+#define __RLIN3_GET_SELF_TEST_STAT(_N_)                     (LIN3N_VAL(_N_).LSTC & 0x01)
+
+/*RLN3nLMD — LIN/UART Mode Register*/
 #define __RLIN3_SET_UART_MODE(_N_,_MASK_,_VALUE_)           MODIFY_REG(&LIN3N_VAL(_N_).LMD,_MASK_,_VALUE_)
 #define __RLIN3_GET_UART_MODE(_N_,_MASK_)                   (LIN3N_VAL(_N_).LMD & _MASK_)
+#define __RLIN3_SET_LIN_MODE(_N_,_MASK_,_VALUE_)            __RLIN3_SET_UART_MODE(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_LIN_MODE(_N_,_MASK_)                    __RLIN3_GET_UART_MODE(_N_,_MASK_)
 
 /*RLN3nLBFC — UART Configuration Register*/
-#define __RLIN3_SET_UART_CONFIG(_N_,_MASK_,_VALUE_)           MODIFY_REG(&LIN3N_VAL(_N_).LBFC,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_CONFIG(_N_,_MASK_)                   (LIN3N_VAL(_N_).LBFC & _MASK_)
+/*RLN3nLBFC — LIN Break Field Configuration Register*/
+#define __RLIN3_SET_UART_CONFIG(_N_,_MASK_,_VALUE_)         MODIFY_REG(&LIN3N_VAL(_N_).LBFC,_MASK_,_VALUE_)
+#define __RLIN3_GET_UART_CONFIG(_N_,_MASK_)                 (LIN3N_VAL(_N_).LBFC & _MASK_)
+#define __RLIN3_SET_BREAK_FIELD_CONFIG(_N_,_MASK_,_VALUE_)  __RLIN3_SET_UART_CONFIG(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_BREAK_FIELD_CONFIG(_N_,_MASK_)          __RLIN3_GET_UART_CONFIG(_N_,_MASK_)
 
-/*LN3nLSC — UART Space Configuration Register*/
-#define __RLIN3_SET_UART_SPACE(_N_,_MASK_,_VALUE_)           MODIFY_REG(&LIN3N_VAL(_N_).LSC,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_SPACE(_N_,_MASK_)                   (LIN3N_VAL(_N_).LSC & _MASK_)
+/*LN3nLSC — LIN/UART Space Configuration Register*/
+#define __RLIN3_SET_UART_SPACE(_N_,_MASK_,_VALUE_)          MODIFY_REG(&LIN3N_VAL(_N_).LSC,_MASK_,_VALUE_)
+#define __RLIN3_GET_UART_SPACE(_N_,_MASK_)                  (LIN3N_VAL(_N_).LSC & _MASK_)
+#define __RLIN3_SET_LIN_SPACE(_N_,_MASK_,_VALUE_)           __RLIN3_SET_UART_SPACE(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_LIN_SPACE(_N_,_MASK_)                   __RLIN3_GET_UART_SPACE(_N_,_MASK_)
 
-/*RLN3nLEDE —UART Error Detection Enable Register*/
-#define __RLIN3_ENABLE_ERR_DETECT(_N_,_MASK_,_VALUE_)        MODIFY_REG(&LIN3N_VAL(_N_).LEDE,_MASK_,_VALUE_)
-#define __RLIN3_GET_ERR_DETECT(_N_,_MASK_)                   (LIN3N_VAL(_N_).LEDE & _MASK_)
+/*RLN3nLWUP — LIN Wake-Up Configuration Register*/
+#define __RLIN3_SET_WAKEUP_CONIFG(_N_,_MASK_,_VALUE_)       MODIFY_REG(&LIN3N_VAL(_N_).LWUP,_MASK_,_VALUE_)
+#define __RLIN3_GET_WAKEUP_CONIFG(_N_,_MASK_)               (LIN3N_VAL(_N_).LWUP & _MASK_)
 
-/*RLN3nLCUC — UART Control Register*/
+/*RLN3nLIE — LIN Interrupt Enable Register*/
+#define __RLIN3_ENABLE_INT(_N_,_MASK_,_VALUE_)              MODIFY_REG(&LIN3N_VAL(_N_).LIE,_MASK_,_VALUE_)
+#define __RLIN3_GET_INT_STAT(_N_,_MASK_)                    (LIN3N_VAL(_N_).LIE & _MASK_)
+#define __RLIN3_CONFIG_INT(_N_,_VALUE_)                     (LIN3N_VAL(_N_).LIE  = _VALUE_ & 0xff)
+/*RLN3nLEDE — LIN/UART Error Detection Enable Register*/
+#define __RLIN3_ENABLE_ERR_DETECT(_N_,_MASK_,_VALUE_)       MODIFY_REG(&LIN3N_VAL(_N_).LEDE,_MASK_,_VALUE_)
+#define __RLIN3_GET_ERR_DETECT(_N_,_MASK_)                  (LIN3N_VAL(_N_).LEDE & _MASK_)
+#define __RLIN3_CONFIG_ERR_DETECT(_N_,_VALUE_)              (LIN3N_VAL(_N_).LEDE  = _VALUE_ & 0xff)
+/*RLN3nLCUC — LIN/UART Control Register*/
 #define __RLIN3_SET_UART_CTL(_N_,_MASK_,_VALUE_)            MODIFY_REG(&LIN3N_VAL(_N_).LCUC,_MASK_,_VALUE_)
 #define __RLIN3_GET_UART_CTL(_N_,_MASK_)                    (LIN3N_VAL(_N_).LCUC & _MASK_)
 
-/*RLN3nLTRC — UART Transmission Control Register*/
+/*RLN3nLTRC — LIN/UART Transmission Control Register*/
 #define __RLIN3_SET_UART_TX_CTL(_N_,_MASK_,_VALUE_)         MODIFY_REG(&LIN3N_VAL(_N_).LTRC,_MASK_,_VALUE_)
 #define __RLIN3_GET_UART_TX_CTL(_N_,_MASK_)                 (LIN3N_VAL(_N_).LTRC & _MASK_)
+#define __RLIN3_SET_LIN_TX_CTL(_N_,_MASK_,_VALUE_)          __RLIN3_SET_UART_TX_CTL(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_LIN_TX_CTL(_N_,_MASK_)                  __RLIN3_GET_UART_TX_CTL(_N_,_MASK_)
 
-/*RLN3nLMST — UART Mode Status Register read-only register*/
+/*RLN3nLMST — LIN/UART Mode Status Register read-only register*/
 #define __RLIN3_GET_UART_MODE_STAT(_N_,_MASK_)              (LIN3N_VAL(_N_).LMST & _MASK_)
+#define __RLIN3_GET_LIN_MODE_STAT(_N_,_MASK_)               __RLIN3_GET_UART_MODE_STAT(_N_,_MASK_)
 
-/*RLN3nLST — UART Status Register*/
+/*RLN3nLST — LIN/UART Status Register*/
 #define __RLIN3_SET_UART_STAT(_N_,_MASK_,_VALUE_)           MODIFY_REG(&LIN3N_VAL(_N_).LST,_MASK_,_VALUE_)
 #define __RLIN3_GET_UART_STAT(_N_,_MASK_)                   (LIN3N_VAL(_N_).LST & _MASK_)
+#define __RLIN3_SET_LIN_STAT(_N_,_MASK_,_VALUE_)            __RLIN3_SET_UART_STAT(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_LIN_STAT(_N_,_MASK_)                    __RLIN3_GET_UART_STAT(_N_,_MASK_)
 
-/*RLN3nLEST — UART Error Status Register*/
+/*RLN3nLEST — LIN/UART Error Status Register*/
 #define __RLIN3_SET_UART_ERR_STAT(_N_,_MASK_,_VALUE_)       MODIFY_REG(&LIN3N_VAL(_N_).LEST,_MASK_,_VALUE_)
 #define __RLIN3_GET_UART_ERR_STAT(_N_,_MASK_)               (LIN3N_VAL(_N_).LEST & _MASK_)
+#define __RLIN3_SET_LIN_ERR_STAT(_N_,_MASK_,_VALUE_)        __RLIN3_SET_UART_ERR_STAT(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_LIN_ERR_STAT(_N_,_MASK_)                __RLIN3_GET_UART_ERR_STAT(_N_,_MASK_)
 
 /*RLN3nLDFC — UART Data Field Configuration Register*/
 #define __RLIN3_SET_DATA_FIELD_CONFIG(_N_,_MASK_,_VALUE_)   MODIFY_REG(&LIN3N_VAL(_N_).LDFC,_MASK_,_VALUE_)
 #define __RLIN3_GET_DATA_FIELD_CONFIG(_N_,_MASK_)           (LIN3N_VAL(_N_).LDFC & _MASK_)
 
-/*RLN3nLIDB — UART ID Buffer Register*/
+/*RLN3nLIDB — LIN/UART ID Buffer Register*/
 #define __RLIN3_SET_ID_BUF(_N_,_VALUE_)                     (LIN3N_VAL(_N_).LIDB = _VALUE_ & 0xFF)
 #define __RLIN3_GET_ID_BUF(_N_)                             (LIN3N_VAL(_N_).LIDB & 0xFF)
+
+/*RLN3nLCBR — LIN Checksum Buffer Register*/
+#define __RLIN3_SET_CHECKSUM_BUF(_N_,_VALUE_)               (LIN3N_VAL(_N_).LCBR = _VALUE_ & 0xFF)
+#define __RLIN3_GET_CHECKSUM_BUF(_N_)                       (LIN3N_VAL(_N_).LCBR & 0xFF)
 
 /*RLN3nLUDB0 — UART Data Buffer 0 Register*/
 #define __RLIN3_WRITE_DATA_BUF0(_N_,_VALUE_)                (LIN3N_VAL(_N_).LUDB0 = _VALUE_ & 0xFF)
 #define __RLIN3_READ_DATA_BUF0(_N_)                         (LIN3N_VAL(_N_).LUDB0 & 0xFF)
 
-/*LN3nLDBRb — UART Data Buffer b Register (b = 1 to 8)*/
+/*LN3nLDBRb — LIN/UART Data Buffer b Register (b = 1 to 8)*/
 #define __RLIN3_WRITE_DATA_BUF(_N_,_B_,_VALUE_)             (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + _B_ - 1) = _VALUE_ & 0xFF)
 #define __RLIN3_READ_DATA_BUF(_N_,_B_)                      (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + _B_ - 1) & 0xFF)
 
@@ -204,37 +333,67 @@
 #define __RLIN3_READ_TXWAIT_DATA(_N_)                       (LIN3N_VAL(_N_).LUWTDR.UINT16 & 0x1FF)
 
 
-#define UART_BAUDRATE_SAMPLE_CNT_16_  0
-#define UART_BAUDRATE_SAMPLE_CNT_6    5
-#define UART_BAUDRATE_SAMPLE_CNT_7    6
-#define UART_BAUDRATE_SAMPLE_CNT_8    7
-#define UART_BAUDRATE_SAMPLE_CNT_9    8
-#define UART_BAUDRATE_SAMPLE_CNT_10   9
-#define UART_BAUDRATE_SAMPLE_CNT_11   10
-#define UART_BAUDRATE_SAMPLE_CNT_12   11
-#define UART_BAUDRATE_SAMPLE_CNT_13   12
-#define UART_BAUDRATE_SAMPLE_CNT_14   13
-#define UART_BAUDRATE_SAMPLE_CNT_15   14
-#define UART_BAUDRATE_SAMPLE_CNT_16   15
+#define BAUDRATE_SAMPLE_CNT_16_  0
+#define BAUDRATE_SAMPLE_CNT_6    5
+#define BAUDRATE_SAMPLE_CNT_7    6
+#define BAUDRATE_SAMPLE_CNT_8    7
+#define BAUDRATE_SAMPLE_CNT_9    8
+#define BAUDRATE_SAMPLE_CNT_10   9
+#define BAUDRATE_SAMPLE_CNT_11   10
+#define BAUDRATE_SAMPLE_CNT_12   11
+#define BAUDRATE_SAMPLE_CNT_13   12
+#define BAUDRATE_SAMPLE_CNT_14   13
+#define BAUDRATE_SAMPLE_CNT_15   14
+#define BAUDRATE_SAMPLE_CNT_16   15
 
-#define UART_PRESCALER_CLK_DIV_1      0
-#define UART_PRESCALER_CLK_DIV_2      1
-#define UART_PRESCALER_CLK_DIV_4      2
-#define UART_PRESCALER_CLK_DIV_8      3
-#define UART_PRESCALER_CLK_DIV_16     4
-#define UART_PRESCALER_CLK_DIV_32     5
-#define UART_PRESCALER_CLK_DIV_64     6
-#define UART_PRESCALER_CLK_DIV_128    7
+#define PRESCALER_CLK_DIV_1      0
+#define PRESCALER_CLK_DIV_2      1
+#define PRESCALER_CLK_DIV_4      2
+#define PRESCALER_CLK_DIV_8      3
+#define PRESCALER_CLK_DIV_16     4
+#define PRESCALER_CLK_DIV_32     5
+#define PRESCALER_CLK_DIV_64     6
+#define PRESCALER_CLK_DIV_128    7
 
+#define LIN3_EN_HDR_TX_INT_MASK  8 //Successful Header Transmission Interrupt Request mask
+#define LIN3_ERR_DETECT_INT_MASK 4 //Error Detection Interrupt Request mask
+#define LIN3_FRM_WU_RX_INT_MASK  2 //Successful Frame/Wake-up Reception Interrupt Request mask
+#define LIN3_FRM_WU_TX_INT_MASK  1 //Successful Frame/Wake-up Transmission Interrupt Request mask
 
+#define LIN3_FRM_ERR_DETECT_MASK 8 //Framing Error Detection mask
+#define LIN3_TIO_ERR_DETECT_MASK 4 //Timeout Error Detection mask
+#define LIN3_PHB_ERR_DETECT_MASK 2 //Physical Bus Error Detection mask
+#define LIN3_BIT_ERR_DETECT_MASK 1 //Bit Error Detection mask
+
+typedef enum{
+    LIN3_MASTER,//0 0: LIN master mode
+    UART_MODE,  //0 1:Uart mode
+    LIN3_SLAVE_AUTO,//1 0: LIN Slave mode (auto baud rate)
+    LIN3_SLAVE_FIXED,//1 1: LIN Slave mode (fixed baud rate)
+}LIN3_Mode;
+
+typedef union{
+    uint16_t brp; //baudrate prescaler
+    struct{
+        uint16_t brp0:8;
+        uint16_t brp1:8;
+    }bits;
+}Br_PrescalerUnion;
 
 typedef struct{
-    uint8_t bit_sample_cnt; //Bit Sampling Count Select
+    uint8_t bit_sample_cnt; /*<Bit Sampling Count Select  UART: 6 -16 samplings>
+                                LIN master: only 16 samplings
+                                LIN slave : 4,8,16 samplings*/
     uint8_t prescaler_clk;  //Prescaler Clock Select
-    uint16_t br_prescaler;  /*<the baud rate prescaler divides the frequency of the
-                               clock that is selected by the LPRS bits (prescaler clock select bits)
-                               in the RLN3nLWBR register by L + 1.>*/
-}UART_BaudrateTypedef;
+    Br_PrescalerUnion brp_un;  /*<the baud rate prescaler divides the frequency of
+                                the prescaler clock by L + 1.UART or LIN slave: 0-65535
+                                LIN master:low 8 bit set to RLN3nLBRP0,hi 8 bit set to RLN3nLBRP1*/
+    uint8_t lin_sys_clk;   /*<LIN System Clock Select:>
+                                0 0: fa (Clock generated by baud rate prescaler 0)
+                                0 1: fb (1/2 clock generated by baud rate prescaler 0)
+                                1 0: fc (1/8 clock generated by baud rate prescaler 0)
+                                1 1: fd (1/2 clock generated by baud rate prescaler 1)*/
+}UART_BaudrateTypeDef,LIN3_BaudrateTypeDef;
 
 typedef union{
     uint8_t err_dct;
@@ -277,7 +436,37 @@ typedef struct{
     UART_OptionUnion opt_un;
 }UART_InitTypeDef;
 
+typedef struct{
+    uint8_t break_delim_width;/*<Transmission Break Delimiter (High Level) Width Select
+                                0 0: 1 Tbit, 0 1: 2 Tbits,1 0: 3 Tbits,1 1: 4 Tbits>*/
+    uint8_t break_width;/*<Transmission Break (Low Level) Width Select
+                            0 0 0 0: 13 Tbits
+                            0 0 0 1: 14 Tbits
+                            0 0 1 0: 15 Tbits
+                            :
+                            1 1 1 0: 27 Tbits
+                            1 1 1 1: 28 Tbits>*/
+    uint8_t inter_byte_space;/*<Inter-Byte Space Select
+                            0 0: 0 Tbit, 0 1: 1 Tbit,1 0: 2 Tbits,1 1: 3 Tbits>*/
+    uint8_t resp_space; /*<Inter-Byte Space (Header)/Response Space Select
+                            0 0 0: 0 Tbit
+                            0 0 1: 1 Tbit
+                            0 1 0: 2 Tbits
+                            0 1 1: 3 Tbits
+                            1 0 0: 4 Tbits
+                            1 0 1: 5 Tbits
+                            1 1 0: 6 Tbits
+                            1 1 1: 7 Tbits>*/
+    uint8_t wu_tx_ll_width//Wake-up Transmission Low Level Width
+}LIN3_ConfigurationTypeDef;
 
+
+typedef struct{
+    uint8_t linn;
+    LIN3_Mode mode;
+    uint16_t baudrate; // 1- 20K
+    LIN3_ConfigurationTypeDef cfg_param;
+}LIN3_InitTypeDef;
 
 uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len);
 
