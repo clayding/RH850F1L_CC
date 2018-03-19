@@ -270,6 +270,8 @@
 /*RLN3nLCUC — LIN/UART Control Register*/
 #define __RLIN3_SET_UART_CTL(_N_,_MASK_,_VALUE_)            MODIFY_REG(&LIN3N_VAL(_N_).LCUC,_MASK_,_VALUE_)
 #define __RLIN3_GET_UART_CTL(_N_,_MASK_)                    (LIN3N_VAL(_N_).LCUC & _MASK_)
+#define __RLIN3_SET_LIN_CTL(_N_,_MASK_,_VALUE_)             __RLIN3_SET_UART_CTL(_N_,_MASK_,_VALUE_)
+#define __RLIN3_GET_LIN_CTL(_N_,_MASK_)                     __RLIN3_GET_UART_CTL(_N_,_MASK_)
 
 /*RLN3nLTRC — LIN/UART Transmission Control Register*/
 #define __RLIN3_SET_UART_TX_CTL(_N_,_MASK_,_VALUE_)         MODIFY_REG(&LIN3N_VAL(_N_).LTRC,_MASK_,_VALUE_)
@@ -309,9 +311,9 @@
 #define __RLIN3_WRITE_DATA_BUF0(_N_,_VALUE_)                (LIN3N_VAL(_N_).LUDB0 = _VALUE_ & 0xFF)
 #define __RLIN3_READ_DATA_BUF0(_N_)                         (LIN3N_VAL(_N_).LUDB0 & 0xFF)
 
-/*LN3nLDBRb — LIN/UART Data Buffer b Register (b = 1 to 8)*/
-#define __RLIN3_WRITE_DATA_BUF(_N_,_B_,_VALUE_)             (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + _B_ - 1) = _VALUE_ & 0xFF)
-#define __RLIN3_READ_DATA_BUF(_N_,_B_)                      (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + _B_ - 1) & 0xFF)
+/*RLN3nLDBRb — LIN/UART Data Buffer b Register (b = 1 to 8)*/
+#define __RLIN3_WRITE_DATA_BUF(_N_,_B_,_VALUE_)             (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + (_B_) - 1) = _VALUE_ & 0xFF)
+#define __RLIN3_READ_DATA_BUF(_N_,_B_)                      (*(((uint8_t*)&LIN3N_VAL(_N_).LDBR1) + (_B_) - 1) & 0xFF)
 
 /*RLN3nLUOER — UART Operation Enable Register*/
 #define __RLIN3_ENABEL_OPERATION(_N_,_MASK_,_VALUE_)        MODIFY_REG(&LIN3N_VAL(_N_).LUOER,_MASK_,_VALUE_)
@@ -334,6 +336,7 @@
 
 
 #define BAUDRATE_SAMPLE_CNT_16_  0
+#define BAUDRATE_SAMPLE_CNT_4    3
 #define BAUDRATE_SAMPLE_CNT_6    5
 #define BAUDRATE_SAMPLE_CNT_7    6
 #define BAUDRATE_SAMPLE_CNT_8    7
@@ -460,11 +463,27 @@ typedef struct{
     uint8_t wu_tx_ll_width//Wake-up Transmission Low Level Width
 }LIN3_ConfigurationTypeDef;
 
+typedef struct{
+    uint8_t frm_id; /*the ID set the 6-bit ID value to be transmitted in the ID field of the LIN frame.*/
+    uint8_t idp0;   //sets the parity bits (P0) to be transmitted in the ID field
+    uint8_t idp1;   //sets the parity bits (P1) to be transmitted in the ID field.
+    uint8_t frm_sep;/*<Frame Separate Mode Select:
+                    0: Frame separate mode is not set. 1: Frame separate mode is set.
+                    With 0 set,after header transmission is started,response is transmitted/received without
+                    setting the RTS bit in the RLN3nLTRC register.>*/
+    uint8_t resp_dir;/*<sets the direction of the response field/wake-up signal communication
+                    0: Reception 1: Transmission>*/
+    uint8_t cs_meth;/*<selects the checksum mode.
+                    0: Classic checksum mode 1: Enhanced checksum mode>*/
+}LIN3_Frm_InfoTypeDef;
+
+
 
 typedef struct{
     uint8_t linn;
     LIN3_Mode mode;
     uint16_t baudrate; // 1- 20K
+    uint8_t noi_filter_off; // Sets noise filter ON/OFF,0:enable(ON) 1:disable(OFF)
     LIN3_ConfigurationTypeDef cfg_param;
 }LIN3_InitTypeDef;
 
