@@ -32,7 +32,7 @@
 //#define RSCAN_TEST
 
 /************************RLIN3/UART Config *****************************************/
-//#define RSLIN3_UART_MODE_TEST
+#define RSLIN3_UART_MODE_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized

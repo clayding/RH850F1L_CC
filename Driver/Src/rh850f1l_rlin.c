@@ -13,13 +13,21 @@
   */
 #include "rh850f1l_rlin.h"
 
-static __IO bool tx_continue = TRUE;
-static __IO bool tx_buf_complete = TRUE;
-static __IO bool rx_available = FALSE;
+static __IO bool tx_continue = TRUE;     //uart transmit could continue
+static __IO bool tx_buf_complete = TRUE; //uart transmit using buffer completely
+static __IO bool rx_available = FALSE;  // uart receive an available data
 
-static __IO bool resp_recept = FALSE;
+static __IO bool m_hdr_sent = FALSE;   //lin master header   sent     completely
+static __IO bool m_resp_sent = FALSE;  //lin master response sent     completely
+static __IO bool m_resp_recept = FALSE;//lin master response recepted completed
+static __IO bool s_hdr_recept = FALSE; //lin slave  header   recepted completely
+static __IO bool s_resp_sent = FALSE;  //lin slave  response sent     completely
+static __IO bool s_resp_recept = FALSE;//lin slave  response recepted completed
+
 
 static void UART_Baudrate_Generator(uint8_t uartn,uint32_t baudrate);
+static bool UART_Send_Int_Req_Made(uint8_t uartn);
+static void UART_Clear_Int_Req(uint8_t uartn);
 
 
 void UART_Init(UART_InitTypeDef* UART_InitStruct)
@@ -88,7 +96,7 @@ uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len)
     }
 
     for(cnt = 0;cnt < len;cnt++){
-        while(!tx_continue);
+        while(!tx_continue && !UART_Send_Int_Req_Made(uartn));
         if(exp_bit_flag){
 			if((data_len %2) && (cnt == len -1))
 				val = data[cnt];
@@ -99,6 +107,7 @@ uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len)
         }
 		__RLIN3_WRITE_TX_DATA(uartn,val);
         tx_continue = 0;
+		UART_Clear_Int_Req(uartn);
     }
 
     return cnt;
@@ -164,12 +173,78 @@ bool UART_Get_Rx_State(void)
 	return rx_available;
 }
 
+bool UART_Send_Int_Req_Made(uint8_t uartn)
+{
+    uint16_t eiint_ch = 0;
+
+    switch (uartn) {
+        case 0:
+            eiint_ch = 26;
+            break;
+        case 1:
+            eiint_ch = 113;
+            break;
+        case 2:
+            eiint_ch = 157;
+            break;
+        case 3:
+            eiint_ch = 221;
+            break;
+        case 4:
+            eiint_ch = 225;
+            break;
+        case 5:
+            eiint_ch = 229;
+            break;
+        default:
+            return FALSE;
+    }
+    return Eiit_Int_Req_Made(eiint_ch);
+}
+
+void UART_Clear_Int_Req(uint8_t uartn)
+{
+    uint16_t eiint_ch = 0;
+
+    switch (uartn) {
+        case 0:
+            eiint_ch = 26;
+            break;
+        case 1:
+            eiint_ch = 113;
+            break;
+        case 2:
+            eiint_ch = 157;
+            break;
+        case 3:
+            eiint_ch = 221;
+            break;
+        case 4:
+            eiint_ch = 225;
+            break;
+        case 5:
+            eiint_ch = 229;
+            break;
+        default:
+            return;
+    }
+    Eiit_Clear_Int_Req(eiint_ch);
+}
 
 /**************************LIN3 function****************************************/
 static void LIN3_Baudrate_Generator(uint8_t linn,LIN3_Mode mode,uint32_t baudrate);
 static void LIN3_Enable_Int(uint8_t linn,uint8_t int_out,uint8_t int_mask);
 static void LIN3_Enable_Err_Detect(uint8_t linn,uint8_t timeout_err_sel,uint8_t err_mask);
 static void LIN3_Set_Frame_Config(uint8_t linn,LIN3_ConfigurationTypeDef *cfg_param_p);
+
+static int8_t LIN3_Master_Send_Header(uint8_t linn,uint8_t id);
+static void LIN3_Master_Send_Resp(uint8_t linn);
+static int8_t LIN3_Master_Recv_Resp(uint8_t linn,uint8_t *recv_data);
+static int8_t LIN3_Slave_Recv_Header(uint8_t linn);
+static void LIN3_Slave_Send_Resp(uint8_t linn);
+static int8_t LIN3_Slave_Recv_Resp(uint8_t linn,uint8_t* recv_data);
+
+static uint8_t LIN3_ID_Parity_Calculate(uint8_t id);
 
 void LIN3_Init(LIN3_InitTypeDef* LIN3_InitStruct)
 {
@@ -182,14 +257,14 @@ void LIN3_Init(LIN3_InitTypeDef* LIN3_InitStruct)
 
     LIN3_Baudrate_Generator(linn,mode,LIN3_InitStruct->baudrate);
     //Sets noise filter ON/OFF
-    __RLIN3_SET_LIN3_MODE(linn,LIN3_LRDNFS_MASK,LIN3_InitStruct->noi_filter_off);
+    __RLIN3_SET_LIN_MODE(linn,LIN3_LRDNFS_MASK,LIN3_InitStruct->noi_filter_off);
     //Enables interrupt
     LIN3_Enable_Int(linn,0,0);
     //Enables error detection
     LIN3_Enable_Err_Detect(linn,0,0);
     //Sets frame configuration parameters
     LIN3_Set_Frame_Config(linn,&LIN3_InitStruct->cfg_param);
-    //Transitions to LIN master mode
+    //Transitions to LIN master mode/LIN slave mode
     __RLIN3_SET_LIN_MODE(linn,LIN3_LMD_MASK,(uint8_t)mode);
     //Exits from LIN reset mode.
     __RLIN3_SET_LIN_CTL(linn,LIN3_OM0_MASK,1);
@@ -248,15 +323,15 @@ void LIN3_Baudrate_Generator(uint8_t linn,LIN3_Mode mode,uint32_t baudrate)
     __RLIN3_SET_BAUDRATE_PRE01(linn,br_st.brp_un.brp);
 
     //Configure the RLN3nLMD register when LIN reset mode)
-    __RLIN3_SET_LIN3_MODE(linn,LIN3_LCKS_MASK,br_st.lin_sys_clk << LIN3_LCKS_OFFSET);
+    __RLIN3_SET_LIN_MODE(linn,LIN3_LCKS_MASK,br_st.lin_sys_clk << LIN3_LCKS_OFFSET);
 }
 
 void LIN3_Enable_Int(uint8_t linn,uint8_t int_out,uint8_t int_mask)
 {
     if(!int_out){
-        __RLIN3_SET_LIN3_MODE(linn,LIN3_LIOS_MASK,0);
+        __RLIN3_SET_LIN_MODE(linn,LIN3_LIOS_MASK,0);
     }else{
-        __RLIN3_SET_LIN3_MODE(linn,LIN3_LIOS_MASK,1 << LIN3_LIOS_OFFSET);
+        __RLIN3_SET_LIN_MODE(linn,LIN3_LIOS_MASK,1 << LIN3_LIOS_OFFSET);
         __RLIN3_CONFIG_INT(linn,int_mask);
     }
 }
@@ -282,34 +357,59 @@ void LIN3_Set_Frame_Config(uint8_t linn,LIN3_ConfigurationTypeDef *cfg_param_p)
     //config the lin wake-up
     __RLIN3_SET_WAKEUP_CONIFG(linn,LIN3_WUTL_MASK,cfg_param_p->wu_tx_ll_width << LIN3_WUTL_OFFSET);
 }
-void LIN3_Communication_Process(LIN3_Frm_InfoTypeDef info,uint8_t resp_len,uint8_t *resp_data)
+int8_t LIN3_Master_Process(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data)
 {
+    __IO uint8_t mask = 0, val = 0, recv_len = 0;
 
+    //Configures the RLN3nLDFC register,the checksum mode, response direction and
+    mask = LIN3_LCS_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
+    /*In response reception,repeats the transmission of inter-byte spaces as many times as the data
+    length specified in bits RFDL[3:0] in the RLN3nLDFC register),so the resp_len mut be specified*/
+    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RCDS_MASK) |
+        resp_len;
+
+    if(info_p->resp_dir == 1){//Response Field Communication Direction: transmission
+        __IO uint8_t i = 0;
+        for(;i < resp_len;i++){
+            __RLIN3_WRITE_DATA_BUF(linn,(i+1),resp_data[i]);
+        }
+
+    }
+    __RLIN3_SET_DATA_FIELD_CONFIG(linn,mask,val);
+
+    LIN3_Master_Send_Header(linn,info_p->frm_id);
+
+    if(info_p->resp_dir == 1){ //Response Field Communication Direction: transmission
+        LIN3_Master_Send_Resp(linn);
+    }else{ //Response Field Communication Direction: reception
+        recv_len = LIN3_Master_Recv_Resp(linn,resp_data);
+    }
+
+    return recv_len;
 
 }
 
-int8_t LIN3_Send_Header(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p)
+int8_t LIN3_Master_Send_Header(uint8_t linn,uint8_t id)
 {
-    uint8_t id = 0,idp0 = 0,idp1 = 0;
+    __IO uint8_t idp = 0;
 
-    id = info_p->frm_id;
-    //LIN3_Set_Frame_Config()
-    idp0 = (id & 0x01) ^((id >> 1) & 0x01) ^ ((id >> 2) & 0x01) ^ ((id >> 4) & 0x01);
-    idp1 = ((id >> 1) & 0x01) ^ ((id >> 3) & 0x01) ^ ((id >> 4) & 0x01) ^ ((id >> 5) & 0x01);
-    idp1 = ~idp1;
-    INFOR("id:0x%x,idp0:%d,idp1:%d\n",id,idp0,idp1);
-    __RLIN3_SET_ID_BUF(linn,idp1 << LIN3_IDP1_OFFSET | idp0 << LIN3_IDP0_OFFSET | id);
+    idp = LIN3_ID_Parity_Calculate(id);
+    idp &= 0x03;
+
+    __RLIN3_SET_ID_BUF(linn,idp<< LIN3_IDP0_OFFSET | id);
 
     //frame transmission or wake-up transmission/reception started
     //__RLIN3_SET_UART_TX_CTL(linn,LIN3_FTS_MASK,1);
 
-    while(__RLIN3_GET_LIN_STAT(linn,LIN3_HTRC_MASK) == 0);//failed after 10ms delay
+    while(m_hdr_sent == FALSE);//failed after 10ms delay
+
+    m_hdr_sent = FALSE;//revert to default
 
     return 0;//Successful
 }
 
 
-void LIN3_Send_Resp(uint8_t linn)
+void LIN3_Master_Send_Resp(uint8_t linn)
 {
 
     if(__RLIN3_GET_DATA_FIELD_CONFIG(linn,LIN3_FSM_MASK)){
@@ -327,11 +427,11 @@ void LIN3_Send_Resp(uint8_t linn)
 
 }
 
-int8_t LIN3_Recv_Resp(uint8_t linn,uint8_t *recv_data)
+int8_t LIN3_Master_Recv_Resp(uint8_t linn,uint8_t *recv_data)
 {
-    uint8_t recv_len = 0,i = 0;
+    __IO uint8_t recv_len = 0,i = 0;
 
-    while(resp_recept == FALSE);
+    while(m_resp_recept == FALSE);
 
     // wait for frame or wake-up receive completed
     while(__RLIN3_GET_LIN_STAT(linn,LIN3_FRC_MASK) == 0);
@@ -350,9 +450,140 @@ int8_t LIN3_Recv_Resp(uint8_t linn,uint8_t *recv_data)
 
     __RLIN3_SET_LIN_STAT(linn,LIN3_D1RC_MASK,0);
     //clear the flag
-    __RLIN3_GET_LIN_STAT(linn,LIN3_FRC_MASK,0);
+    __RLIN3_SET_LIN_STAT(linn,LIN3_FRC_MASK,0);
 
     return recv_len;
+}
+
+int8_t LIN3_Slave_Process(uint8_t linn, LIN3_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data)
+{
+    __IO uint8_t mask = 0, val = 0,recv_len = 0;
+
+    //Configures the RLN3nLDFC register,the checksum mode, response direction and response Field Length
+    mask = LIN3_LCS_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
+    /*In response reception,repeats the transmission of inter-byte spaces as many times as the data
+    length specified in bits RFDL[3:0] in the RLN3nLDFC register),so the resp_len mut be specified*/
+    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RCDS_MASK) |
+        resp_len;
+
+    if(info_p->resp_dir == 1){//Response Field Communication Direction: transmission
+        __IO uint8_t i = 0;
+        for(;i < resp_len;i++){
+            __RLIN3_WRITE_DATA_BUF(linn,(i+1),resp_data[i]);
+        }
+
+    }
+    __RLIN3_SET_DATA_FIELD_CONFIG(linn,mask,val);
+
+    if(LIN3_Slave_Recv_Header(linn) == -1){
+        return -1;
+    }
+
+
+    if(info_p->resp_dir == 1){ //Response Field Communication Direction: transmission
+        LIN3_Slave_Send_Resp(linn);
+    }else{ //Response Field Communication Direction: reception
+        recv_len = LIN3_Slave_Recv_Resp(linn,resp_data);
+    }
+
+    return recv_len;
+}
+
+
+int8_t LIN3_Slave_Recv_Header(uint8_t linn)
+{
+    //frame transmission or wake-up transmission/reception started
+    __RLIN3_SET_LIN_TX_CTL(linn,LIN3_FTS_MASK,1);
+
+    //Checks the RLN3nLST register, and clears flags.
+    //wait for header reception complete interrupt and Successful Header Reception Flag
+    while(s_hdr_recept == FALSE || __RLIN3_GET_LIN_STAT(linn,LIN3_HTRC_MASK) == 0);
+
+    s_hdr_recept = FALSE;//revert to default
+    __RLIN3_SET_LIN_STAT(linn,LIN3_HTRC_MASK,0);
+
+    //ID parity detection enabled
+    if(__RLIN3_GET_ERR_DETECT(linn,LIN3_IPERE_MASK)){
+        /*When the IPERE bit in the RLN3nLEDE register is 1 (ID parity detection
+        enabled), the received value and the value calculated internally are compared.
+        If they do not match, IPER (ID parity error flag) is set.*/
+        if(__RLIN3_GET_LIN_ERR_STAT(linn,LIN3_IPER_MASK)){
+            ERROR("lin:%d ID parity compared internally not matched.",linn);
+            return -1;
+        }
+    }else{ //ID parity detection disabled
+        uint8_t id = 0,idp = 0;
+        id = __RLIN3_GET_ID_BUF(linn);
+
+        idp = id >> LIN3_IDP0_OFFSET;
+        id &= 0x3F;
+        //Checks the RLN3nLIDB register, and prepares a response
+        if(idp != LIN3_ID_Parity_Calculate(id)){
+            ERROR("lin:%d ID parity error has been detected.",linn);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+
+void LIN3_Slave_Send_Resp(uint8_t linn)
+{
+    __RLIN3_SET_LIN_TX_CTL(linn,LIN3_RTS_MASK,1 << LIN3_RTS_OFFSET);
+
+    while(s_resp_sent == FALSE);//wait for interruption
+
+    // wait for frame or wake-up transmission completed
+    while(__RLIN3_GET_LIN_STAT(linn,LIN3_FTC_MASK) == 0);
+    //clear the flag
+    __RLIN3_SET_LIN_STAT(linn,LIN3_FTC_MASK,0);
+}
+
+int8_t LIN3_Slave_Recv_Resp(uint8_t linn,uint8_t* recv_data)
+{
+    __IO uint8_t recv_len = 0,i = 0;
+
+    //Sets the response transmission/reception start bit (RTS bit) to 1
+    __RLIN3_SET_LIN_TX_CTL(linn,LIN3_RTS_MASK,1 << LIN3_RTS_OFFSET);
+
+    while(s_resp_recept == FALSE);//wait for recepted interruption
+
+    // wait for frame or wake-up receive completed
+    //while(__RLIN3_GET_LIN_STAT(linn,LIN3_FRC_MASK) == 0);
+
+    //clear the Successful Data 1 Reception Flag
+    if(__RLIN3_GET_LIN_STAT(linn,LIN3_D1RC_MASK) == 0){
+        ERROR("Data 1 of data group is not completely\n");
+        return -1;
+    }
+
+    recv_len = __RLIN3_GET_DATA_FIELD_CONFIG(linn,LIN3_RFDL_MASK);
+
+    for(;i < recv_len;i++){
+        recv_data[i] =  __RLIN3_READ_DATA_BUF(linn,i + 1) ;
+    }
+
+    __RLIN3_SET_LIN_STAT(linn,LIN3_D1RC_MASK,0);
+    //clear the flag
+    __RLIN3_SET_LIN_STAT(linn,LIN3_FRC_MASK,0);
+
+    return recv_len;
+
+}
+
+uint8_t LIN3_ID_Parity_Calculate(uint8_t id)
+{
+    __IO uint8_t idp0 = 0,idp1 = 0;
+
+    idp0 = (id & 0x01) ^((id >> 1) & 0x01) ^ ((id >> 2) & 0x01) ^ ((id >> 4) & 0x01);
+    idp1 = ((id >> 1) & 0x01) ^ ((id >> 3) & 0x01) ^ ((id >> 4) & 0x01) ^ ((id >> 5) & 0x01);
+    idp1 = ~idp1;
+
+    INFOR("id:0x%x,idp0:%d,idp1:%d\n",id,idp0,idp1);
+    idp0 |= idp1 << 1;
+
+    return idp0;// bit 1:idp1 bit0:idp0
 }
 
 /******************************************************************************/
@@ -360,10 +591,10 @@ int8_t LIN3_Recv_Resp(uint8_t linn,uint8_t *recv_data)
 void RLIN30SendIntHandler(unsigned long eiic)
 {
     tx_continue = 1;
-    if(__RLIN3_GET_UART_STAT(0,LIN3_FTC_MASK)){
+    /*if(__RLIN3_GET_UART_STAT(0,LIN3_FTC_MASK)){
         __RLIN3_SET_UART_STAT(0,LIN3_FTC_MASK,0);
 		tx_buf_complete = TRUE;
-	}
+	}*/
 }
 
 #pragma interrupt RLIN30RecvCompleteIntHandler(channel = 27, enable = false, callt = false, fpu = false)

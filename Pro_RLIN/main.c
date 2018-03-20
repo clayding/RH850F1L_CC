@@ -26,6 +26,7 @@ void main(void)
 	printf("MCU Started\n");
     while (1)
     {
+		printf("MCU Started\n");
 
     }
 

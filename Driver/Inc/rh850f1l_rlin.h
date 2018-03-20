@@ -81,7 +81,7 @@
 
 /*RLN3nLEDE — LIN/UART Error Detection Enable Register*/
 #define LIN3_LTES_OFFSET     7
-#define LIN3_PERE_OFFSET     6
+#define LIN3_IPERE_OFFSET    6
 #define LIn3_SFERE_OFFSET    4
 #define LIN3_FERE_OFFSET     3
 #define LIN3_OERE_OFFSET     2
@@ -90,7 +90,7 @@
 #define LIN3_PBERE_OFFSET    1
 
 #define LIN3_LTES_MASK      ((uint8_t)(0x01 << LIN3_LTES_OFFSET)) //Timeout Error Select
-#define LIN3_PERE_MASK      ((uint8_t)(0x01 << LIN3_PERE_OFFSET)) //ID Parity Error Detection Enable
+#define LIN3_IPERE_MASK     ((uint8_t)(0x01 << LIN3_IPERE_OFFSET)) //ID Parity Error Detection Enable
 #define LIn3_SFERE_MASK     ((uint8_t)(0x01 << LIn3_SFERE_OFFSET))//Sync Field Error Detection Enable
 #define LIN3_FERE_MASK      ((uint8_t)(0x01 << LIN3_FERE_OFFSET)) //Framing Error Detection Enable
 #define LIN3_OERE_MASK      ((uint8_t)(0x01 << LIN3_OERE_OFFSET)) //Overrun Error Detection Enable
@@ -107,7 +107,7 @@
 /*RLN3nLTRC — LIN/UART Transmission Control Register*/
 #define LIN3_RTS_OFFSET      1
 #define LIN3_RTS_MASK        ((uint8_t)(0x01 << LIN3_RTS_OFFSET)) //Response Transmission/Reception Start
-#define LIN3_FTS_MASK        ((uint8_t)0x01))   //Frame Transmission/Wake-up Transmission/Reception Start
+#define LIN3_FTS_MASK        ((uint8_t)0x01)   //Frame Transmission/Wake-up Transmission/Reception Start
 
 /*RLN3nLMST — LIN/UART Mode Status Register read-only register*/
 #define LIN3_OMM1_OFFSET    1
@@ -117,6 +117,7 @@
 /*RLN3nLST — LIN/UART Status Register*/
 #define LIN3_HTRC_OFFSET     7
 #define LIN3_D1RC_OFFSET     6
+#define LIN3_IPER_OFFSET     6
 #define LIN3_URS_OFFSET      5
 #define LIN3_UTS_OFFSET      4
 #define LIN3_ERR_OFFSET      3
@@ -125,6 +126,7 @@
 
 #define LIN3_HTRC_MASK       ((uint8_t)(0x01 << LIN3_HTRC_OFFSET)) //Successful Header Transmission Flag
 #define LIN3_D1RC_MASK       ((uint8_t)(0x01 << LIN3_D1RC_OFFSET)) //Successful Data 1 Reception Flag
+#define LIN3_IPER_MASK       ((uint8_t)(0x01 << LIN3_IPER_OFFSET)) //ID Parity Error Flag
 #define LIN3_URS_MASK        ((uint8_t)(0x01 << LIN3_URS_OFFSET))  //Reception Status Flag
 #define LIN3_UTS_MASK        ((uint8_t)(0x01 << LIN3_UTS_OFFSET))  //Transmission Status Flag
 #define LIN3_ERR_MASK        ((uint8_t)(0x01 << LIN3_ERR_OFFSET))  //Error Detection Flag
@@ -460,13 +462,13 @@ typedef struct{
                             1 0 1: 5 Tbits
                             1 1 0: 6 Tbits
                             1 1 1: 7 Tbits>*/
-    uint8_t wu_tx_ll_width//Wake-up Transmission Low Level Width
+    uint8_t wu_tx_ll_width;//Wake-up Transmission Low Level Width
 }LIN3_ConfigurationTypeDef;
 
 typedef struct{
     uint8_t frm_id; /*the ID set the 6-bit ID value to be transmitted in the ID field of the LIN frame.*/
-    uint8_t idp0;   //sets the parity bits (P0) to be transmitted in the ID field
-    uint8_t idp1;   //sets the parity bits (P1) to be transmitted in the ID field.
+    //uint8_t idp0;   //sets the parity bits (P0) to be transmitted in the ID field
+    //uint8_t idp1;   //sets the parity bits (P1) to be transmitted in the ID field.
     uint8_t frm_sep;/*<Frame Separate Mode Select:
                     0: Frame separate mode is not set. 1: Frame separate mode is set.
                     With 0 set,after header transmission is started,response is transmitted/received without

@@ -48,11 +48,11 @@
 #define FCLA0INTRm_MASK       ((uint8_t)0x01)
 
 /*Get the type of interrupt detection. Read only.
-  retval ret - return the bits*/
+  retval ret(uint16_t) - return the bits*/
 #define __GET_EIINT_ICXX_CTL(ret,_REG_ADDR_)  do{ \
                                                 ret = READ_BIT(_REG_ADDR_,EIINT_ICXX_MASK); \
                                               }while(0)
-/*Get an interrupt request flag.0: No interrupt request is made.1: Interrupt request is made. */
+/*Get an interrupt request flag.ret(uint16_t)0: No interrupt request is made.No zero: Interrupt request is made.*/
 #define __GET_EIINT_RFXX_CTL(ret, _REG_ADDR_) do{ \
                                                 ret = READ_BIT(_REG_ADDR_,EIINT_RFXX_MASK); \
                                               } while (0)
@@ -64,7 +64,7 @@
                                                 else \
                                                   CLEAR_BIT(_REG_ADDR_,EIINT_RFXX_MASK); \
                                               }while(0)
-/*Get the interrupt request mask bit state,0-enable ,1-disable*/
+/*Get the interrupt request mask bit state,ret(uint16_t) 0-enable ,no zero-disable*/
 #define __GET_EIINT_MKXX_CTL(ret, _REG_ADDR_) do{ \
                                                 ret = READ_BIT(_REG_ADDR_,EIINT_MKXX_MASK); \
                                               }while (0)
@@ -75,7 +75,7 @@
                                                 else \
                                                   CLEAR_BIT(_REG_ADDR_,EIINT_MKXX_MASK); \
                                               } while (0)
-/*Get the way to determine the interrupt vector.0-Direct Vector Method,1-Table Reference Method*/
+/*Get the way to determine the interrupt vector.ret(uint16_t)0-Direct Vector Method,no zero-Table Reference Method*/
 #define __GET_EIINT_TBXX_CTL(ret, _REG_ADDR_) do{ \
                                                 ret = READ_BIT(_REG_ADDR_,EIINT_TBXX_MASK); \
                                               } while (0)
@@ -127,34 +127,8 @@ void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
     __SET_EIINT_PXXX_CTL(eiit_addr,Eiint_InitStruct->eiint_priority);
     if(Eiint_InitStruct->eiint_ext_int)
         Eiit_Filter_Ctl_Operate(EXT_INTP12, OPT_WRITE,&Eiint_InitStruct->eiint_detect);
-/*
-    eiit_addr =(__IO uint16_t*)Eiit_Get_Address_By_Channel(76);
-    __SET_EIINT_MKXX_CTL(eiit_addr,Eiint_InitStruct->eiint_process);
-    __SET_EIINT_TBXX_CTL(eiit_addr,Eiint_InitStruct->eiint_refer_method);
-    __SET_EIINT_PXXX_CTL(eiit_addr,Eiint_InitStruct->eiint_priority);
 
-    eiit_addr =(__IO uint16_t*)Eiit_Get_Address_By_Channel(134);
-    __SET_EIINT_MKXX_CTL(eiit_addr,Eiint_InitStruct->eiint_process);
-    __SET_EIINT_TBXX_CTL(eiit_addr,Eiint_InitStruct->eiint_refer_method);
-    __SET_EIINT_PXXX_CTL(eiit_addr,Eiint_InitStruct->eiint_priority);*/
-
-
-  /*__SET_EIINT_MKXX_CTL(P_12,Eiint_InitStruct->eiint_process);
-  __SET_EIINT_TBXX_CTL(P_12,Eiint_InitStruct->eiint_refer_method);
-  __SET_EIINT_PXXX_CTL(P_12,Eiint_InitStruct->eiint_priority);
-  Eiit_Filter_Ctl_Operate(EXT_INTP12, OPT_WRITE,&Eiint_InitStruct->eiint_detect);
-
-  __SET_EIINT_MKXX_CTL(OSTM0,Eiint_InitStruct->eiint_process);
-  __SET_EIINT_TBXX_CTL(OSTM0,Eiint_InitStruct->eiint_refer_method);
-  __SET_EIINT_PXXX_CTL(OSTM0,Eiint_InitStruct->eiint_priority);
-
-  __SET_EIINT_MKXX_CTL(TAUB0I0,Eiint_InitStruct->eiint_process);
-  __SET_EIINT_TBXX_CTL(TAUB0I0,Eiint_InitStruct->eiint_refer_method);
-  __SET_EIINT_PXXX_CTL(TAUB0I0,Eiint_InitStruct->eiint_priority);*/
-
-
-
-  __EI();
+    __EI();
 }
 
 
@@ -285,6 +259,30 @@ void Eiit_Filter_Ctl_Operate(INPUT_SIGNAL_Type in_sig, OperateDirection opt_dir,
         CLEAR_BIT(target_reg, FCLA0INTFm_MASK);
     }
   }
+}
+
+//Interrupt request is made?
+bool Eiit_Int_Req_Made(uint16_t eiint_ch)
+{
+    __IO uint16_t ret = 0;//must be uint16_t
+    __IO uint16_t* eiit_addr = (__IO uint16_t*)0xFFFF9000;
+
+    if(eiint_ch/0x120) return;// if chnanl number > 287(max),invalid,
+    eiit_addr =(__IO uint16_t*)Eiit_Get_Address_By_Channel(eiint_ch);
+
+    __GET_EIINT_RFXX_CTL(ret,eiit_addr);
+
+    return ret;
+}
+
+void Eiit_Clear_Int_Req(uint16_t eiint_ch)
+{
+    __IO uint16_t* eiit_addr = (__IO uint16_t*)0xFFFF9000;
+
+    if(eiint_ch/0x120) return;// if chnanl number > 287(max),invalid,
+    eiit_addr =(__IO uint16_t*)Eiit_Get_Address_By_Channel(eiint_ch);
+
+    __SET_EIINT_RFXX_CTL(eiit_addr,0);
 }
 
 static uint8_t i = 0;

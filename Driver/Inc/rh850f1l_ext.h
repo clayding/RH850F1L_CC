@@ -240,6 +240,7 @@ typedef struct{
 
 void Eiit_Init();
 void Eiit_Filter_Ctl_Operate(INPUT_SIGNAL_Type in_sig, OperateDirection opt_dir, uint8_t *trig_io);
-
+bool Eiit_Int_Req_Made(uint16_t eiint_ch);
+void Eiit_Clear_Int_Req(uint16_t eiint_ch);
 
 #endif //RH850F1L_EXT_H
