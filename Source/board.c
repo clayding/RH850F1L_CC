@@ -26,13 +26,15 @@
 //#define WDTA1_TEST
 
 /************************RTCA Config ******************************************/
-#define RTCA0_TEST
+//#define RTCA0_TEST
 
 /************************RSCAN Config *****************************************/
 //#define RSCAN_TEST
 
 /************************RLIN3/UART Config *****************************************/
-#define RSLIN3_UART_MODE_TEST
+//#define RLIN3_UART_MODE_TEST
+#define RLIN3_LIN_MODE_TEST
+
 
 /*!
  * Flag to indicate if the MCU is Initialized
@@ -160,8 +162,24 @@ void Board_Port_Config(void)
     PM1     &= ~(1U<<1);
     P1	 	|= (1U<<1);*/
 #endif
-#ifdef RSLIN3_UART_MODE_TEST
+#ifdef RLIN3_UART_MODE_TEST
+    port.pin_mask = PORT_PIN_3;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
 
+    port.pin_mask = PORT_PIN_2;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
+#endif
+
+#ifdef RLIN3_LIN_MODE_TEST
     port.pin_mask = PORT_PIN_3;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
@@ -218,7 +236,7 @@ void Board_Port_Config(void)
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);
 #endif
-#ifdef RSLIN3_UART_MODE_TEST
+#ifdef RLIN3_UART_MODE_TEST
         eiint.eiint_ch = 26;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
@@ -230,6 +248,22 @@ void Board_Port_Config(void)
         Eiit_Init(&eiint);
 
         eiint.eiint_ch = 28;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RLIN3_LIN_MODE_TEST
+        eiint.eiint_ch = 113;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 114;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 115;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);
@@ -451,9 +485,16 @@ void Board_Port_Config(void)
     }
 #endif
 
-#ifdef RSLIN3_UART_MODE_TEST
+#ifdef RLIN3_UART_MODE_TEST
     {
         uart_init();
+    }
+#endif
+
+#ifdef RLIN3_LIN_MODE_TEST
+    {
+        lin3_init();
+        //lin3_self_mode_init();
     }
 #endif
 

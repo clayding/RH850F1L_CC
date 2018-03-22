@@ -26,8 +26,6 @@ static __IO bool s_resp_recept = FALSE;//lin slave  response recepted completed
 
 
 static void UART_Baudrate_Generator(uint8_t uartn,uint32_t baudrate);
-static bool UART_Send_Int_Req_Made(uint8_t uartn);
-static void UART_Clear_Int_Req(uint8_t uartn);
 
 
 void UART_Init(UART_InitTypeDef* UART_InitStruct)
@@ -96,7 +94,7 @@ uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len)
     }
 
     for(cnt = 0;cnt < len;cnt++){
-        while(!tx_continue && !UART_Send_Int_Req_Made(uartn));
+		while(!tx_continue);
         if(exp_bit_flag){
 			if((data_len %2) && (cnt == len -1))
 				val = data[cnt];
@@ -107,7 +105,6 @@ uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len)
         }
 		__RLIN3_WRITE_TX_DATA(uartn,val);
         tx_continue = 0;
-		UART_Clear_Int_Req(uartn);
     }
 
     return cnt;
@@ -173,69 +170,13 @@ bool UART_Get_Rx_State(void)
 	return rx_available;
 }
 
-bool UART_Send_Int_Req_Made(uint8_t uartn)
-{
-    uint16_t eiint_ch = 0;
 
-    switch (uartn) {
-        case 0:
-            eiint_ch = 26;
-            break;
-        case 1:
-            eiint_ch = 113;
-            break;
-        case 2:
-            eiint_ch = 157;
-            break;
-        case 3:
-            eiint_ch = 221;
-            break;
-        case 4:
-            eiint_ch = 225;
-            break;
-        case 5:
-            eiint_ch = 229;
-            break;
-        default:
-            return FALSE;
-    }
-    return Eiit_Int_Req_Made(eiint_ch);
-}
-
-void UART_Clear_Int_Req(uint8_t uartn)
-{
-    uint16_t eiint_ch = 0;
-
-    switch (uartn) {
-        case 0:
-            eiint_ch = 26;
-            break;
-        case 1:
-            eiint_ch = 113;
-            break;
-        case 2:
-            eiint_ch = 157;
-            break;
-        case 3:
-            eiint_ch = 221;
-            break;
-        case 4:
-            eiint_ch = 225;
-            break;
-        case 5:
-            eiint_ch = 229;
-            break;
-        default:
-            return;
-    }
-    Eiit_Clear_Int_Req(eiint_ch);
-}
 
 /**************************LIN3 function****************************************/
 static void LIN3_Baudrate_Generator(uint8_t linn,LIN3_Mode mode,uint32_t baudrate);
 static void LIN3_Enable_Int(uint8_t linn,uint8_t int_out,uint8_t int_mask);
 static void LIN3_Enable_Err_Detect(uint8_t linn,uint8_t timeout_err_sel,uint8_t err_mask);
-static void LIN3_Set_Frame_Config(uint8_t linn,LIN3_ConfigurationTypeDef *cfg_param_p);
+static void LIN3_Set_Frame_Config(uint8_t linn,LIN3_Mode mode,LIN3_ConfigurationTypeDef *cfg_param_p);
 
 static int8_t LIN3_Master_Send_Header(uint8_t linn,uint8_t id);
 static void LIN3_Master_Send_Resp(uint8_t linn);
@@ -248,9 +189,8 @@ static uint8_t LIN3_ID_Parity_Calculate(uint8_t id);
 
 void LIN3_Init(LIN3_InitTypeDef* LIN3_InitStruct)
 {
-    uint8_t linn  = 0;
-
-    LIN3_Mode mode = LIN3_MASTER;
+    __IO uint8_t linn  = 0;
+    LIN3_Mode mode = LIN3_MASTER;//default LIN3_MASTER
 
     linn = LIN3_InitStruct->linn;
     mode = LIN3_InitStruct->mode;
@@ -259,11 +199,13 @@ void LIN3_Init(LIN3_InitTypeDef* LIN3_InitStruct)
     //Sets noise filter ON/OFF
     __RLIN3_SET_LIN_MODE(linn,LIN3_LRDNFS_MASK,LIN3_InitStruct->noi_filter_off);
     //Enables interrupt
-    LIN3_Enable_Int(linn,0,0);
+    LIN3_Enable_Int(linn,LIN3_InitStruct->int_out_sel,
+        LIN3_InitStruct->int_en_mask);
     //Enables error detection
-    LIN3_Enable_Err_Detect(linn,0,0);
+    LIN3_Enable_Err_Detect(linn,LIN3_InitStruct->timeout_err_sel,
+        LIN3_InitStruct->err_en_mask);
     //Sets frame configuration parameters
-    LIN3_Set_Frame_Config(linn,&LIN3_InitStruct->cfg_param);
+    LIN3_Set_Frame_Config(linn,mode,&LIN3_InitStruct->cfg_param);
     //Transitions to LIN master mode/LIN slave mode
     __RLIN3_SET_LIN_MODE(linn,LIN3_LMD_MASK,(uint8_t)mode);
     //Exits from LIN reset mode.
@@ -289,7 +231,7 @@ void LIN3_Baudrate_Generator(uint8_t linn,LIN3_Mode mode,uint32_t baudrate)
         (16 samplings) or “1111B” (16 samplings)
         In LIN master mode (LIN/UART mode select bits in LIN mode register = 00B),
         set these bits to 0000B or 1111B (16 sampling) */
-        br_st.bit_sample_cnt = BAUDRATE_SAMPLE_CNT_16;
+        br_st.bit_sample_cnt = BAUDRATE_SAMPLE_CNT_16_;
 
         //default fa is 307200 Hz,40MHz / 307200 = 130.2
         br_st.prescaler_clk = PRESCALER_CLK_DIV_2;
@@ -326,11 +268,14 @@ void LIN3_Baudrate_Generator(uint8_t linn,LIN3_Mode mode,uint32_t baudrate)
     __RLIN3_SET_LIN_MODE(linn,LIN3_LCKS_MASK,br_st.lin_sys_clk << LIN3_LCKS_OFFSET);
 }
 
-void LIN3_Enable_Int(uint8_t linn,uint8_t int_out,uint8_t int_mask)
+void LIN3_Enable_Int(uint8_t linn,uint8_t int_out_sel,uint8_t int_mask)
 {
-    if(!int_out){
+    if(!int_out_sel){
+        //RLIN3n interrupt is used.
         __RLIN3_SET_LIN_MODE(linn,LIN3_LIOS_MASK,0);
     }else{
+        // RLIN3n transmission interrupt, RLIN3n successful reception interrupt, and
+        // RLIN3n status interrupt are used.
         __RLIN3_SET_LIN_MODE(linn,LIN3_LIOS_MASK,1 << LIN3_LIOS_OFFSET);
         __RLIN3_CONFIG_INT(linn,int_mask);
     }
@@ -346,11 +291,15 @@ void LIN3_Enable_Err_Detect(uint8_t linn,uint8_t timeout_err_sel,uint8_t err_mas
     __RLIN3_ENABLE_ERR_DETECT(linn,LIN3_LTES_MASK,timeout_err_sel << LIN3_LTES_OFFSET);
 }
 
-void LIN3_Set_Frame_Config(uint8_t linn,LIN3_ConfigurationTypeDef *cfg_param_p)
+void LIN3_Set_Frame_Config(uint8_t linn,LIN3_Mode mode,LIN3_ConfigurationTypeDef *cfg_param_p)
 {
+    if(mode == LIN3_MASTER){
     //config the lin break field
-    __RLIN3_SET_BREAK_FIELD_CONFIG(linn,LIN3_BDT_MASK| LIN3_BLT_MASK,
-        cfg_param_p->break_delim_width << LIN3_BDT_OFFSET | cfg_param_p->break_width);
+        __RLIN3_SET_BREAK_FIELD_CONFIG(linn,LIN3_BDT_MASK| LIN3_BLT_MASK,
+            cfg_param_p->break_delim_width << LIN3_BDT_OFFSET | cfg_param_p->break_width);
+    }else{ //LIN3_SLAVE_AUTO or LIN3_SLAVE_FIXED
+        __RLIN3_SET_BREAK_FIELD_CONFIG(linn,LIN3_LBLT_MASK, cfg_param_p->rx_break_detect_width);
+    }
     //config the lin space
     __RLIN3_SET_LIN_SPACE(linn,LIN3_IBS_MASK | LIN3_IBHS_MASK,
         cfg_param_p->inter_byte_space << LIN3_IBS_OFFSET | cfg_param_p->resp_space);
@@ -365,7 +314,7 @@ int8_t LIN3_Master_Process(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p,uint8_t res
     mask = LIN3_LCS_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
     /*In response reception,repeats the transmission of inter-byte spaces as many times as the data
     length specified in bits RFDL[3:0] in the RLN3nLDFC register),so the resp_len mut be specified*/
-    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RCDS_MASK) |
+    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RCDS_OFFSET) |
         resp_len;
 
     if(info_p->resp_dir == 1){//Response Field Communication Direction: transmission
@@ -392,14 +341,14 @@ int8_t LIN3_Master_Process(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p,uint8_t res
 int8_t LIN3_Master_Send_Header(uint8_t linn,uint8_t id)
 {
     __IO uint8_t idp = 0;
-
+    __IO uint8_t* addr = (__IO uint8_t* )0xFFCF0050;
     idp = LIN3_ID_Parity_Calculate(id);
     idp &= 0x03;
 
-    __RLIN3_SET_ID_BUF(linn,idp<< LIN3_IDP0_OFFSET | id);
+    __RLIN3_SET_ID_BUF(linn,(idp << LIN3_IDP0_OFFSET) | id);
 
     //frame transmission or wake-up transmission/reception started
-    //__RLIN3_SET_UART_TX_CTL(linn,LIN3_FTS_MASK,1);
+    __RLIN3_SET_LIN_TX_CTL(linn,LIN3_FTS_MASK,1);
 
     while(m_hdr_sent == FALSE);//failed after 10ms delay
 
@@ -578,13 +527,63 @@ uint8_t LIN3_ID_Parity_Calculate(uint8_t id)
 
     idp0 = (id & 0x01) ^((id >> 1) & 0x01) ^ ((id >> 2) & 0x01) ^ ((id >> 4) & 0x01);
     idp1 = ((id >> 1) & 0x01) ^ ((id >> 3) & 0x01) ^ ((id >> 4) & 0x01) ^ ((id >> 5) & 0x01);
-    idp1 = ~idp1;
+    idp1 = !idp1;
 
     INFOR("id:0x%x,idp0:%d,idp1:%d\n",id,idp0,idp1);
     idp0 |= idp1 << 1;
 
     return idp0;// bit 1:idp1 bit0:idp0
 }
+
+void RLIN3_Self_Mode_Init(LIN3_SelfModeInitTypeDef *LIN3_InitStruct)
+{
+    __IO uint8_t linn  = 0;
+    LIN3_Mode mode = LIN3_MASTER;//default LIN3_MASTER
+
+    linn = LIN3_InitStruct->linn;
+    mode = LIN3_InitStruct->mode;
+    //Transition to LIN reset mode
+    //Set the OM0 bit in the RLN3nLCUC register to 0 (LIN reset mode).
+    //Read the OMM0 bit in the RLN3nLMST register; verify that it is 0 (LIN reset mode)
+    while(__RLIN3_GET_LIN_MODE_STAT(linn,LIN3_OMM0_MASK)){
+        __RLIN3_SET_LIN_CTL(linn,LIN3_OM0_MASK,0);
+    }
+
+    //Select a LIN mode
+    //LMD bits in RLN3nLMD = 00B (LIN master mode) or 11B (LIN slave mode [fixed baud rate])
+    __RLIN3_SET_LIN_MODE(linn,LIN3_LMD_MASK,(uint8_t)mode);
+
+    //1st write: RLN3nLSTC register = 1010 0111B (A7H)
+    //2nd write: RLN3nLSTC register = 0101 1000B (58H)
+    //3rd write: RLN3nLSTC register = 0000 0001B (01H)
+    __RLIN3_ENTER_SELF_TEST(linn);
+
+    //Verify the transition to LIN self-test mode
+    //Read the LSTM bit in the RLN3nLSTC register; verify that it is 1 (LIN self-test mode)
+
+    if(__RLIN3_GET_SELF_TEST_STAT(linn) == 0){
+        ERROR("Transition to LIN reset mode failed\n");
+        return;
+    }
+
+    LIN3_Baudrate_Generator(linn,mode,LIN3_InitStruct->baudrate);
+    //Sets noise filter ON/OFF
+    __RLIN3_SET_LIN_MODE(linn,LIN3_LRDNFS_MASK,LIN3_InitStruct->noi_filter_off);
+    //Enables interrupt
+    LIN3_Enable_Int(linn,LIN3_InitStruct->int_out_sel,
+        LIN3_InitStruct->int_en_mask);
+    //Enables error detection
+    LIN3_Enable_Err_Detect(linn,LIN3_InitStruct->timeout_err_sel,
+        LIN3_InitStruct->err_en_mask);
+    //Sets frame configuration parameters
+    LIN3_Set_Frame_Config(linn,mode,&LIN3_InitStruct->cfg_param);
+    //Transitions to LIN master mode/LIN slave mode
+    __RLIN3_SET_LIN_MODE(linn,LIN3_LMD_MASK,(uint8_t)mode);
+    //Exits from LIN reset mode.
+    __RLIN3_SET_LIN_CTL(linn,LIN3_OM0_MASK,1);
+    while(__RLIN3_GET_LIN_MODE_STAT(linn,LIN3_OMM0_MASK) == 0);
+}
+
 
 /******************************************************************************/
 #pragma interrupt RLIN30SendIntHandler(channel = 26, enable = false, callt = false, fpu = false)
@@ -595,10 +594,35 @@ void RLIN30SendIntHandler(unsigned long eiic)
         __RLIN3_SET_UART_STAT(0,LIN3_FTC_MASK,0);
 		tx_buf_complete = TRUE;
 	}*/
+	m_hdr_sent = TRUE;
 }
 
 #pragma interrupt RLIN30RecvCompleteIntHandler(channel = 27, enable = false, callt = false, fpu = false)
 void RLIN30RecvCompleteIntHandler(unsigned long eiic)
 {
 	rx_available = TRUE;
+}
+
+#pragma interrupt RLIN30StatusIntHandler(channel = 115, enable = false, callt = false, fpu = false)
+void RLIN30StatusIntHandler(unsigned long eiic)
+{
+	while(1);
+}
+
+
+#pragma interrupt RLIN31SendIntHandler(channel = 113, enable = false, callt = false, fpu = false)
+void RLIN31SendIntHandler(unsigned long eiic)
+{
+	m_hdr_sent = TRUE;
+}
+
+#pragma interrupt RLIN31RecvCompleteIntHandler(channel = 114, enable = false, callt = false, fpu = false)
+void RLIN31RecvCompleteIntHandler(unsigned long eiic)
+{
+}
+
+#pragma interrupt RLIN31StatusIntHandler(channel = 115, enable = false, callt = false, fpu = false)
+void RLIN31StatusIntHandler(unsigned long eiic)
+{
+	while(1);
 }

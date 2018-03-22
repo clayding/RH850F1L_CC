@@ -359,12 +359,12 @@
 #define PRESCALER_CLK_DIV_32     5
 #define PRESCALER_CLK_DIV_64     6
 #define PRESCALER_CLK_DIV_128    7
-
+/*LIN Interrupt Enable mask*/
 #define LIN3_EN_HDR_TX_INT_MASK  8 //Successful Header Transmission Interrupt Request mask
 #define LIN3_ERR_DETECT_INT_MASK 4 //Error Detection Interrupt Request mask
 #define LIN3_FRM_WU_RX_INT_MASK  2 //Successful Frame/Wake-up Reception Interrupt Request mask
 #define LIN3_FRM_WU_TX_INT_MASK  1 //Successful Frame/Wake-up Transmission Interrupt Request mask
-
+/*LIN Error Detection Enable mask*/
 #define LIN3_FRM_ERR_DETECT_MASK 8 //Framing Error Detection mask
 #define LIN3_TIO_ERR_DETECT_MASK 4 //Timeout Error Detection mask
 #define LIN3_PHB_ERR_DETECT_MASK 2 //Physical Bus Error Detection mask
@@ -451,6 +451,9 @@ typedef struct{
                             :
                             1 1 1 0: 27 Tbits
                             1 1 1 1: 28 Tbits>*/
+    uint8_t rx_break_detect_width;/*<Reception Break (Low-Level) Detection Width Setting>
+                            0: A break (low-level) is detected in 9.5 or 10 Tbits
+                            1: A break (low-level) is detected in 10.5 or 11 Tbits*/
     uint8_t inter_byte_space;/*<Inter-Byte Space Select
                             0 0: 0 Tbit, 0 1: 1 Tbit,1 0: 2 Tbits,1 1: 3 Tbits>*/
     uint8_t resp_space; /*<Inter-Byte Space (Header)/Response Space Select
@@ -487,11 +490,23 @@ typedef struct{
     uint16_t baudrate; // 1- 20K
     uint8_t noi_filter_off; // Sets noise filter ON/OFF,0:enable(ON) 1:disable(OFF)
     LIN3_ConfigurationTypeDef cfg_param;
-}LIN3_InitTypeDef;
+    uint8_t int_out_sel; /*<LIN Interrupt Output Select
+                            0: RLIN3 interrupt is used.
+                            1: RLIN3n transmission interrupt, RLIN3n successful reception
+                            interrupt, and RLIN3n reception status interrupt are used.>*/
+    uint8_t int_en_mask;//LIN Interrupt Enable mask
+    uint8_t timeout_err_sel;/*<Timeout Error Select
+                            0: Frame timeout error
+                            1: Response timeout error>*/
+    uint8_t err_en_mask;//LIN Error Detection Enable mask
+}LIN3_InitTypeDef,LIN3_SelfModeInitTypeDef;
 
 uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len);
 
 uint8_t UART_Recv_Data(uint8_t uartn,uint16_t* data);
-
 bool UART_Get_Rx_State(void);
+
+void LIN3_Init(LIN3_InitTypeDef* LIN3_InitStruct);
+int8_t LIN3_Master_Process(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data);
+void RLIN3_Self_Mode_Init(LIN3_SelfModeInitTypeDef *LIN3_InitStruct);
 #endif//RH850F1L_RLIN_H

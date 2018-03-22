@@ -164,7 +164,7 @@
 	.dw #_Dummy_EI ; INT25
 	.dw #_RLIN30SendIntHandler ; INT26
 	.dw #_RLIN30RecvCompleteIntHandler ; INT27
-	.dw #_Dummy_EI ; INT28
+	.dw #_RLIN30StatusIntHandler ; INT28
 	.dw #_Dummy_EI ; INT29
 	.dw #_Dummy_EI ; INT30
 	.dw #_Dummy_EI ; INT31
@@ -249,9 +249,9 @@
 	.dw #_Dummy_EI ; INT110
 	.dw #_Dummy_EI ; INT111
 	.dw #_Dummy_EI ; INT112
-	.dw #_Dummy_EI ; INT113
-	.dw #_Dummy_EI ; INT114
-	.dw #_Dummy_EI ; INT115
+	.dw #_RLIN31SendIntHandler ; INT113
+	.dw #_RLIN31RecvCompleteIntHandler ; INT114
+	.dw #_RLIN31StatusIntHandler ; INT115
 	.dw #_Dummy_EI ; INT116
 	.dw #_Dummy_EI ; INT117
 	.dw #_Dummy_EI ; INT118
