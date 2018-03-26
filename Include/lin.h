@@ -5,5 +5,6 @@
 
 void lin3_init(void);
 void lin3_master_excute(void);
+void lin3_slave_excute(void);
 
 #endif //UART_H

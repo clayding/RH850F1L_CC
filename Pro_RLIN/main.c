@@ -13,6 +13,7 @@
 #include "rh850f1l_timer.h"
 #include "rh850f1l_rscan.h"
 #include "delay.h"
+#include "lin.h"
 
 typedef struct
 {
@@ -31,20 +32,28 @@ LED_CTL_Struct lcs[3];
 
 extern void (*Eiit_Handler_Ptr)(void);
 extern void (*Eiit_Handler_Ptr_2)(void);
-
+extern void (lin3_test_excute)(void);
+uint8_t lin_master_sent_count = 0;
 void main(void)
 {
     __IO uint16_t msg;
 	LED_Struct_Init(lcs, ARRAY_SIZE(lcs));
     Board_MCU_Init();
 	printf("MCU Started\n");
-    lin3_master_excute();
+
     while (1)
     {
+		lin3_test_excute();
 
     }
 
 }
+
+void test_count()
+{
+	lin_master_sent_count++;
+}
+
 
 void LED_Struct_Init(LED_CTL_Struct *lcs_t, uint8_t arr_size)
 {
@@ -64,7 +73,7 @@ void LED_Struct_Init(LED_CTL_Struct *lcs_t, uint8_t arr_size)
     lcs_t->led_pin = PORT_PIN_6;
 
     Eiit_Handler_Ptr = led_blink2;
-    Eiit_Handler_Ptr_2 = led_blink1;
+    Eiit_Handler_Ptr_2 = test_count;
 }
 
 void LED_Blink(LED_CTL_Struct lcs_t[], uint8_t arr_size,uint8_t ledn)

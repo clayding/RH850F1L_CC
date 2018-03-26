@@ -635,6 +635,7 @@ void OSTM_Init();
 void OSTM_Delay(__IO uint32_t delay_us);
 void OSTM_Cmp_Reload(const uint32_t new_value);
 uint8_t OSTM_Count_State_Get(void* unit);
+uint32_t OSTM_GetTick(void);
 
 void TAUB_Independent_Init(TAUB_ChMode_TypeDef *mode);
 void TAUB_Set_Channel_Output_Mode(uint8_t channel_num,TAUB_CH_OUTPUT_MODE_Type out_mode);

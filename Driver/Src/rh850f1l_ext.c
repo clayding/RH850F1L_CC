@@ -301,7 +301,7 @@ void WDTA0IntHandler(unsigned long eiic)
     static int count = 0;
     WDTA_Reload(_WDTA0);
     if(++count / 5){
-    	Eiit_Handler_Ptr_2();
+        //Eiit_Handler_Ptr_2();
 	count = 0;
     }
 }
@@ -312,7 +312,7 @@ void WDTA1IntHandler(unsigned long eiic)
     static int count = 0;
     WDTA_Reload(_WDTA1);
     if(++count / 5){
-    	Eiit_Handler_Ptr();
+        //Eiit_Handler_Ptr();
 	    count = 0;
     }
 }
@@ -320,7 +320,7 @@ void WDTA1IntHandler(unsigned long eiic)
 #pragma interrupt TAUD0CH1IntHandler(channel = 39, enable = false, callt = false, fpu = false)
 void TAUD0CH1IntHandler(unsigned long eiic)
 {
-    Eiit_Handler_Ptr_2();
+    //Eiit_Handler_Ptr_2();
 }
 
 extern __IO uint32_t uw_tick;
@@ -334,7 +334,7 @@ void OSTMIntHandler(unsigned long eiic)
 #pragma interrupt Inp12Handler(channel = 123, enable = false, callt = false, fpu = false)
 void Inp12Handler(unsigned long eiic)
 {
-  Eiit_Handler_Ptr();
+  Eiit_Handler_Ptr_2();
 }
 
 #pragma interrupt TAUB0CH0IntHandler(channel = 134, enable = false, callt = false, fpu = false)
@@ -346,7 +346,7 @@ void TAUB0CH0IntHandler(unsigned long eiic)
 #pragma interrupt TAUB0CH1IntHandler(channel = 135, enable = false, callt = false, fpu = false)
 void TAUB0CH1IntHandler(unsigned long eiic)
 {
-    Eiit_Handler_Ptr_2();
+    //Eiit_Handler_Ptr_2();
 }
 
 #pragma interrupt TAUB0CH02ntHandler(channel = 136, enable = false, callt = false, fpu = false)

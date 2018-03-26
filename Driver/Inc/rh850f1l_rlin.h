@@ -11,6 +11,10 @@
 #define RH850F1L_RLIN_H
 #include "rh850f1l.h"
 
+#define MAX_LIN_NUM     6
+#define MAX_UART_NUM    MAX_LIN_NUM
+
+
 #define _RLIN30         RLN30
 #define _RLIN31         RLN31
 #define _RLIN32         RLN32
@@ -105,7 +109,9 @@
 #define LIN3_OM0_MASK        0x01 //LIN Reset
 
 /*RLN3nLTRC — LIN/UART Transmission Control Register*/
+#define LIN3_LNRR_OFFSET     2
 #define LIN3_RTS_OFFSET      1
+#define LIN3_LNRR_MASK       ((uint8_t)(0x01 << LIN3_LNRR_OFFSET)) //No LIN Response Request
 #define LIN3_RTS_MASK        ((uint8_t)(0x01 << LIN3_RTS_OFFSET)) //Response Transmission/Reception Start
 #define LIN3_FTS_MASK        ((uint8_t)0x01)   //Frame Transmission/Wake-up Transmission/Reception Start
 
@@ -363,8 +369,12 @@
 #define LIN3_EN_HDR_TX_INT_MASK  8 //Successful Header Transmission Interrupt Request mask
 #define LIN3_ERR_DETECT_INT_MASK 4 //Error Detection Interrupt Request mask
 #define LIN3_FRM_WU_RX_INT_MASK  2 //Successful Frame/Wake-up Reception Interrupt Request mask
+#define LIN3_RES_WU_RX_INT_MASK  2 //Successful Response/Wake-up Reception Interrupt Request Enable
 #define LIN3_FRM_WU_TX_INT_MASK  1 //Successful Frame/Wake-up Transmission Interrupt Request mask
+#define LIN3_RES_WU_TX_INT_MASK  1 //Successful Response/Wake-up Transmission Interrupt Request Enable
 /*LIN Error Detection Enable mask*/
+#define LIN3_IDP_ERR_DETECT_MASK 64   //ID Parity Error Detection Enable
+#define LIN3_SYN_ERR_DETECT_MASK 16 //Sync Field Error Detection Enable
 #define LIN3_FRM_ERR_DETECT_MASK 8 //Framing Error Detection mask
 #define LIN3_TIO_ERR_DETECT_MASK 4 //Timeout Error Detection mask
 #define LIN3_PHB_ERR_DETECT_MASK 2 //Physical Bus Error Detection mask
@@ -482,8 +492,6 @@ typedef struct{
                     0: Classic checksum mode 1: Enhanced checksum mode>*/
 }LIN3_Frm_InfoTypeDef;
 
-
-
 typedef struct{
     uint8_t linn;
     LIN3_Mode mode;
@@ -504,7 +512,7 @@ typedef struct{
 uint8_t UART_Send_Data(uint8_t uartn,uint8_t* data, uint8_t data_len);
 
 uint8_t UART_Recv_Data(uint8_t uartn,uint16_t* data);
-bool UART_Get_Rx_State(void);
+bool UART_Get_Rx_State(uint8_t uartn);
 
 void LIN3_Init(LIN3_InitTypeDef* LIN3_InitStruct);
 int8_t LIN3_Master_Process(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data);

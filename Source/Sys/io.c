@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "rh850f1l_rlin.h"
-//#define DEBUG_PRINT
+#define DEBUG_PRINT
 
 void (*fputc)(char c);
 

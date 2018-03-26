@@ -13,6 +13,9 @@
 #include "board.h"
 #include "can.h"
 #include "uart.h"
+
+/****************************OSTM0 config*************************************/
+//#define OSTM_TEST
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
@@ -32,7 +35,7 @@
 //#define RSCAN_TEST
 
 /************************RLIN3/UART Config *****************************************/
-//#define RLIN3_UART_MODE_TEST
+#define RLIN3_UART_MODE_TEST
 #define RLIN3_LIN_MODE_TEST
 
 
@@ -180,19 +183,19 @@ void Board_Port_Config(void)
 #endif
 
 #ifdef RLIN3_LIN_MODE_TEST
-    port.pin_mask = PORT_PIN_3;
+    port.pin_mask = PORT_PIN_4;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
     port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
     port.bmc_t = BIDIRECTION_MODE_ENABLED;
-    port.alter_t = ALT_FUNC_2;
+    port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum0,&port);
 
-    port.pin_mask = PORT_PIN_2;
+    port.pin_mask = PORT_PIN_5;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_OUTPUT_MODE;
     port.echar_t = OUTPUT_PP | OUTPUT_HDS;
-    port.alter_t = ALT_FUNC_2;
+    port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum0,&port);
 #endif
 
@@ -205,11 +208,12 @@ void Board_Port_Config(void)
         eiint.eiint_priority = INT_PRIORITY_7;
         eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
         Eiit_Init(&eiint);
-
+#ifdef OSTM_TEST
         eiint.eiint_ch = 76;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_5;
         Eiit_Init(&eiint);
+#endif
 #if defined (TAUB0_INTERVAL_MODE_TEST) || defined (TAUB0_PWM_OUTPUT_MODE_TEST)
         eiint.eiint_ch = 134;
         eiint.eiint_ext_int = 0;
@@ -255,17 +259,17 @@ void Board_Port_Config(void)
 #ifdef RLIN3_LIN_MODE_TEST
         eiint.eiint_ch = 113;
         eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
+        eiint.eiint_priority = INT_PRIORITY_3;
         Eiit_Init(&eiint);
 
         eiint.eiint_ch = 114;
         eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
+        eiint.eiint_priority = INT_PRIORITY_3;
         Eiit_Init(&eiint);
 
         eiint.eiint_ch = 115;
         eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
+        eiint.eiint_priority = INT_PRIORITY_3;
         Eiit_Init(&eiint);
 #endif
 #ifdef WDTA0_TEST
@@ -325,7 +329,9 @@ void Board_Port_Config(void)
         RTCA_Init(rtca_init);
     }
 #endif
-        //OSTM_Init();
+#ifdef OSTM_TEST
+        OSTM_Init();
+#endif
 #ifdef TAUB0_INTERVAL_MODE_TEST
     {
         TAUB_ChMode_TypeDef ch_mode;

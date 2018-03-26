@@ -110,7 +110,7 @@ void hexdump8(const void *ptr, size_t len);
 
 #if DEBUGLEVEL >= INFO
 /* Show warnings e.g. for FIFO errors */
-#define INFOR(...)    do{printf("Infor:");printf(__VA_ARGS__);}while(0)
+#define INFOR(...)    do{printf(__VA_ARGS__);}while(0)
 #else
 #define INFOR(...)
 #endif
