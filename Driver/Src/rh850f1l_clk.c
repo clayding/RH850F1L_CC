@@ -74,6 +74,7 @@ SET_DOMAIN_ISO_FUNC_DECLARE(IPERI2);
 SET_DOMAIN_ISO_FUNC_DECLARE(ILIN);
 SET_DOMAIN_ISO_FUNC_DECLARE(ICAN);
 SET_DOMAIN_ISO_FUNC_DECLARE(ICANOSC);
+SET_DOMAIN_ISO_FUNC_DECLARE(ICSI);
 
 
 DOMAIN_SET_Ref dsf[] = {
@@ -86,6 +87,7 @@ DOMAIN_SET_Ref dsf[] = {
     {ILIN,C_ISO_ILIN_Domain_Set},
     {ICAN,  C_ISO_ICAN_Domain_Set},
     {ICANOSC,C_ISO_ICANOSC_Domain_Set},
+    {ICSI,C_ISO_ICSI_Domain_Set},
 };
 
 static MOSC_AMP_GAIN_Type Clock_MOSC_Control(OperateDirection optd, MOSC_AMP_GAIN_Type val);
@@ -255,7 +257,6 @@ SET_CLK_DOMAIN_RET_Type C_ISO_IPERI1_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
         return SET_SRC_CLK_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
-
 }
 
 SET_CLK_DOMAIN_RET_Type C_ISO_IPERI2_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
@@ -285,7 +286,7 @@ SET_CLK_DOMAIN_RET_Type C_ISO_ILIN_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ILIN,S_ACT) & STR_CONCAT2(ILIN,S_ACT_MASK))) { //Confirm completion of selection
         //return SET_SRC_CLK_FAIL;
     }
-	
+
     /*Step 2 Set up a clock divider The setting of this register is only applicable to RLIN30*/
     val_.clk_divider_val = ILIN_CTL_DIVI_1;//CKSC_ILINS_CTL selection /1 (default)
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,CPUCLK,D_CTL);
@@ -328,6 +329,21 @@ SET_CLK_DOMAIN_RET_Type C_ISO_ICANOSC_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     return SET_CLK_DOMAIN_SUCCESS;
 
 }
+
+SET_CLK_DOMAIN_RET_Type C_ISO_ICSI_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Source Clock Setting for C_ISO_ICSI*/
+    val_.src_clk_ctl_val = ICSI_SRC_CPUCLK;//Source Clock Setting for C_ISO_ICSI
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ICSI,S_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ICSI,S_CTL_MASK))) != ERROR);//Select a source clock
+    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ICSI,S_ACT) & STR_CONCAT2(ICSI,S_ACT_MASK))) { //Confirm completion of selection
+        return SET_SRC_CLK_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+}
+
 
 void Clock_Fout_Config(void)
 {

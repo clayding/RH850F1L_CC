@@ -87,6 +87,9 @@
 #define ICANOSCD_CTL_MASK   ((uint32_t)0x03) //CKSC_ICANOSCD_CTL Bit Mask
 #define ICANOSCD_ACT_MASK   ((uint32_t)0x03) //CKSC_ICANOSCD_ACT  Bit Mask
 
+#define ICSIS_CTL_MASK       ((uint32_t)0x03) //CKSC_ICSIS_CTL bit mask
+#define ICSIS_ACT_MASK       ((uint32_t)0x03) //CKSC_ICSIS_ACT bit mask
+
 #define FOUT_DIV_MASK       ((uint32_t)0x3F) //FOUTDIV Mask
 #define FOUTSYNC_MASK       ((uint32_t)0x01) //FOUTSTAT FOUTSYNC Mask
 #define FOUTCLKACT_MASK     ((uint32_t)0x01 << 1) //FOUTSTAT FOUTCLKACT Mask
@@ -191,6 +194,12 @@ typedef enum{
     ICANOSC_DIV_MAINOSC_1, //01B: MainOSC /1
     ICANOSC_DIV_MAINOSC_2, //10B: MainOSC /2
 }ICANOSC_DIV_CLK_Type;
+
+typedef enum{
+    ICSI_SRC_DISABLED, //00B: Disabled
+    ICSI_SRC_CPUCLK,   //01B: CPUCLK (default)
+    ICSI_SRC_PPLLCLK,  //10B: PPLLCLK
+}ICSI_SRC_CLK_Type;
 
 void Clock_MOSC_Config(OSC_OPT_Type opt);
 void Clock_SOSC_Config(OSC_OPT_Type opt);
