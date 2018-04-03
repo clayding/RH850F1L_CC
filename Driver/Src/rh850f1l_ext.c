@@ -115,6 +115,7 @@ void Inp12Handler(unsigned long eiic);
 void (*Eiit_Handler_Ptr)(void);
 void (*Eiit_Handler_Ptr_2)(void);
 static uintptr_t Eiit_Get_Address_By_Channel(uint16_t channel_no);//max 288 , can not be uint8_t
+static void Eiit_Int_Select(uint16_t eiint_ch,uint16_t mask,uint16_t val);
 
 void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
 {
@@ -127,7 +128,9 @@ void Eiit_Init(Eiint_InitTypeDef *Eiint_InitStruct)
     __SET_EIINT_PXXX_CTL(eiit_addr,Eiint_InitStruct->eiint_priority);
     if(Eiint_InitStruct->eiint_ext_int)
         Eiit_Filter_Ctl_Operate(EXT_INTP12, OPT_WRITE,&Eiint_InitStruct->eiint_detect);
-
+    if(Eiint_InitStruct->selb_mask)
+        Eiit_Int_Select(Eiint_InitStruct->eiint_ch,Eiint_InitStruct->selb_mask,
+            Eiint_InitStruct->selb_val);
     __EI();
 }
 
@@ -283,6 +286,17 @@ void Eiit_Clear_Int_Req(uint16_t eiint_ch)
     eiit_addr =(__IO uint16_t*)Eiit_Get_Address_By_Channel(eiint_ch);
 
     __SET_EIINT_RFXX_CTL(eiit_addr,0);
+}
+
+void Eiit_Int_Select(uint16_t eiint_ch,uint16_t mask,uint16_t val)
+{
+    if(!mask) return;
+
+    if((eiint_ch >=77 && eiint_ch <= 80) || (eiint_ch >=137 && eiint_ch <= 149)){
+        Eiit_Sel_Bit_Set(SELB_INTC2_REG,val,mask);
+    }else{
+        Eiit_Sel_Bit_Set(SELB_INTC1_REG,val,mask);
+    }
 }
 
 static uint8_t i = 0;

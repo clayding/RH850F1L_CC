@@ -179,14 +179,62 @@
 #define CTP_15  CTP15
 
 
-#define EDGE_DETECTION      ((uint8_t)0x01)
-#define LEVEL_DETECTION     ((uint8_t)(0x01 << 1))
-#define FALL_EDGE_ENABLE    ((uint8_t)(0x01 << 2))
-#define FALL_EDGE_DISABLE   ((uint8_t)(0x01 << 3))
-#define RISE_EDGE_ENABLE    ((uint8_t)(0x01 << 4))
-#define RISE_EDGE_DISABLE   ((uint8_t)(0x01 << 5))
-#define LOW_LEVEL_DETECT    ((uint8_t)(0x01 << 6))
-#define HIGH_LEVEL_DETECT   ((uint8_t)(0x01 << 7))
+#define EDGE_DETECTION          ((uint8_t)0x01)
+#define LEVEL_DETECTION         ((uint8_t)(0x01 << 1))
+#define FALL_EDGE_ENABLE        ((uint8_t)(0x01 << 2))
+#define FALL_EDGE_DISABLE       ((uint8_t)(0x01 << 3))
+#define RISE_EDGE_ENABLE        ((uint8_t)(0x01 << 4))
+#define RISE_EDGE_DISABLE       ((uint8_t)(0x01 << 5))
+#define LOW_LEVEL_DETECT        ((uint8_t)(0x01 << 6))
+#define HIGH_LEVEL_DETECT       ((uint8_t)(0x01 << 7))
+
+/** @defgroup int_select
+  * @{
+SELB_INTC1 — INTC1 Interrupt Select Register
+When two interrupt sources are assigned to one interrupt channel, this register
+selects which interrupt sources is enabled*/
+#define EIINT_CH7_SELECT_MASK    ((uint16_t)(0x01 << 11))
+#define EIINT_CH153_SELECT_MASK  EIINT_CH7_SELECT_MASK
+#define EIINT_CH6_SELECT_MASK    ((uint16_t)(0x01 << 10))
+#define EIINT_CH152_SELECT_MASK  EIINT_CH6_SELECT_MASK
+#define EIINT_CH5_SELECT_MASK    ((uint16_t)(0x01 << 9))
+#define EIINT_CH151_SELECT_MASK  EIINT_CH5_SELECT_MASK
+#define EIINT_CH1_SELECT_MASK    ((uint16_t)(0x01 << 8))
+#define EIINT_CH150_SELECT_MASK  EIINT_CH1_SELECT_MASK
+#define EIINT_CH31_SELECT_MASK   ((uint16_t)(0x01 << 7))
+#define EIINT_CH127_SELECT_MASK  EIINT_CH31_SELECT_MASK
+#define EIINT_CH30_SELECT_MASK   ((uint16_t)(0x01 << 6))
+#define EIINT_CH126_SELECT_MASK  EIINT_CH30_SELECT_MASK
+#define EIINT_CH29_SELECT_MASK   ((uint16_t)(0x01 << 5))
+#define EIINT_CH125_SELECT_MASK  EIINT_CH29_SELECT_MASK
+#define EIINT_CH0_SELECT_MASK    ((uint16_t)(0x01 << 4))
+#define EIINT_CH124_SELECT_MASK  EIINT_CH0_SELECT_MASK
+#define EIINT_CH20_SELECT_MASK   ((uint16_t)(0x01 << 3))
+#define EIINT_CH111_SELECT_MASK  EIINT_CH20_SELECT_MASK
+#define EIINT_CH19_SELECT_MASK   ((uint16_t)(0x01 << 2))
+#define EIINT_CH110_SELECT_MASK  EIINT_CH19_SELECT_MASK
+#define EIINT_CH9_SELECT_MASK    ((uint16_t)(0x01 << 1))
+#define EIINT_CH109_SELECT_MASK  EIINT_CH9_SELECT_MASK
+#define EIINT_CH8_SELECT_MASK    ((uint16_t)0x01)
+#define EIINT_CH108_SELECT_MASK  EIINT_CH8_SELECT_MASK
+
+/*SELB_INTC2 — INTC2 Interrupt Select Register
+When two interrupt sources are assigned to one interrupt channel, this register
+selects which interrupt sources is enabled*/
+#define EIINT_CH149_SELECT_MASK ((uint16_t)(0x01 << 10))
+#define EIINT_CH147_SELECT_MASK ((uint16_t)(0x01 << 9))
+#define EIINT_CH145_SELECT_MASK ((uint16_t)(0x01 << 8))
+#define EIINT_CH143_SELECT_MASK ((uint16_t)(0x01 << 7))
+#define EIINT_CH141_SELECT_MASK ((uint16_t)(0x01 << 6))
+#define EIINT_CH139_SELECT_MASK ((uint16_t)(0x01 << 5))
+#define EIINT_CH137_SELECT_MASK ((uint16_t)(0x01 << 4))
+#define EIINT_CH80_SELECT_MASK  ((uint16_t)(0x01 << 3))
+#define EIINT_CH79_SELECT_MASK  ((uint16_t)(0x01 << 2))
+#define EIINT_CH78_SELECT_MASK  ((uint16_t)(0x01 << 1))
+#define EIINT_CH77_SELECT_MASK  ((uint16_t)0x01)
+/**
+  * @}
+  */
 
 typedef enum{
     P_0,P_1,P_2,P_3,P_4,P_5,P_6,P_7,P_8,P_9,P_10,
@@ -231,6 +279,11 @@ typedef uint8_t Eiint_DetectionTypeDef;
 
 typedef struct{
     uint16_t eiint_ch;
+    uint16_t selb_mask; /*!< Specifies which interrupt sources is enabled when two
+                        interrupt sources are assigned to one interrupt channel.
+                        This parameter can be a value or the combination of @ref int_select */
+    uint16_t selb_val; /*This parameter can be a value or the combination of @ref int_select,
+                        include 0*/
     uint8_t  eiint_ext_int;//if it's external interruption,please set this bit
     EIINT_PROCESS_Type eiint_process;
     EIINT_REFER_METHOD_Type eiint_refer_method;

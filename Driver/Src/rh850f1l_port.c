@@ -122,7 +122,9 @@ void Port_Init(Port_Group_Index_Type portx,Port_InitTypeDef *Port_InitStruct)
       Port_InputBuf_Ctl_Bit_Config(portx,INPUT_BUF_ENABLED,mask_bit);
     }else{
       Port_Alt_Func_Ctl_Config(portx, Port_InitStruct->alter_t, mask_bit);//Set Alternative Function
-      Port_Mode_Ctl_Bit_Config(portx, Port_InitStruct->opt_mode, mask_bit);//Set Alternative Mode
+      Port_Mode_Ctl_Bit_Config(portx, AF_MODE, mask_bit);//Set Alternative Mode
+      if(Port_InitStruct->opt_mode == DIRECT_AF_MODE)
+        Port_IP_Bit_Config(portx,DIRECT_AF_MODE,mask_bit);
     }
 
 
@@ -285,7 +287,7 @@ void Port_IO_Mode_Config(Port_Group_Index_Type portx, IO_TypeDef io_mode, uint16
     mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
-      Port_IP_Bit_Config(portx,io_mode,mask_bit);
+      Port_IO_Mode_Bit_Config(portx,io_mode,mask_bit);
     }
   }
 }
@@ -320,7 +322,7 @@ void Port_InputBuf_Ctl_Config(Port_Group_Index_Type portx,InputBuf_Ctl_Type ibc_
     mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
-        Port_IP_Bit_Config(portx,ibc_t,mask_bit);
+        Port_InputBuf_Ctl_Bit_Config(portx,ibc_t,mask_bit);
     }
   }
 }
@@ -458,7 +460,7 @@ void Port_Bidirection_Ctl_Config(Port_Group_Index_Type portx,Bidirect_Mode_Ctl_T
     mask_bit = READ_BIT(&last_bit, bitpos);
 
     if(mask_bit != 0x00){// need to be set or clear
-      Port_IP_Bit_Config(portx,bmc_t,mask_bit);
+      Port_Bidirection_Ctl_Bit_Config(portx,bmc_t,mask_bit);
     }
   }
 }

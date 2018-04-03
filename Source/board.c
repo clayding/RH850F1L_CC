@@ -13,7 +13,7 @@
 #include "board.h"
 #include "can.h"
 #include "uart.h"
-
+#include "csi.h"
 /****************************OSTM0 config*************************************/
 //#define OSTM_TEST
 /****************************TAUB/D Config*************************************/
@@ -36,8 +36,8 @@
 
 /************************RLIN3/UART Config *****************************************/
 #define RLIN3_UART_MODE_TEST
-#define RLIN3_LIN_MODE_TEST
-
+//#define RLIN3_LIN_MODE_TEST
+#define CSIG_MODE_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized
@@ -76,6 +76,7 @@ void System_Clock_Config(void)
     //rscan clock domain Setting
     Clock_Domain_Set(ICAN);
     Clock_Domain_Set(ICANOSC);
+	Clock_Domain_Set(ICSI);
 
 }
 
@@ -198,6 +199,37 @@ void Board_Port_Config(void)
     port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum0,&port);
 #endif
+#ifdef CSIG_MODE_TEST
+    port.pin_mask = PORT_PIN_4;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_5;
+    Port_Init(PortGroupNum10,&port);
+
+    port.pin_mask = PORT_PIN_6;
+    port.opt_mode = DIRECT_AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum10,&port);
+
+    port.pin_mask = PORT_PIN_7;
+    port.opt_mode = DIRECT_AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum10,&port);
+
+    port.pin_mask = PORT_PIN_8;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum10,&port);
+#endif
 
     {//Eiint Init start
         Eiint_InitTypeDef eiint;
@@ -287,6 +319,21 @@ void Board_Port_Config(void)
 #endif
 #ifdef RTCA0_TEST
         eiint.eiint_ch = 201;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef CSIG_MODE_TEST
+        eiint.eiint_ch = 19;
+        eiint.selb_mask = EIINT_CH19_SELECT_MASK;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 20;
+        eiint.selb_mask = EIINT_CH20_SELECT_MASK;
+        eiint.selb_val = 0;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);
@@ -502,6 +549,12 @@ void Board_Port_Config(void)
         lin3_init();
         //lin3_self_mode_init();
     }
+#endif
+
+#ifdef CSIG_MODE_TEST
+	{
+		csi_init();
+	}
 #endif
 
 }

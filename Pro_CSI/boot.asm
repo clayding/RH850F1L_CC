@@ -155,8 +155,8 @@
 	.dw #_RSCAN0CH0ErrorIntHandler ; INT16
 	.dw #_RSCAN0CH0TrFIFORecvCompletionIntHandler ; INT17
 	.dw #_RSCAN0CH0SendCompleteIntHandler ; INT18
-	.dw #_Dummy_EI ; INT19
-	.dw #_Dummy_EI ; INT20
+	.dw #_CSIG0ComStatusIntHandler ; INT19
+	.dw #_CSIG0RecvIntHandler ; INT20
 	.dw #_Dummy_EI ; INT21
 	.dw #_Dummy_EI ; INT22
 	.dw #_Dummy_EI ; INT23
@@ -185,7 +185,7 @@
 	.dw #_Dummy_EI ; INT46
 	.dw #_Dummy_EI ; INT47
 	.dw #_Dummy_EI ; INT48
-	.dw #_Dummy_EI ; INT49
+	.dw #_CSIG0ComErrorIntHandler ; INT49
 	.dw #_Dummy_EI ; INT50
 	.dw #_Dummy_EI ; INT51
 	.dw #_Dummy_EI ; INT52

@@ -338,8 +338,8 @@ SET_CLK_DOMAIN_RET_Type C_ISO_ICSI_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     val_.src_clk_ctl_val = ICSI_SRC_CPUCLK;//Source Clock Setting for C_ISO_ICSI
     ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,ICSI,S_CTL);
     while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(ICSI,S_CTL_MASK))) != ERROR);//Select a source clock
-    if(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ICSI,S_ACT) & STR_CONCAT2(ICSI,S_ACT_MASK))) { //Confirm completion of selection
-        return SET_SRC_CLK_FAIL;
+    while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,ICSI,S_ACT) & STR_CONCAT2(ICSI,S_ACT_MASK))) { //Confirm completion of selection
+        //return SET_SRC_CLK_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
 }
