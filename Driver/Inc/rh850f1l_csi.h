@@ -74,7 +74,7 @@
 #define CSI_CSIGnOVEC_MASK          ((uint16_t)0x01) //Controls the overrun error flag clear command
 
 /*CSIGnBCTL0 - CSIGn Rx-Only Mode Control Register 0*/
-#define CSI_CSIGnSCE_MASK           ((uint18_t)0x01) //Disables/enables the start of the next data reception by reading CSIGnRX0
+#define CSI_CSIGnSCE_MASK           ((uint8_t)0x01) //Disables/enables the start of the next data reception by reading CSIGnRX0
 
 /*CSIGnCFG0 - CSIGn Configuration Register 0*/
 #define CSI_CSIGnPS_OFFSET          28 //Specifies parity
@@ -196,7 +196,7 @@
 /** @defgroup csi_clock_phase
   * @{
   */
-#define CSI_CPHA_1Edge                ((uint32_t)(0x01 << CSI_CSIGnDIR_OFFSET))
+#define CSI_CPHA_1Edge                ((uint32_t)(0x01 << CSI_CSIGnDAP_OFFSET))
 #define CSI_CPHA_2Edge                ((uint32_t)0x0000)
 /**
   * @}
@@ -277,5 +277,9 @@ void CSIG_Init(CSIG_InitTypeDef *CSIG_InitStruct);
 void CSIG_SendData(uint8_t CSIGn, uint16_t data);
 
 uint16_t CSIG_ReceiveData(uint8_t CSIGn);
+
+int8_t CSIG_Get_Status(uint8_t CSIGn,uint8_t direction);
+
+void CSIG_Clear_Status(uint8_t CSIGn,uint8_t direction);
 
 #endif //RH850F1L_CSI_H

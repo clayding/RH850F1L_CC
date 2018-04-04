@@ -351,9 +351,9 @@
 	.dw #_RSCAN0CH3ErrorIntHandler ; INT212
 	.dw #_RSCAN0CH3TrFIFORecvCompletionIntHandler ; INT213
 	.dw #_RSCAN0CH3SendCompleteIntHandler ; INT214
-	.dw #_Dummy_EI ; INT215
-	.dw #_Dummy_EI ; INT216
-	.dw #_Dummy_EI ; INT217
+	.dw #_CSIG1ComStatusIntHandler ; INT215
+	.dw #_CSIG1RecvIntHandler ; INT216
+	.dw #_CSIG1ComErrorIntHandler ; INT217
 	.dw #_Dummy_EI ; INT218
 	.dw #_Dummy_EI ; INT219
 	.dw #_Dummy_EI ; INT220

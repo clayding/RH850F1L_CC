@@ -37,14 +37,14 @@ uint8_t csi_master_sent_count = 0;
 void main(void)
 {
     __IO uint16_t msg;
-	LED_Struct_Init(lcs, ARRAY_SIZE(lcs));
+	//LED_Struct_Init(lcs, ARRAY_SIZE(lcs));
     Board_MCU_Init();
 	printf("MCU Started\n");
 
     while (1)
     {
-		csi_master_excute();
-        while(1);
+		csi_test();
+		mdelay(500);
 
     }
 }

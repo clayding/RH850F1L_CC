@@ -15,7 +15,7 @@
 #include "uart.h"
 #include "csi.h"
 /****************************OSTM0 config*************************************/
-//#define OSTM_TEST
+#define OSTM_TEST
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
@@ -200,7 +200,16 @@ void Board_Port_Config(void)
     Port_Init(PortGroupNum0,&port);
 #endif
 #ifdef CSIG_MODE_TEST
+
     port.pin_mask = PORT_PIN_4;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_5;
+    Port_Init(PortGroupNum10,&port);
+
+	port.pin_mask = PORT_PIN_5;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
     port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
@@ -229,6 +238,44 @@ void Board_Port_Config(void)
     port.bmc_t = BIDIRECTION_MODE_ENABLED;
     port.alter_t = ALT_FUNC_2;
     Port_Init(PortGroupNum10,&port);
+
+	port.pin_mask = PORT_PIN_8;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum11,&port);
+
+    port.pin_mask = PORT_PIN_9;
+    port.opt_mode = DIRECT_AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum11,&port);
+
+    port.pin_mask = PORT_PIN_10;
+    port.opt_mode = DIRECT_AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum11,&port);
+
+    port.pin_mask = PORT_PIN_11;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum11,&port);
+
+	port.pin_mask = PORT_PIN_0;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum18,&port);
+
 #endif
 
     {//Eiint Init start
@@ -324,6 +371,7 @@ void Board_Port_Config(void)
         Eiit_Init(&eiint);
 #endif
 #ifdef CSIG_MODE_TEST
+        /*CSIG0 EIINT Initialized*/
         eiint.eiint_ch = 19;
         eiint.selb_mask = EIINT_CH19_SELECT_MASK;
         eiint.selb_val = 0;
@@ -334,6 +382,29 @@ void Board_Port_Config(void)
         eiint.eiint_ch = 20;
         eiint.selb_mask = EIINT_CH20_SELECT_MASK;
         eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 49;
+        eiint.selb_mask = 0;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        /*CSIG1 EIINT Initialized*/
+        eiint.eiint_ch = 215;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 216;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 217;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
         Eiit_Init(&eiint);
