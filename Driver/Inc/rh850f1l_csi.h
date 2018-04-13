@@ -11,9 +11,9 @@
 #define RH850F1L_CSI_H
 #include "rh850f1l.h"
 #define _CSIG0  CSIG0
-#define _CTL0   CTL0
-#define _CTL1   CTL1
-#define _CTL2   CTL2
+#define _CTL0_   CTL0
+#define _CTL1_   CTL1
+#define _CTL2_   CTL2
 #define _STR0   STR0
 #define _STCR0  STCR0
 #define _BCTL0  BCTL0
@@ -107,16 +107,16 @@
 #define CSIGN_VAL(_UNIT_)           (*((volatile struct __tag36 *)(((uint8_t*)(&_CSIG0))+  0x2000*(_UNIT_))))
 
 /*CSIGnCTL0 - CSIGn Control Register 0*/
-#define __CSIG_SET_CTL0(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL0.UINT8,_MASK_,_VALUE_)
-#define __CSIG_GET_CTL0(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL0.UINT8 & _MASK_)
+#define __CSIG_SET_CTL0(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL0_.UINT8,_MASK_,_VALUE_)
+#define __CSIG_GET_CTL0(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL0_.UINT8 & _MASK_)
 
 /*CSIGnCTL1 - CSIGn Control Register 1*/
-#define __CSIG_SET_CTL1(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL1,_MASK_,_VALUE_)
-#define __CSIG_GET_CTL1(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL1 & _MASK_)
+#define __CSIG_SET_CTL1(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL1_,_MASK_,_VALUE_)
+#define __CSIG_GET_CTL1(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL1_ & _MASK_)
 
 /*CSIGnCTL2 - CSIGn Control Register 2*/
-#define __CSIG_SET_CTL2(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL2,_MASK_,_VALUE_)
-#define __CSIG_GET_CTL2(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL2 & _MASK_)
+#define __CSIG_SET_CTL2(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL2_,_MASK_,_VALUE_)
+#define __CSIG_GET_CTL2(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL2_ & _MASK_)
 
 /*CSIGnSTR0 - CSIGn Status Register 0 -- read-only */
 #define __CSIG_GET_STAT(_N_,_MASK_)             (CSIGN_VAL(_N_)._STR0 & _MASK_)

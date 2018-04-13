@@ -15,7 +15,7 @@
 #include "uart.h"
 #include "csi.h"
 /****************************OSTM0 config*************************************/
-#define OSTM_TEST
+//#define OSTM_TEST
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
@@ -36,8 +36,8 @@
 
 /************************RLIN3/UART Config *****************************************/
 #define RLIN3_UART_MODE_TEST
-//#define RLIN3_LIN_MODE_TEST
-#define CSIG_MODE_TEST
+#define RLIN3_LIN_MODE_TEST
+//#define CSIG_MODE_TEST
 
 /*!
  * Flag to indicate if the MCU is Initialized

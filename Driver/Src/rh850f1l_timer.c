@@ -232,6 +232,7 @@ ErrorStatus TAUB_Simultaneous_Rewrite_Init(uint8_t channel_num,TAUB_SIMULREWR_CF
 
     __ENABLE_RELOAD_DATA_TRIGGER(_TAUB0,channel_num);
 
+    return SUCCESS;
 }
 
 /**

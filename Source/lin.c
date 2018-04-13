@@ -1,8 +1,10 @@
 #include "lin.h"
 
 #define LIN3_INDEX_USED     1
-#define LIN3_MASTER_TEST    0
+#define LIN3_MASTER_TEST    1 //the switch between master and slave
 #define LIN3_SLAVE_TEST     !LIN3_MASTER_TEST
+
+#define LIN3_RESP_FROM_MASTER	0  // response direction 1: Master---> Slave, 0 :Slave---->Master
 
 void (*lin3_func_excute)(void);
 
@@ -87,16 +89,19 @@ void lin3_self_mode_init(void)
 
 void lin3_master_excute(void)
 {
-    __IO uint8_t resp_data[10] = "abcdefg";
+    uint8_t resp_data[10] = "abcdefg";
     LIN3_Frm_InfoTypeDef lin3_frm;
-
+	static uint8_t test_frm_id = 0x30;
     memset(&lin3_frm,0,sizeof(lin3_frm));
 
-    lin3_frm.frm_id = 0x30;
+    lin3_frm.frm_id = test_frm_id++;
     lin3_frm.frm_sep = 0;
-    lin3_frm.resp_dir = 1;//response direction 1:transmit 0:receive
+    lin3_frm.resp_dir = LIN3_RESP_FROM_MASTER;//response direction 1:transmit 0:receive
 
     LIN3_Master_Process(LIN3_INDEX_USED,&lin3_frm,7,resp_data);
+	
+	if(test_frm_id == 0x3f)
+		test_frm_id = 0x30;
 }
 
 void lin3_slave_excute(void)
@@ -107,7 +112,7 @@ void lin3_slave_excute(void)
 
     memset(&lin3_frm,0,sizeof(lin3_frm));
 
-    lin3_frm.resp_dir = 0;// 1:transmit 0:receive
+    lin3_frm.resp_dir = !LIN3_RESP_FROM_MASTER;// 1:transmit 0:receive
 
     LIN3_Slave_Process(LIN3_INDEX_USED,&lin3_frm,7,resp_data);
 }

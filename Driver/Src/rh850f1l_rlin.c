@@ -468,7 +468,7 @@ int8_t LIN3_Master_Recv_Resp(uint8_t linn,uint8_t *recv_data)
 int8_t LIN3_Slave_Process(uint8_t linn, LIN3_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data)
 {
     __IO uint8_t mask = 0, val = 0,recv_len = resp_len;
-    __IO uint8_t frm_id = 0;
+    __IO int8_t frm_id = 0;
 
     //Configures the RLN3nLDFC register,the checksum mode, response direction and response Field Length
     mask = LIN3_LCS_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
