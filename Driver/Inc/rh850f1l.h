@@ -19,6 +19,8 @@
 #include <ctype.h>
 #include <debug.h>
 #include <printf.h>
+
+#include <rh850f1l_conf.h>
 /**
 * @}
 */

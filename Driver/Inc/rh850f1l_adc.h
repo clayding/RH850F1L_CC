@@ -12,6 +12,57 @@
 #define _ADCA0_ADDR         ((volatile struct __tag49 *)&ADCA0)
 #define _ADCA1_ADDR         ((volatile struct __tag49 *)&ADCA1)
 
+/*************************ADCA Specific Registers Label************************/
+#define _VCR00              VCR00.UINT32
+#define _DR00               DR00.UINT32
+#define _DIR00              DIR00
+#define _PWDVCR             PWDVCR
+#define _PWDTSNDR           PWDTSNDR.UINT16[1]
+#define _PWDDIR             PWDDIR
+#define _ADHALTR            ADHALTR
+#define _ADCR               ADCR.UINT32
+#define _MPXCURR            MPXCURR.UINT32
+#define _THSMPSTCR          THSMPSTCR.UINT32
+#define _THCR               THCR.UINT32
+#define _THAHLDSTCR         THAHLDSTCR.UINT32
+#define _THBHLDSTCR         THBHLDSTCR.UINT32
+#define _THACR              THACR.UINT32
+#define _THBCR              THBCR.UINT32
+#define _THER               THER.UINT32
+#define _THGSR              THGSR.UINT32
+#define _SMPCR              SMPCR.UINT8[0]
+#define _SFTCR              SFTCR.UINT32
+#define _ULLMTBR0           ULLMTBR0.UINT32
+#define _ULLMTBR1           ULLMTBR1.UINT32
+#define _ULLMTBR2           ULLMTBR2.UINT32
+#define _ULMTBR0            ULLMTBR0.UINT16[1]
+#define _ULMTBR1            ULLMTBR1.UINT16[1]
+#define _ULMTBR2            ULLMTBR2.UINT16[1]
+#define _LLMTBR0            ULLMTBR0.UINT16[0]
+#define _LLMTBR1            ULLMTBR1.UINT16[0]
+#define _LLMTBR2            ULLMTBR2.UINT16[0]
+#define _ECR                ECR
+#define _ULER               ULER
+#define _OWER               OWER
+/************************Scan Group (SG) Specific Registers Label**************/
+#define _SGSTCR_BASE        SGSTCR1.UINT32
+#define _SGCR_BASE          SGCR1.UINT32
+#define _PWDSGCR            PWDSGCR.UINT32
+#define _SGVCSP_BASE        SGVCSP1.UINT32
+#define _SGVCEP_BASE        SGVCEP1.UINT32
+#define _SGMCYCR_BASE       SGMCYCR1.UINT32
+#define _PWDSGSEFCR         PWDSGSEFCR.UINT32
+#define _SGSEFCR_BASE       SGSEFCR1.UINT32
+#define _SGSTR              SGSTR.UINT32
+#define _SGTSEL_BASE        _SGTSEL1
+
+/**************************/
+#define _DGCTL0             DGCTL0
+#define _DGCTL1             DGCTL1
+#define _PDCTL1             PDCTL1
+#define _PDCTL2             PDCTL2
+
+
 /*ADCAnVCRj — Virtual Channel Register j*/
 /*ADCAnPWDVCR — PWM-Diag Virtual Channel Register,Note that bit8 and bit9 not defined*/
 #define ADC_VCR_MPXE_OFFSET     15  //MPX Enable,only supported for ADCA0
@@ -177,9 +228,9 @@ ADCAnTHBCR — T&H Group B Control Register*/
 #define ADC_PWDTRGMD_MASK       ((uint32_t)0x01) //PWM-Diag Trigger Mode Select
 
 /*ADCAnSGVCSPx — Scan Group x Start Virtual Channel Pointer*/
-#define ADC_VCSP_MASK           ((uint32_t)0x01) //Start Virtual Channel Pointer
+#define ADC_VCSP_MASK           ((uint32_t)0x3F) //Start Virtual Channel Pointer
 /*ADCAnSGVCEPx — Scan Group x End Virtual Channel Pointer*/
-#define ADC_VCEP_MASK           ((uint32_t)0x01) //End Virtual Channel Pointer
+#define ADC_VCEP_MASK           ((uint32_t)0x3F) //End Virtual Channel Pointer
 
 /*ADCAnSGMCYCRx — Scan Group x Multicycle Register*/
 #define ADC_MCYC_MASK           ((uint32_t)0x03) //Multicycle Number Specification
@@ -220,7 +271,7 @@ ADCAnTHBCR — T&H Group B Control Register*/
 #define ADC_PSEL_MASK           ((uint32_t)0x07)    //Self-Diagnostic Voltage Level Select
 
 /*ADCAnDGCTL1 — Self-Diagnosis Control Register 1*/
-#define ADC_CDGn_MASK(n)        ((uint32_t)(0x01 << n)) //Self-Diagnostic Channel Select
+#define ADC_CDGn_MASK(offset)   ((uint32_t)(0x01 << offset)) //Self-Diagnostic Channel Select
 
 /*ADCAnPDCTL1 — Pull Down Control Register 1*/
 #define ADC_PDNA_MASK           ((uint32_t)0xFF)    //Pull Down Enable Control
@@ -231,18 +282,225 @@ ADCAnTHBCR — T&H Group B Control Register*/
 #define ADCAN_ADDR(_UNIT_)      (_UNIT_ == 0 ?_ADCA0_ADDR :_ADCA1_ADDR)
 #define ADCAN_VAL(_UNIT_)       (_UNIT_ == 0 ?_ADCA0 :_ADCA1)
 
-#define ADCA_VCR_ADDR(_N_,_J_)      ((uint32_t*)(&ADCAN_VAL(_N_).VCR00.UINT32) + _J_)
+#define ADCA_VCR_ADDR(_N_,_J_)      ((uint32_t*)(&ADCAN_VAL(_N_)._VCR00) + _J_)
 #define ADCA_VCR_VAL(_N_,_J_)       (*ADCA_VCR_ADDR(_N_,_J_))
 
-#define ADCA_DR_ADDR(_N_,_J_)       ((uint32_t*)(&ADCAN_VAL(_N_).DR00.UINT32) + _J_)
+#define ADCA_DR_ADDR(_N_,_J_)       ((uint32_t*)(&ADCAN_VAL(_N_)._DR00) + _J_)
 #define ADCA_DR_VAL(_N_,_J_)        (*ADCA_DR_ADDR(_N_,_J_))
+
+#define ADCA_DIR_ADDR(_N_,_J_)       ((uint32_t*)(&ADCAN_VAL(_N_)._DIR00) + _J_)
+#define ADCA_DIR_VAL(_N_,_J_)        (*ADCA_DIR_ADDR(_N_,_J_))
 
 /*ADCAnVCRj — Virtual Channel Register j*/
 #define ADCA_SET_VC_CTL(_N_,_J_,_MASK_,_VALUE_)     (MODIFY_REG(ADCA_VCR_ADDR(_N_,_J_),_MASK_,_VALUE_))
 #define ADCA_GET_VC_CTL(_N_,_J_,_MASK_)             (ADCA_VCR_VAL(_N_,_J_) & _MASK_)
 /*ADCAnPWDVCR — PWM-Diag Virtual Channel Register,Note that bit8 and bit9 not defined*/
-#define ADCA_SET_PWDVC_CTL(_N_)                     (MODIFY_REG((&ADCAN_VAL(_N).PWDVCR),_MASK_,_VALUE_))
-#define ADCA_GET_PWDVC_CTL(_N_)                     (DCAN_VAL(_N).PWDVCR & _MASK_)
+#define ADCA_SET_PWDVC_CTL(_N_)                     (MODIFY_REG((&ADCAN_VAL(_N_)._PWDVCR),_MASK_,_VALUE_))
+#define ADCA_GET_PWDVC_CTL(_N_)                     (ADCAN_VAL(_N_)._PWDVCR & _MASK_)
 
 /*ADCAnDRj — Data Register j, 32-/16-bit read-only register*/
-#define ADCA_READ_DATA(_N_,_J_)                     (ADCA_VCR_VAL(_N_,_J_) & _MASK_)
+#define ADCA_READ_DATA(_N_,_J_)                     (ADCA_DR_VAL(_N_,_J_))
+
+/*ADCAnDIRj — Data Supplementary Information Register j,32-bit read-only register
+only supported by ADCA0*/
+#define ADCA_READ_DATA_INFO(N_,_J_,_MASK_)          (ADCA_DIR_VAL(_N_,_J_) & _MASK_)
+
+/*ADCAnPWDTSNDR — PWM-Diag Data Register,32-/16-bit read-only,high 16 bits valid*/
+#define ADCA_READ_PWD_DATA(_N_,_J_)                 (ADCAN_VAL(_N_)._PWDTSNDR)
+
+/*ADCAnPWDDIR — PWM-Diag Data Supplementary Information Register*,32-bit read-only register
+only supported for ADCA0*/
+#define ADCA_READ_PWD_DATA_INFO(N_,_J_,_MASK_)      (ADCAN_VAL(_N_)._PWDDIR & _MASK_)
+
+/*ADCAnADHALTR — A/D Force Halt Register,write-only register*/
+#define ADCA_FORCE_HALT_TRIGGER(_N_)                (ADCAN_VAL(_N_)._ADHALTR |= ADC_HALT_MASK)
+
+/*ADCAnADCR — A/D Control Register*/
+#define ADCA_SET_COMMON_CTL(_N_,_MASK_,_VALUE_)     (MODIFY_REG((&ADCAN_VAL(_N_)._ADCR),_MASK_,_VALUE_))
+
+/*ADCAnMPXCURR — MPX Current Register,read-only register
+only ADCA0 supports this function*/
+#define ADCA_GET_CURRENT_MPX(_N_)                   (ADCAN_VAL(_N_)._MPXCURR & ADC_MPXCUR_MASK)
+
+/*ADCAnTHSMPSTCR — T&H Sampling Start Control Register, write-only register
+control the start of sampling for all T&Hk (k = 0 to 5),only ADCA0 supports this function*/
+#define ADCA_START_TH_SAMPLING_(_N_)                (ADCAN_VAL(_N_)._THSMPSTCR |= ADC_SMPST_MASK)
+#define ADCA_START_TH_SAMPLING()                    ADCA_START_TH_SAMPLING_(0)
+
+/*ADCAnTHCR — T&H Control Register,only ADCA0 supports this function.*/
+#define ADCA_SET_AUTO_SAMPLING_(_N_,_ENABLE_)       do{ \
+                                                        if(_ENABLE_) \
+                                                            (ADCAN_VAL(_N_)._THCR |= ADC_ASMPMSK_MASK); \
+                                                        else \
+                                                            (ADCAN_VAL(_N_)._THCR &= ~ADC_ASMPMSK_MASK); \
+                                                    }while(0)
+#define ADCA_SET_AUTO_SAMPLING(_ENABLE_)            ADCA_SET_AUTO_SAMPLING_(0,_ENABLE_)
+
+/*ADCAnTHAHLDSTCR — T&H Group A Hold Start Control Register,write-only register
+ADCAnTHBHLDSTCR — T&H Group B Hold Start Control Register,write-only register
+only ADCA0 supports this function*/
+#define ADCA_START_THA_HOLD_(_N_)                   (ADCAN_VAL(_N_)._THAHLDSTCR |= ADC_HLDST_MASK)
+#define ADCA_START_THB_HOLD_(_N_)                   (ADCAN_VAL(_N_)._THBHLDSTCR |= ADC_HLDST_MASK)
+#define ADCA_START_THA_HOLD()                       ADCA_START_THA_HOLD_(0)
+#define ADCA_START_THB_HOLD()                       ADCA_START_THB_HOLD_(0)
+
+/*ADCAnTHACR — T&H Group A Control Register,only ADCA0 supports this function
+ADCAnTHBCR — T&H Group B Control Register,only ADCA0 supports this function*/
+#define ADCA_SET_THA_CTL_(_N_)                      (MODIFY_REG((&ADCAN_VAL(_N_)._THACR),_MASK_,_VALUE_))
+#define ADCA_SET_THB_CTL_(_N_)                      (MODIFY_REG((&ADCAN_VAL(_N_)._THBCR),_MASK_,_VALUE_))
+#define ADCA_SET_THA_CTL()                          ADCA_SET_THA_CTL_(0)
+#define ADCA_SET_THB_CTL()                          ADCA_SET_THB_CTL_(0)
+
+/*ADCAnTHER — T&H Enable Register,ADCAnTHER — T&H Enable Register,only ADCA0 supports this function*/
+#define ADCA_TH_ENABLE_(_N_)                        (ADCAN_VAL(_N_)._THER |= (0x01 << _INDEX_) & 0x3F)
+#define ADCA_TH_DISABLE_(_N_)                       (ADCAN_VAL(_N_)._THER &= ~((0x01 << _INDEX_) & 0x3F))
+#define ADCA_TH_ENABLE()                            ADCA_TH_ENABLE_(0)
+#define ADCA_TH_DISABLE()                           ADCA_TH_DISABLE_(0)
+
+/*ADCAnTHGSR — T&H Group Select Register,only ADCA0 supports this function*/
+#define ADCA_TH_SELECT_(_N_)                        (ADCAN_VAL(_N_)._THGSR |= (0x01 << _INDEX_) & 0x3F)
+#define ADCA_TH_DESELECT_(_N_)                      (ADCAN_VAL(_N_)._THGSR &= ~((0x01 << _INDEX_) & 0x3F))
+#define ADCA_TH_SELECT()                            ADCA_TH_SELECT_(0)
+#define ADCA_TH_DESELECT()                          ADCA_TH_DESELECT_(0)
+
+/*ADCAnSMPCR — Sampling Control Register,used to set the sampling time (the number of cycles)
+12H, or 18H shouled be set,settings other than above are prohibited*/
+#define ADCA_SET_SAMPLING_TIME(_N_)                 (ADCAN_VAL(_N_)._SMPCR |= (0x01 << _INDEX_) & ADC_SMPT_MASK)
+#define ADCA_GET_SAMPLING_TIME(_N_)                 (ADCAN_VAL(_N_)._SMPCR |= (0x01 << _INDEX_) & ADC_SMPT_MASK)
+#define IS_SAMPLING_TIME(_TIME_)                    ( ((_TIME_) == 0x12)|| \
+                                                      ((_TIME_) == 0x18) )
+/*ADCAnSFTCR — Safety Control Register*/
+#define ADCA_SET_SAFETY_CTL(_N_,_MASK_,_VALUE_)     (MODIFY_REG((&ADCAN_VAL(_N_)._SFTCR),_MASK_,_VALUE_))
+#define ADCA_GET_SAFETY_CTL(_N_,_MASK_)             (ADCAN_VAL(_N_)._SFTCR & _MASK_)
+
+/*ADCAnULLMTBR0 to 2 — Upper Limit/Lower Limit Table Registers 0 to 2
+_REG_INDEX:0,1 ,2*/
+#define ADCA_SET_UPPER_LIMIT(_N_,_REGx_,_VALUE_)    (ADCAN_VAL(_N_)._ULMTBR##_REGx_ = (_VALUE_ << ADC_ULMTB_OFFSET) \
+                                                        & ADC_ULMTB_MASK)
+#define ADCA_SET_LOWER_LIMIT(_N_,_REGx_,_VALUE_)    (ADCAN_VAL(_N_)._LLMTBR##_REGx_ = (_VALUE_ << ADC_LLMTB_OFFSET) \
+                                                        & ADC_LLMTB_MASK)
+#define ADCA_GET_LOWER_LIMIT(_N_,_REGx_)            (ADCAN_VAL(_N_)._ULLMTBR##_REGx_)
+
+/*ADCAnECR — Error Clear Register,control clearing of an error, write-only register*/
+#define ADCA_CLEAR_ERROR(_N_)                       (MODIFY_REG((&ADCAN_VAL(_N_)._ECR),_MASK_,_VALUE_))
+
+/*ADCAnULER — Upper Limit/Lower Limit Error Register,read-only register,
+several bits are only supported for ADCA0*/
+#define ADCA_GET_ULLIMIT_ERR_INFO(_N_,_MASK_)       (ADCAN_VAL(_N_)._ULER & _MASK_)
+
+/*ADCAnOWER — Overwrite Error Register,32/16/8-bit read-only register*/
+#define ADCA_GET_OVERWRITE_ERR(_N_,_MASK_)          (ADCAN_VAL(_N_)._OWER & _MASK_)
+
+/********************Scan Group (SG) Specific Registers Operation**************/
+#define ADCAN_SGx_ADDR(_N_,_X_,_REG_BASE_)          ((uint32_t*)(&ADCAN_VAL(_N_)._REG_BASE_) + ((_X_- 1) *0x10)) //the _X_ from 1 to 3 --> _X_ -1
+#define ADCAN_SGx_VAL(_N_,_X_,_REG_BASE_)           (*ADCAN_SGx_ADDR(_X_,_REG_BASE_))
+/*ADCAnSGSTCRx — Scan Group x Start Control Register,write-only register
+_X_: 1 to 3*/
+#define ADCA_START_SGx(_N_,_X_)                     (ADCAN_SGx_VAL(_N_,_X_,_SGSTCR_BASE) |= ADC_SGST_MASK)
+
+/*ADCAnSGCRx — Scan Group x Control Register*/
+#define ADCA_SET_SGx_CTL(_N_,_X_,_MASK_,_VALUE_)    (MODIFY_REG(ADCAN_SGx_ADDR(_N_,_X_,_SGCR_BASE),_MASK_,_VALUE_))
+#define ADCA_GET_SGx_CTL(_N_,_X_,_MASK_)            (ADCAN_SGx_VAL(_N_,_X_,_SGCR_BASE) & _MASK_)
+
+/*ADCAnPWDSGCR — PWM-Diag Scan Group Control Register*/
+#define ADCA_SELECT_PWD_TRIGGER_MODE(_N_,_BIT_VAL_) do{ \
+                                                        if(_BIT_VAL_) \
+                                                            (ADCAN_VAL(_N_)._PWDSGCR |= ADC_PWDTRGMD_MASK); \
+                                                        else \
+                                                            (ADCAN_VAL(_N_)._PWDSGCR &= ~ADC_PWDTRGMD_MASK); \
+                                                    }while(0)
+/*ADCAnSGVCSPx — Scan Group x Start Virtual Channel Pointer*/
+#define ADCA_SET_START_POINTER(_N_,_X_,_VALUE_)     (ADCAN_SGx_VAL(_N_,_X_,_SGVCSP_BASE) = _VALUE_ & ADC_VCSP_MASK)
+#define ADCA_GET_START_POINTER(_N_,_X_)             (ADCAN_SGx_VAL(_N_,_X_,_SGVCSP_BASE) & ADC_VCSP_MASK)
+/*ADCAnSGVCEPx — Scan Group x End Virtual Channel Pointer*/
+#define ADCA_SET_END_POINTER(_N_,_X_,_VALUE_)       (ADCAN_SGx_VAL(_N_,_X_,_SGVCEP_BASE) = _VALUE_ & ADC_VCEP_MASK)
+#define ADCA_GET_END_POINTER(_N_,_X_,_VALUE_)       (ADCAN_SGx_VAL(_N_,_X_,_SGVCEP_BASE) & ADC_VCEP_MASK)
+
+#define IS_START_POINTER_VALUE(N_,_X_,_VALUE_)      (_VALUE_ <= ADCA_GET_END_POINTER(_N_,_X_,_VALUE_) )
+#define IS_END_POINTER_VALUE(N_,_X_,_VALUE_)        (_VALUE_ >= ADCA_GET_START_POINTER(_N_,_X_,_VALUE_))
+
+/*ADCAnSGMCYCRx — Scan Group x Multicycle Register*/
+#define ADCA_SET_SCAN_TIME(_N_,_X_,_TIMES_)         (ADCAN_SGx_VAL(_N_,_X_,_SGMCYCR_BASE)  = _TIMES_ & ADC_MCYC_MASK)
+#define ADCA_GET_SCAN_TIME(_N_,_X_)                 (ADCAN_SGx_VAL(_N_,_X_,_SGMCYCR_BASE) & ADC_MCYC_MASK)
+
+/*DCAnPWDSGSEFCR — PWM-Diag Scan End Flag Clear Register,write-only register
+to clear of PWM-Diag scan end flag (SEF)*/
+#define ADCA_CLEAR_PWD_SCAN_END_FLAG(_N_)           (ADCAN_VAL(_N_)._PWDSGSEFCR  |= ADC_PWDSEFC_MASK)
+
+/*ADCAnSGSEFCRx — Scan Group x Scan End Flag Clear Register*/
+#define ADCA_CLEAR_SGx_SCAN_END_FLAG(_N_,_X_)       (ADCAN_SGx_VAL(_N_,_X_,_SGSEFCR_BASE)  |= ADC_SEFC_MASK)
+
+/*ADCAnSGSTR — Scan Group Status Register,read-only register*/
+#define ADCA_GET_SG_STAT(_N_,_MASK_)                (ADCAN_VAL(_N_)._SGSTR & _MASK_)
+
+/******************Hardware Trigger Specific Register Operation****************/
+/*ADCAnSGTSELx — Scan Group x Start Trigger Control Register x*/
+#define ADCA_ENABLE_HARDWARE_TRIGGER(_N_,_X_,_P_)   (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE)  = ADC_TxSELp_MASK(_P_))
+#define ADCA_DISABLE_HARDWARE_TRIGGER(_N_,_X_,_P_)  (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE)  &= ~ADC_TxSELp_MASK(_P_))
+
+/*Self-Diagnosis Specific Registers,controls the self-diagnostic voltage level*/
+#define ADCA_SELECT_Self-Diag_VOLT_LEVEL(_N_,_VALUE_)       (ADCAN_VAL(_N_)._DGCTL0 = _VALUE_ & ADC_PSEL_MASK)
+
+/*ADCAnDGCTL1 — Self-Diagnosis Control Register 1*/
+#define ADCA_SELECT_Self-Diag_CHANNEL(_N_,_MASK_,_VALUE_)   (MODIFY_REG(&(ADCAN_VAL(_N_)._DGCTL1),_MASK_,_VALUE_))
+
+/*ADCAnPDCTL1 — Pull Down Control Register 1*/
+#define ADCA_ENABLE_PULL_DOWN_L(_N_,_MASK_,_VALUE_)  (MODIFY_REG(&(ADCAN_VAL(_N_)._PDCTL1),_MASK_,_VALUE_))
+#define ADCA_ENABLE_PULL_DOWN_H(_N_,_MASK_,_VALUE_)  (MODIFY_REG(&(ADCAN_VAL(_N_)._PDCTL2),_MASK_,_VALUE_))
+
+union{
+    uint32_t opctl;
+    struct{
+        uint32_t SUSMTD     :2;     //Suspend Mode Select
+        uint32_t            :2
+        uint32_t CTYP       :1;     //12/10 Bit Select Mode
+        uint32_t CRAC       :1;     //Alignment Control
+        uint32_t            :1;
+        uint32_t DGON       :1;     //Self-Diagnostic Voltage Standby Control
+        uint32_t            :24;    //Reserved
+    }reg_bits;
+    struct{
+        uint32_t susp_mode  :2;     //Suspend Mode Select
+        uint32_t            :2
+        uint32_t bit_mode   :1;     //Transmit/Receive FIFO Receive Interrupt Enable
+        uint32_t alin_fmt   :1;     //Transmit/Receive FIFO Transmit Interrupt Enable
+        uint32_t            :1;     //Reserved
+        uint32_t sd_volt    :1;     //Transmit/Receive FIFO Buffer Depth Configuration
+        uint32_t            :24;    //Reserved
+    }param_bits;
+}ADCA_OptCtlUnion;
+
+
+union{
+    uint32_t safectl;
+    struct{
+        uint32_t            :2;     //Reserved
+        uint32_t OWEIE      :1      //A/D Error Interrupt (INT_ADE) Enable on Overwrite Error Detection
+        uint32_t ULEIE      :1;     //A/D Error Interrupt (INT_ADE) Enable on Upper/Lower Limit Error Detection
+        uint32_t RDCLRE     :1;     //Read & Clear Enable
+        uint32_t            :27;
+    }reg_bits;
+    struct{
+        uint32_t            :2;     //Reserved
+        uint32_t ow_int     :1      //A/D Error Interrupt (INT_ADE) Enable on Overwrite Error Detection
+        uint32_t ul_int     :1;     //A/D Error Interrupt (INT_ADE) Enable on Upper/Lower Limit Error Detection
+        uint32_t rc_en      :1;     //Read & Clear Enable
+        uint32_t            :27;
+    }param_bits;
+}ADCA_SafeCtlUnion;
+
+typedef struct{
+    uint16_t ulimit[3];
+    uint16_t llimit[3];
+}ADCA_ULLimitSetTypeDef;
+
+
+
+typedef struct{
+    uint8_t vh;                 //virtual channel
+    ADCA_OptCtlUnion opt_ctl;   //ADC common operation control
+    uint8_t sampling_time;      //the sampling time (the number of cycles)
+    ADCA_SafeCtlUnion safe_ctl;
+    ADCA_ULLimitSetTypeDef *ullimit;
+
+}ADCA_InitTypeDef;

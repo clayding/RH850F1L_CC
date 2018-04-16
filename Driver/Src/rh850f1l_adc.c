@@ -11,3 +11,10 @@
   *           + ADCA functions
   ******************************************************************************
   */
+#include "rh850f1l_adc.h"
+
+
+void ADCA_Init(ADCA_InitTypeDef *ADCA_InitStruct)
+{
+
+}
