@@ -20,7 +20,7 @@
 #include "rh850f1l_rlin.h"
 
 void Board_MCU_Init();
-
+void Uart_Print_Config(void);
 void System_Clock_Config(void);
 
 #endif //BOARD_H_

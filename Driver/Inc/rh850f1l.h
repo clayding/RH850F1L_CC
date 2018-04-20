@@ -62,6 +62,8 @@ typedef enum {
   * @}
   */
 
+#define IS_ALL_NULL(PTR)		(PTR != NULL)
+
 #define STR_CONCAT2(s1,s2)      (s1##s2)
 #define STR_CONCAT3(s1,s2,s3)   (s1##s2##s3)
 #define ARRAY_SIZE(arr)         (sizeof(arr)/sizeof(arr[0]))

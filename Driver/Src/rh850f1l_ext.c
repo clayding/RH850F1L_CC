@@ -337,6 +337,12 @@ void TAUD0CH1IntHandler(unsigned long eiic)
     //Eiit_Handler_Ptr_2();
 }
 
+#pragma interrupt TAUD0CH7IntHandler(channel = 42, enable = false, callt = false, fpu = false)
+void TAUD0CH7IntHandler(unsigned long eiic)
+{
+    //Eiit_Handler_Ptr_2();
+}
+
 extern __IO uint32_t uw_tick;
 #pragma interrupt OSTMIntHandler(channel = 76, enable = false, callt = false, fpu = false)
 void OSTMIntHandler(unsigned long eiic)

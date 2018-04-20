@@ -14,6 +14,7 @@
 #include "rh850f1l_rscan.h"
 #include "delay.h"
 #include "lin.h"
+#include "adc.h"
 
 typedef struct
 {
@@ -39,11 +40,10 @@ void main(void)
     __IO uint16_t msg;
 	LED_Struct_Init(lcs, ARRAY_SIZE(lcs));
     Board_MCU_Init();
-	printf("MCU Started\n");
 
     while (1)
     {
-		lin3_test_excute();
+		adca0_test();
 
     }
 
@@ -73,7 +73,7 @@ void LED_Struct_Init(LED_CTL_Struct *lcs_t, uint8_t arr_size)
     lcs_t->led_pin = PORT_PIN_6;
 
     Eiit_Handler_Ptr = led_blink2;
-    Eiit_Handler_Ptr_2 = test_count;
+    Eiit_Handler_Ptr_2 = led_blink1;
 }
 
 void LED_Blink(LED_CTL_Struct lcs_t[], uint8_t arr_size,uint8_t ledn)
@@ -102,6 +102,7 @@ void led_blink2(void)
 }
 void assert_failed(uint8_t *file, uint32_t line)
 {
+    ERROR("[FILE]%s [LINE]%d\n",file,line);
     while (1)
     {
     }

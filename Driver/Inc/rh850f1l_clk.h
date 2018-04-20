@@ -111,6 +111,15 @@
 #define ARTCA_CTL_DIVI_4    ((uint32_t)0x03) //011B: CKSC_ARTCAS_CTL selection /4
 #define ARTCA_CTL_DIVI_8    ((uint32_t)0x04) //100B: CKSC_ARTCAS_CTL selection /8
 
+#define AADCAS_CTL_MASK     ((uint32_t)0x03)
+#define AADCAS_ACT_MASK     ((uint32_t)0x03)
+#define AADCAD_CTL_MASK     ((uint32_t)0x03)
+#define AADCAD_ACT_MASK     ((uint32_t)0x03)
+
+#define AADCA_CTL_DIVI_1    ((uint32_t)0x01) //01B: CKSC_AADCAS_CTL selection /1 (default)
+#define AADCA_CTL_DIVI_2    ((uint32_t)0x02) //10B: CKSC_AADCAS_CTL selection /2
+
+
 typedef enum {
     OSC_DISABLE,
     OSC_ENABLE = !OSC_DISABLE,
@@ -170,10 +179,17 @@ typedef enum{
 
 typedef enum{
     ARTCA_DISABLED,//00B: Disable (default)
-    ARTCA_SUBOSC,//01B: SubOSC*1
-    ARTCA_MAINOSC,//10B: MainOSC*2
+    ARTCA_SUBOSC,  //01B: SubOSC*1
+    ARTCA_MAINOSC, //10B: MainOSC*2
     ARTCA_LSINTOSC,//11B: LS IntOSC
 }ARTCA_SRC_SEL_Type;
+
+typedef enum{
+    AADCA_DISABLED, //00B: Disabled
+    AADCA_HSIntOSC, //01B: HS IntOSC (default)
+    AADCA_MAINOSC,  //10B: MainOSC
+    AADCA_PPLLCLK2, //11B: PPLLCLK2
+}AADCA_SRC_SEL_Type;
 
 typedef enum{
     ILIN_SRC_DISABLED,//00B:Disabled

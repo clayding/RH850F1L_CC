@@ -146,9 +146,9 @@
 	.dw #_Dummy_EI ; INT7
 	.dw #_Dummy_EI ; INT8
 	.dw #_Dummy_EI ; INT9
-	.dw #_Dummy_EI ; INT10
-	.dw #_Dummy_EI ; INT11
-	.dw #_Dummy_EI ; INT12
+	.dw #_ADCA0SG1EndIntHandler ; INT10
+	.dw #_ADCA0SG2EndIntHandler ; INT11
+	.dw #_ADCA0SG3EndIntHandler ; INT12
 	.dw #_Dummy_EI ; INT13
 	.dw #_RSCAN0GlobalErrorIntHandler ; INT14
 	.dw #_RSCAN0RecvFIFOIntHandler ; INT15
@@ -178,12 +178,12 @@
 	.dw #_TAUD0CH1IntHandler ; INT39
 	.dw #_Dummy_EI ; INT40
 	.dw #_Dummy_EI ; INT41
-	.dw #_Dummy_EI ; INT42
+	.dw #_TAUD0CH7IntHandler ; INT42
 	.dw #_Dummy_EI ; INT43
 	.dw #_Dummy_EI ; INT44
 	.dw #_Dummy_EI ; INT45
 	.dw #_Dummy_EI ; INT46
-	.dw #_Dummy_EI ; INT47
+	.dw #_ADCA0ADEIntHandler ; INT47
 	.dw #_Dummy_EI ; INT48
 	.dw #_Dummy_EI ; INT49
 	.dw #_Dummy_EI ; INT50

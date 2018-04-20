@@ -14,12 +14,14 @@
 #include "can.h"
 #include "uart.h"
 #include "csi.h"
+#include "adc.h"
+
 /****************************OSTM0 config*************************************/
 //#define OSTM_TEST
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
-//#define TAUD0_INTERVAL_MODE_TEST
+#define TAUD0_INTERVAL_MODE_TEST
 //#define TAUD0_PWM_OUTPUT_MODE_TEST
 //#define TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST
 //#define TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST
@@ -34,10 +36,16 @@
 /************************RSCAN Config *****************************************/
 //#define RSCAN_TEST
 
-/************************RLIN3/UART Config *****************************************/
+/************************RLIN3/UART Config ************************************/
 #define RLIN3_UART_MODE_TEST
-#define RLIN3_LIN_MODE_TEST
-//#define CSIG_MODE_TEST
+//#define RLIN3_LIN_MODE_TEST
+
+/***********************CSIG Config*******************************************/
+//#define CSIG_TEST
+
+/***********************ADCA Config*******************************************/
+#define ADCA0_TEST
+
 
 /*!
  * Flag to indicate if the MCU is Initialized
@@ -68,21 +76,35 @@ void System_Clock_Config(void)
     Clock_Domain_Set(CPUCLK);//set clock domain for cpuclk
     Clock_Domain_Set(IPERI1);//set clock domain for iperi1
     Clock_Domain_Set(IPERI2);//set clock domain for iperi2
+#if defined (WDTA0_TEST) || defined (WDTA1_TEST)
     Clock_Domain_Set(AWDTA);//set clock domain for WDTA
-    Clock_Domain_Set(ARTCA);
+#endif
+#ifdef RTCA0_TEST
+    Clock_Domain_Set(ARTCA);//set clock domain for RTCA
+#endif
+#ifdef ADCA0_TEST
+    Clock_Domain_Set(AADCA);////set clock domain for ADCA0
+#endif
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
+#if defined (RLIN3_LIN_MODE_TEST) || defined(RLIN3_UART_MODE_TEST)
 	Clock_Domain_Set(ILIN);
+#endif
+#ifdef RSCAN_TEST
     //rscan clock domain Setting
     Clock_Domain_Set(ICAN);
     Clock_Domain_Set(ICANOSC);
+#endif
+#ifdef CSIG_TEST
 	Clock_Domain_Set(ICSI);
-
+#endif
 }
 
 void Board_Port_Config(void)
 {
     Port_InitTypeDef port;
+
+	Uart_Print_Config();
 
     port.pin_mask = PORT_PIN_3;
     port.opt_mode = PORT_MODE;
@@ -166,22 +188,7 @@ void Board_Port_Config(void)
     PM1     &= ~(1U<<1);
     P1	 	|= (1U<<1);*/
 #endif
-#ifdef RLIN3_UART_MODE_TEST
-    port.pin_mask = PORT_PIN_3;
-    port.opt_mode = AF_MODE;
-    port.io_mode = PORT_INPUT_MODE;
-    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
-    port.bmc_t = BIDIRECTION_MODE_ENABLED;
-    port.alter_t = ALT_FUNC_2;
-    Port_Init(PortGroupNum0,&port);
 
-    port.pin_mask = PORT_PIN_2;
-    port.opt_mode = AF_MODE;
-    port.io_mode = PORT_OUTPUT_MODE;
-    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
-    port.alter_t = ALT_FUNC_2;
-    Port_Init(PortGroupNum0,&port);
-#endif
 
 #ifdef RLIN3_LIN_MODE_TEST
     port.pin_mask = PORT_PIN_4;
@@ -199,7 +206,7 @@ void Board_Port_Config(void)
     port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum0,&port);
 #endif
-#ifdef CSIG_MODE_TEST
+#ifdef CSIG_TEST
 
     port.pin_mask = PORT_PIN_4;
     port.opt_mode = AF_MODE;
@@ -278,138 +285,6 @@ void Board_Port_Config(void)
 
 #endif
 
-    {//Eiint Init start
-        Eiint_InitTypeDef eiint;
-        eiint.eiint_ch = P_12;
-        eiint.eiint_ext_int = 1;
-        eiint.eiint_process = INT_PROCESS_ENABLE;
-        eiint.eiint_refer_method = TABLE_REFER_METHOD;
-        eiint.eiint_priority = INT_PRIORITY_7;
-        eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
-        Eiit_Init(&eiint);
-#ifdef OSTM_TEST
-        eiint.eiint_ch = 76;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_5;
-        Eiit_Init(&eiint);
-#endif
-#if defined (TAUB0_INTERVAL_MODE_TEST) || defined (TAUB0_PWM_OUTPUT_MODE_TEST)
-        eiint.eiint_ch = 134;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef TAUB0_PWM_OUTPUT_MODE_TEST
-        eiint.eiint_ch = 135;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#if defined (TAUD0_INTERVAL_MODE_TEST) || defined (TAUD0_PWM_OUTPUT_MODE_TEST) || \
-    defined(TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST) || defined(TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST)
-        eiint.eiint_ch = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-
-#ifdef TAUD0_PWM_OUTPUT_MODE_TEST
-        eiint.eiint_ch = 39;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef RLIN3_UART_MODE_TEST
-        eiint.eiint_ch = 26;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 27;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 28;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef RLIN3_LIN_MODE_TEST
-        eiint.eiint_ch = 113;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_3;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 114;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_3;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 115;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_3;
-        Eiit_Init(&eiint);
-#endif
-#ifdef WDTA0_TEST
-        eiint.eiint_ch = 32;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-#endif
-#ifdef WDTA1_TEST
-        eiint.eiint_ch = 33;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef RTCA0_TEST
-        eiint.eiint_ch = 201;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef CSIG_MODE_TEST
-        /*CSIG0 EIINT Initialized*/
-        eiint.eiint_ch = 19;
-        eiint.selb_mask = EIINT_CH19_SELECT_MASK;
-        eiint.selb_val = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 20;
-        eiint.selb_mask = EIINT_CH20_SELECT_MASK;
-        eiint.selb_val = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 49;
-        eiint.selb_mask = 0;
-        eiint.selb_val = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        /*CSIG1 EIINT Initialized*/
-        eiint.eiint_ch = 215;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 216;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 217;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-}//Eiint Init start
 #ifdef WDTA0_TEST //Make sure that the OPBT0 has been set before testing this funtion
 	{
         WDTA_MODE_TypeDef wdta_mode;
@@ -497,10 +372,13 @@ void Board_Port_Config(void)
         TAUB_Batch_Init(ch_mode,2);
     }
 #endif
+#ifdef ADCA0_TEST
+	adc_init();
+#endif
 #ifdef TAUD0_INTERVAL_MODE_TEST
     {
         TAUD_ChMode_TypeDef ch_mode;
-        ch_mode.ch_no = 0;
+        ch_mode.ch_no = 7;
         ch_mode.clk_sel = TAU_CK0;
         ch_mode.clk_div =10;// 2^10 = 1024 ==> PLCLK/1024 = 40M/1024
         ch_mode.cdr = 0x9896;//0x9896 ==> 39062==> 40M/39062 = 1024 = 2^10
@@ -609,12 +487,6 @@ void Board_Port_Config(void)
     }
 #endif
 
-#ifdef RLIN3_UART_MODE_TEST
-    {
-        uart_init();
-    }
-#endif
-
 #ifdef RLIN3_LIN_MODE_TEST
     {
         lin3_init();
@@ -622,10 +494,215 @@ void Board_Port_Config(void)
     }
 #endif
 
-#ifdef CSIG_MODE_TEST
+#ifdef CSIG_TEST
 	{
 		csi_init();
 	}
 #endif
 
+  {//Eiint Init start
+        Eiint_InitTypeDef eiint;
+        eiint.eiint_ch = P_12;
+        eiint.eiint_ext_int = 1;
+        eiint.eiint_process = INT_PROCESS_ENABLE;
+        eiint.eiint_refer_method = TABLE_REFER_METHOD;
+        eiint.eiint_priority = INT_PRIORITY_7;
+        eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
+        Eiit_Init(&eiint);
+#ifdef OSTM_TEST
+        eiint.eiint_ch = 76;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+#endif
+#if defined (TAUB0_INTERVAL_MODE_TEST) || defined (TAUB0_PWM_OUTPUT_MODE_TEST)
+        eiint.eiint_ch = 134;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef TAUB0_PWM_OUTPUT_MODE_TEST
+        eiint.eiint_ch = 135;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#if defined (TAUD0_INTERVAL_MODE_TEST) || defined (TAUD0_PWM_OUTPUT_MODE_TEST) || \
+    defined(TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST) || defined(TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST)
+        eiint.eiint_ch = 42;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+
+#ifdef TAUD0_PWM_OUTPUT_MODE_TEST
+        eiint.eiint_ch = 39;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RLIN3_UART_MODE_TEST_   //RLIN3_UART_MODE_TEST
+        eiint.eiint_ch = 26;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 27;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 28;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RLIN3_LIN_MODE_TEST
+        eiint.eiint_ch = 113;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 114;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 115;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
+        Eiit_Init(&eiint);
+#endif
+#ifdef WDTA0_TEST
+        eiint.eiint_ch = 32;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+#endif
+#ifdef WDTA1_TEST
+        eiint.eiint_ch = 33;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RTCA0_TEST
+        eiint.eiint_ch = 201;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef CSIG_TEST
+        /*CSIG0 EIINT Initialized*/
+        eiint.eiint_ch = 19;
+        eiint.selb_mask = EIINT_CH19_SELECT_MASK;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 20;
+        eiint.selb_mask = EIINT_CH20_SELECT_MASK;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 49;
+        eiint.selb_mask = 0;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        /*CSIG1 EIINT Initialized*/
+        eiint.eiint_ch = 215;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 216;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 217;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+
+#ifdef ADCA0_TEST
+        eiint.eiint_ch = 10;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 11;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 12;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 47;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+#endif
+	}//Eiint Init End
+}
+
+
+void Uart_Print_Config(void)
+{
+
+#ifdef RLIN3_UART_MODE_TEST
+	Eiint_InitTypeDef eiint;
+	Port_InitTypeDef port;
+
+    port.pin_mask = PORT_PIN_3;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
+
+    port.pin_mask = PORT_PIN_2;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
+
+    eiint.eiint_process = INT_PROCESS_ENABLE;
+    eiint.eiint_refer_method = TABLE_REFER_METHOD;
+    eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
+
+    eiint.eiint_ch = 26;
+    eiint.eiint_ext_int = 0;
+    eiint.eiint_priority = INT_PRIORITY_6;
+    Eiit_Init(&eiint);
+
+    eiint.eiint_ch = 27;
+    eiint.eiint_ext_int = 0;
+    eiint.eiint_priority = INT_PRIORITY_6;
+    Eiit_Init(&eiint);
+
+    eiint.eiint_ch = 28;
+    eiint.eiint_ext_int = 0;
+    eiint.eiint_priority = INT_PRIORITY_6;
+    Eiit_Init(&eiint);
+
+	uart_init();
+	{
+		int x = 0xfff; //Delay for a while, or there might be strange character output.
+		while(x--);
+	}
+	printf("RH850F1l-176pin started\nuart printf enabled\n");
+#endif
 }

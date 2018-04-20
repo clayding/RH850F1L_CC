@@ -67,6 +67,7 @@ typedef struct{
 
 SET_DOMAIN_AWO_FUNC_DECLARE(AWDTA);
 SET_DOMAIN_AWO_FUNC_DECLARE(ARTCA);
+SET_DOMAIN_AWO_FUNC_DECLARE(AADCA);
 SET_DOMAIN_AWO_FUNC_DECLARE(AFOUT);
 SET_DOMAIN_ISO_FUNC_DECLARE(CPUCLK);
 SET_DOMAIN_ISO_FUNC_DECLARE(IPERI1);
@@ -80,6 +81,7 @@ SET_DOMAIN_ISO_FUNC_DECLARE(ICSI);
 DOMAIN_SET_Ref dsf[] = {
     {AWDTA, C_AWO_AWDTA_Domain_Set},
     {ARTCA, C_AWO_ARTCA_Domain_Set},
+    {AADCA, C_AWO_AADCA_Domain_Set},
     {AFOUT, C_AWO_AFOUT_Domain_Set},
     {CPUCLK,C_ISO_CPUCLK_Domain_Set},
     {IPERI1,C_ISO_IPERI1_Domain_Set},
@@ -407,6 +409,28 @@ SET_CLK_DOMAIN_RET_Type C_AWO_ARTCA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
     while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(ARTCA,D_CTL_MASK))) != ERROR);//Select a clock divider
 
     while(val_.clk_divider_val != (STR_CONCAT3(CKSC_,ARTCA,D_ACT) & STR_CONCAT2(ARTCA,D_ACT_MASK))) { //Confirm completion of selection
+        //return SET_CLK_DIVIDER_FAIL;
+    }
+    return SET_CLK_DOMAIN_SUCCESS;
+}
+
+SET_CLK_DOMAIN_RET_Type C_AWO_AADCA_Domain_Set(WP_Opt_Reg *wp_reg_ptr)
+{
+    WP_Opt_Reg *ptr = wp_reg_ptr;
+    SET_CLK_DOMAIN_Struct val_;
+    /*Source Clock Setting for C_AWO_RTCA*/
+    val_.src_clk_ctl_val = AADCA_HSIntOSC;//Source Clock Setting for C_AWO_AADCA
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AADCA,S_CTL);
+    while(Write_Protected_Process(*ptr,(val_.src_clk_ctl_val & STR_CONCAT2(AADCA,S_CTL_MASK))) != ERROR);//Select a source clock
+    while(val_.src_clk_ctl_val != (STR_CONCAT3(CKSC_,AADCA,S_ACT) & STR_CONCAT2(AADCA,S_ACT_MASK))) { //Confirm completion of selection
+        //return SET_SRC_CLK_FAIL;
+    }
+
+    val_.clk_divider_val = AADCA_CTL_DIVI_1;//CKSC_AADCAS_CTL selection /1
+    ptr->dst_protect_reg_addr = &STR_CONCAT3(CKSC_,AADCA,D_CTL);
+    while(Write_Protected_Process(*ptr,(val_.clk_divider_val & STR_CONCAT2(AADCA,D_CTL_MASK))) != ERROR);//Select a clock divider
+
+    while(val_.clk_divider_val != (STR_CONCAT3(CKSC_,AADCA,D_ACT) & STR_CONCAT2(AADCA,D_ACT_MASK))) { //Confirm completion of selection
         //return SET_CLK_DIVIDER_FAIL;
     }
     return SET_CLK_DOMAIN_SUCCESS;
