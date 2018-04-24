@@ -503,13 +503,13 @@ Modify the RSCAN0CmCFG register in channel reset mode or channel halt mode. */
 #define __RSCAN_SET_CHANNEL_CTL(_M_,_MASK_,_VALUE_)     do{ \
                                                             MODIFY_REG(CAN_REG_ADDR(_M_,_C0CTR,0x10),_MASK_,_VALUE_);\
                                                         }while(0)
-#define __RSCAN_GET_CHANNEL_CTL(_M_,_MASK_)             (CAN_REG_VAL(_M_,_C0CTR,0x10) & _MASK_)
+#define __RSCAN_GET_CHANNEL_CTL(_M_,_MASK_)             (CAN_REG_VAL(_M_,_C0CTR,0x10) & (_MASK_))
 
 /*Read the RSCAN0CmSTS - Channel Status Register (m = 0 to 5) read-only*/
-#define __RSCAN_GET_CHANNEL_STAT(_M_,_MASK_)            (CAN_REG_VAL(_M_,_C0STS,0x10) & _MASK_)
+#define __RSCAN_GET_CHANNEL_STAT(_M_,_MASK_)            (CAN_REG_VAL(_M_,_C0STS,0x10) & (_MASK_))
 
 /*Config or read RSCAN0CmERFL - Channel Error Flag Register (m = 0 to 5)*/
-#define __RSCAN_GET_CHANNEL_Error(_M_,_MASK_)           (CAN_REG_VAL(_M_,_C0ERFL,0x10) & _MASK_)
+#define __RSCAN_GET_CHANNEL_Error(_M_,_MASK_)           (CAN_REG_VAL(_M_,_C0ERFL,0x10) & (_MASK_))
 
 /*********************************19.3.6--19.3.12******************************/
 /*Config RSCAN0GCFG - Global Configuration Register
@@ -648,7 +648,7 @@ This register is writable only when transmit mode, readable only when the CFM[1:
 #define __RSCAN_WRITE_TRFIFO_DATA_H(_K_,_MSG_BASE_)      CAN_REG_VAL(_K_,_CFDF10,0x10) = *((uint32_t *)_MSG_BASE_)
 #define __RSCAN_READ_TRFIFO_DATA_H(_K_)                  CAN_REG_VAL(_K_,_CFDF10,0x10)
 
-#define __RSCAN_READ_TRFIFO_ADDR(_K_)                  CAN_REG_ADDR(_K_,_CFDF00,0x10)
+#define __RSCAN_READ_TRFIFO_ADDR(_K_)                   CAN_REG_ADDR(_K_,_CFDF00,0x10)
 
 
 /*********************************19.3.40--19.3.45*****************************/

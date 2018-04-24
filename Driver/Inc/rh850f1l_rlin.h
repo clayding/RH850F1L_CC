@@ -226,7 +226,7 @@
 
 /*RLN3nLWBR — LIN Wake-Up Baud Rate Select Register*/
 #define __RLIN3_SELECT_WAKEUP_BAUDRATE(_N_,_MASK_,_VALUE_)    MODIFY_REG(&LIN3N_VAL(_N_).LWBR,_MASK_,_VALUE_)
-#define __RLIN3_GET_WAKEUP_BAUDRATE(_N_,_MASK_)               (LIN3N_VAL(_N_).LWBR & _MASK_)
+#define __RLIN3_GET_WAKEUP_BAUDRATE(_N_,_MASK_)               (LIN3N_VAL(_N_).LWBR & (_MASK_))
 
 /*RLN3nLBRP01 — LIN/UART Baud Rate Prescaler 01/0/1 Register*/
 #define __RLIN3_SET_BAUDRATE_PRE01(_N_,_VALUE_)             (LIN3N_VAL(_N_).LBRP01.UINT16 = _VALUE_ & 0xFFFF)
@@ -246,66 +246,66 @@
 
 /*RLN3nLMD — LIN/UART Mode Register*/
 #define __RLIN3_SET_UART_MODE(_N_,_MASK_,_VALUE_)           MODIFY_REG(&LIN3N_VAL(_N_).LMD,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_MODE(_N_,_MASK_)                   (LIN3N_VAL(_N_).LMD & _MASK_)
+#define __RLIN3_GET_UART_MODE(_N_,_MASK_)                   (LIN3N_VAL(_N_).LMD & (_MASK_))
 #define __RLIN3_SET_LIN_MODE(_N_,_MASK_,_VALUE_)            __RLIN3_SET_UART_MODE(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_LIN_MODE(_N_,_MASK_)                    __RLIN3_GET_UART_MODE(_N_,_MASK_)
 
 /*RLN3nLBFC — UART Configuration Register*/
 /*RLN3nLBFC — LIN Break Field Configuration Register*/
 #define __RLIN3_SET_UART_CONFIG(_N_,_MASK_,_VALUE_)         MODIFY_REG(&LIN3N_VAL(_N_).LBFC,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_CONFIG(_N_,_MASK_)                 (LIN3N_VAL(_N_).LBFC & _MASK_)
+#define __RLIN3_GET_UART_CONFIG(_N_,_MASK_)                 (LIN3N_VAL(_N_).LBFC & (_MASK_))
 #define __RLIN3_SET_BREAK_FIELD_CONFIG(_N_,_MASK_,_VALUE_)  __RLIN3_SET_UART_CONFIG(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_BREAK_FIELD_CONFIG(_N_,_MASK_)          __RLIN3_GET_UART_CONFIG(_N_,_MASK_)
 
 /*LN3nLSC — LIN/UART Space Configuration Register*/
 #define __RLIN3_SET_UART_SPACE(_N_,_MASK_,_VALUE_)          MODIFY_REG(&LIN3N_VAL(_N_).LSC,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_SPACE(_N_,_MASK_)                  (LIN3N_VAL(_N_).LSC & _MASK_)
+#define __RLIN3_GET_UART_SPACE(_N_,_MASK_)                  (LIN3N_VAL(_N_).LSC & (_MASK_))
 #define __RLIN3_SET_LIN_SPACE(_N_,_MASK_,_VALUE_)           __RLIN3_SET_UART_SPACE(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_LIN_SPACE(_N_,_MASK_)                   __RLIN3_GET_UART_SPACE(_N_,_MASK_)
 
 /*RLN3nLWUP — LIN Wake-Up Configuration Register*/
 #define __RLIN3_SET_WAKEUP_CONIFG(_N_,_MASK_,_VALUE_)       MODIFY_REG(&LIN3N_VAL(_N_).LWUP,_MASK_,_VALUE_)
-#define __RLIN3_GET_WAKEUP_CONIFG(_N_,_MASK_)               (LIN3N_VAL(_N_).LWUP & _MASK_)
+#define __RLIN3_GET_WAKEUP_CONIFG(_N_,_MASK_)               (LIN3N_VAL(_N_).LWUP & (_MASK_))
 
 /*RLN3nLIE — LIN Interrupt Enable Register*/
 #define __RLIN3_ENABLE_INT(_N_,_MASK_,_VALUE_)              MODIFY_REG(&LIN3N_VAL(_N_).LIE,_MASK_,_VALUE_)
-#define __RLIN3_GET_INT_STAT(_N_,_MASK_)                    (LIN3N_VAL(_N_).LIE & _MASK_)
+#define __RLIN3_GET_INT_STAT(_N_,_MASK_)                    (LIN3N_VAL(_N_).LIE & (_MASK_))
 #define __RLIN3_CONFIG_INT(_N_,_VALUE_)                     (LIN3N_VAL(_N_).LIE  = _VALUE_ & 0xff)
 /*RLN3nLEDE — LIN/UART Error Detection Enable Register*/
 #define __RLIN3_ENABLE_ERR_DETECT(_N_,_MASK_,_VALUE_)       MODIFY_REG(&LIN3N_VAL(_N_).LEDE,_MASK_,_VALUE_)
-#define __RLIN3_GET_ERR_DETECT(_N_,_MASK_)                  (LIN3N_VAL(_N_).LEDE & _MASK_)
+#define __RLIN3_GET_ERR_DETECT(_N_,_MASK_)                  (LIN3N_VAL(_N_).LEDE & (_MASK_))
 #define __RLIN3_CONFIG_ERR_DETECT(_N_,_VALUE_)              (LIN3N_VAL(_N_).LEDE  = _VALUE_ & 0xff)
 /*RLN3nLCUC — LIN/UART Control Register*/
 #define __RLIN3_SET_UART_CTL(_N_,_MASK_,_VALUE_)            MODIFY_REG(&LIN3N_VAL(_N_).LCUC,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_CTL(_N_,_MASK_)                    (LIN3N_VAL(_N_).LCUC & _MASK_)
+#define __RLIN3_GET_UART_CTL(_N_,_MASK_)                    (LIN3N_VAL(_N_).LCUC & (_MASK_))
 #define __RLIN3_SET_LIN_CTL(_N_,_MASK_,_VALUE_)             __RLIN3_SET_UART_CTL(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_LIN_CTL(_N_,_MASK_)                     __RLIN3_GET_UART_CTL(_N_,_MASK_)
 
 /*RLN3nLTRC — LIN/UART Transmission Control Register*/
 #define __RLIN3_SET_UART_TX_CTL(_N_,_MASK_,_VALUE_)         MODIFY_REG(&LIN3N_VAL(_N_).LTRC,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_TX_CTL(_N_,_MASK_)                 (LIN3N_VAL(_N_).LTRC & _MASK_)
+#define __RLIN3_GET_UART_TX_CTL(_N_,_MASK_)                 (LIN3N_VAL(_N_).LTRC & (_MASK_))
 #define __RLIN3_SET_LIN_TX_CTL(_N_,_MASK_,_VALUE_)          __RLIN3_SET_UART_TX_CTL(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_LIN_TX_CTL(_N_,_MASK_)                  __RLIN3_GET_UART_TX_CTL(_N_,_MASK_)
 
 /*RLN3nLMST — LIN/UART Mode Status Register read-only register*/
-#define __RLIN3_GET_UART_MODE_STAT(_N_,_MASK_)              (LIN3N_VAL(_N_).LMST & _MASK_)
+#define __RLIN3_GET_UART_MODE_STAT(_N_,_MASK_)              (LIN3N_VAL(_N_).LMST & (_MASK_))
 #define __RLIN3_GET_LIN_MODE_STAT(_N_,_MASK_)               __RLIN3_GET_UART_MODE_STAT(_N_,_MASK_)
 
 /*RLN3nLST — LIN/UART Status Register*/
 #define __RLIN3_SET_UART_STAT(_N_,_MASK_,_VALUE_)           MODIFY_REG(&LIN3N_VAL(_N_).LST,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_STAT(_N_,_MASK_)                   (LIN3N_VAL(_N_).LST & _MASK_)
+#define __RLIN3_GET_UART_STAT(_N_,_MASK_)                   (LIN3N_VAL(_N_).LST & (_MASK_))
 #define __RLIN3_SET_LIN_STAT(_N_,_MASK_,_VALUE_)            __RLIN3_SET_UART_STAT(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_LIN_STAT(_N_,_MASK_)                    __RLIN3_GET_UART_STAT(_N_,_MASK_)
 
 /*RLN3nLEST — LIN/UART Error Status Register*/
 #define __RLIN3_SET_UART_ERR_STAT(_N_,_MASK_,_VALUE_)       MODIFY_REG(&LIN3N_VAL(_N_).LEST,_MASK_,_VALUE_)
-#define __RLIN3_GET_UART_ERR_STAT(_N_,_MASK_)               (LIN3N_VAL(_N_).LEST & _MASK_)
+#define __RLIN3_GET_UART_ERR_STAT(_N_,_MASK_)               (LIN3N_VAL(_N_).LEST & (_MASK_))
 #define __RLIN3_SET_LIN_ERR_STAT(_N_,_MASK_,_VALUE_)        __RLIN3_SET_UART_ERR_STAT(_N_,_MASK_,_VALUE_)
 #define __RLIN3_GET_LIN_ERR_STAT(_N_,_MASK_)                __RLIN3_GET_UART_ERR_STAT(_N_,_MASK_)
 
 /*RLN3nLDFC — UART Data Field Configuration Register*/
 #define __RLIN3_SET_DATA_FIELD_CONFIG(_N_,_MASK_,_VALUE_)   MODIFY_REG(&LIN3N_VAL(_N_).LDFC,_MASK_,_VALUE_)
-#define __RLIN3_GET_DATA_FIELD_CONFIG(_N_,_MASK_)           (LIN3N_VAL(_N_).LDFC & _MASK_)
+#define __RLIN3_GET_DATA_FIELD_CONFIG(_N_,_MASK_)           (LIN3N_VAL(_N_).LDFC & (_MASK_))
 
 /*RLN3nLIDB — LIN/UART ID Buffer Register*/
 #define __RLIN3_SET_ID_BUF(_N_,_VALUE_)                     (LIN3N_VAL(_N_).LIDB = _VALUE_ & 0xFF)
@@ -325,11 +325,11 @@
 
 /*RLN3nLUOER — UART Operation Enable Register*/
 #define __RLIN3_ENABEL_OPERATION(_N_,_MASK_,_VALUE_)        MODIFY_REG(&LIN3N_VAL(_N_).LUOER,_MASK_,_VALUE_)
-#define __RLIN3_GET_OPERATION_STAT(_N_,_MASK_)              (LIN3N_VAL(_N_).LUOER & _MASK_)
+#define __RLIN3_GET_OPERATION_STAT(_N_,_MASK_)              (LIN3N_VAL(_N_).LUOER & (_MASK_))
 
 /*RLN3nLUOR1 — UART Option Register 1*/
 #define __RLIN3_SET_OPTION_REG(_N_,_MASK_,_VALUE_)          MODIFY_REG(&LIN3N_VAL(_N_).LUOR1,_MASK_,_VALUE_)
-#define __RLIN3_GET_OPTION_REG(_N_,_MASK_)                  (LIN3N_VAL(_N_).LUOR1 & _MASK_)
+#define __RLIN3_GET_OPTION_REG(_N_,_MASK_)                  (LIN3N_VAL(_N_).LUOR1 & (_MASK_))
 
 /*RLN3nLUTDR — UART Transmission Data Register*/
 #define __RLIN3_WRITE_TX_DATA(_N_,_VALUE_)                  (LIN3N_VAL(_N_).LUTDR.UINT16 = _VALUE_ & 0x1FF)

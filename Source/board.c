@@ -297,6 +297,161 @@ void Board_Port_Config(void)
 	}
 #endif
 
+ {//Eiint Init start
+        Eiint_InitTypeDef eiint;
+        eiint.eiint_ch = P_12;
+        eiint.eiint_ext_int = 1;
+        eiint.eiint_process = INT_PROCESS_ENABLE;
+        eiint.eiint_refer_method = TABLE_REFER_METHOD;
+        eiint.eiint_priority = INT_PRIORITY_7;
+        eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
+        Eiit_Init(&eiint);
+#ifdef OSTM_TEST
+        eiint.eiint_ch = 76;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+#endif
+#if defined (TAUB0_INTERVAL_MODE_TEST) || defined (TAUB0_PWM_OUTPUT_MODE_TEST)
+        eiint.eiint_ch = 134;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef TAUB0_PWM_OUTPUT_MODE_TEST
+        eiint.eiint_ch = 135;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#if defined (TAUD0_INTERVAL_MODE_TEST) || defined (TAUD0_PWM_OUTPUT_MODE_TEST) || \
+    defined(TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST) || defined(TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST)
+        eiint.eiint_ch = 42;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+
+#ifdef TAUD0_PWM_OUTPUT_MODE_TEST
+        eiint.eiint_ch = 39;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RLIN3_UART_MODE_TEST_   //RLIN3_UART_MODE_TEST
+        eiint.eiint_ch = 26;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 27;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 28;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RLIN3_LIN_MODE_TEST
+        eiint.eiint_ch = 113;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 114;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 115;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
+        Eiit_Init(&eiint);
+#endif
+#ifdef WDTA0_TEST
+        eiint.eiint_ch = 32;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+#endif
+#ifdef WDTA1_TEST
+        eiint.eiint_ch = 33;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RTCA0_TEST
+        eiint.eiint_ch = 201;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef CSIG_TEST
+        /*CSIG0 EIINT Initialized*/
+        eiint.eiint_ch = 19;
+        eiint.selb_mask = EIINT_CH19_SELECT_MASK;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 20;
+        eiint.selb_mask = EIINT_CH20_SELECT_MASK;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 49;
+        eiint.selb_mask = 0;
+        eiint.selb_val = 0;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        /*CSIG1 EIINT Initialized*/
+        eiint.eiint_ch = 215;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 216;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 217;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+
+#ifdef ADCA0_TEST
+        eiint.eiint_ch = 10;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 11;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 12;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+
+        eiint.eiint_ch = 47;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_5;
+        Eiit_Init(&eiint);
+#endif
+	}//Eiint Init End
+
 #ifdef WDTA1_TEST
 	{
         WDTA_MODE_TypeDef wdta_mode;
@@ -500,160 +655,6 @@ void Board_Port_Config(void)
 	}
 #endif
 
-  {//Eiint Init start
-        Eiint_InitTypeDef eiint;
-        eiint.eiint_ch = P_12;
-        eiint.eiint_ext_int = 1;
-        eiint.eiint_process = INT_PROCESS_ENABLE;
-        eiint.eiint_refer_method = TABLE_REFER_METHOD;
-        eiint.eiint_priority = INT_PRIORITY_7;
-        eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
-        Eiit_Init(&eiint);
-#ifdef OSTM_TEST
-        eiint.eiint_ch = 76;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_5;
-        Eiit_Init(&eiint);
-#endif
-#if defined (TAUB0_INTERVAL_MODE_TEST) || defined (TAUB0_PWM_OUTPUT_MODE_TEST)
-        eiint.eiint_ch = 134;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef TAUB0_PWM_OUTPUT_MODE_TEST
-        eiint.eiint_ch = 135;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#if defined (TAUD0_INTERVAL_MODE_TEST) || defined (TAUD0_PWM_OUTPUT_MODE_TEST) || \
-    defined(TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST) || defined(TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST)
-        eiint.eiint_ch = 42;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-
-#ifdef TAUD0_PWM_OUTPUT_MODE_TEST
-        eiint.eiint_ch = 39;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef RLIN3_UART_MODE_TEST_   //RLIN3_UART_MODE_TEST
-        eiint.eiint_ch = 26;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 27;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 28;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef RLIN3_LIN_MODE_TEST
-        eiint.eiint_ch = 113;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_3;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 114;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_3;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 115;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_3;
-        Eiit_Init(&eiint);
-#endif
-#ifdef WDTA0_TEST
-        eiint.eiint_ch = 32;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-#endif
-#ifdef WDTA1_TEST
-        eiint.eiint_ch = 33;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef RTCA0_TEST
-        eiint.eiint_ch = 201;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-#ifdef CSIG_TEST
-        /*CSIG0 EIINT Initialized*/
-        eiint.eiint_ch = 19;
-        eiint.selb_mask = EIINT_CH19_SELECT_MASK;
-        eiint.selb_val = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 20;
-        eiint.selb_mask = EIINT_CH20_SELECT_MASK;
-        eiint.selb_val = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 49;
-        eiint.selb_mask = 0;
-        eiint.selb_val = 0;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        /*CSIG1 EIINT Initialized*/
-        eiint.eiint_ch = 215;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 216;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 217;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_6;
-        Eiit_Init(&eiint);
-#endif
-
-#ifdef ADCA0_TEST
-        eiint.eiint_ch = 10;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_5;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 11;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_5;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 12;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_5;
-        Eiit_Init(&eiint);
-
-        eiint.eiint_ch = 47;
-        eiint.eiint_ext_int = 0;
-        eiint.eiint_priority = INT_PRIORITY_5;
-        Eiit_Init(&eiint);
-#endif
-	}//Eiint Init End
 }
 
 

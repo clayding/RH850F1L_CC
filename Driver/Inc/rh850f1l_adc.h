@@ -26,8 +26,12 @@
 #define _ADCA0_ADDR         				((volatile struct __tag49 *)&ADCA0) //defined in iodefine.h
 #define _ADCA1_ADDR         				((volatile struct __tag50 *)&ADCA1)	//defined in iodefine.h
 
-#define ADCA_SG_INDEX_MIN					1	// Scan Group smallest index
-#define ADCA_SG_INDEX_MAX					3	// Scan Group largest index
+#define ADCA_SG_INDEX_1                     1
+#define ADCA_SG_INDEX_2                     2
+#define ADCA_SG_INDEX_3                     3
+
+#define ADCA_SG_INDEX_MIN					ADCA_SG_INDEX_1	// Scan Group smallest index
+#define ADCA_SG_INDEX_MAX					ADCA_SG_INDEX_3	// Scan Group largest index
 
 #define ADCA0_PHY_CH_NUM_MAX           		36	//the number of physical channel in ANCA0
 #define ADCA0_VIR_CH_NUM_MAX            	50	//the number of virtual channel in ANCA0
@@ -47,7 +51,7 @@
 #define _PWDVCR             PWDVCR.UINT32
 #define _PWDTSNDR           PWDTSNDR.UINT16[1]
 #define _PWDDIR             PWDDIR
-#define _ADHALTR            ADHALTR
+#define _ADHALTR            ADHALTR.UINT32
 #define _ADCR               ADCR.UINT32
 #define _MPXCURR            MPXCURR.UINT32
 #define _THSMPSTCR          THSMPSTCR.UINT32
@@ -315,24 +319,24 @@ ADCAnTHBCR - T&H Group B Control Register*/
 
 /*ADCAnVCRj - Virtual Channel Register j*/
 #define __ADCA_SET_VC_CTL(_N_,_J_,_MASK_,_VALUE_)       (MODIFY_REG(ADCA_VCR_ADDR(_N_,_J_),_MASK_,_VALUE_))
-#define __ADCA_GET_VC_CTL(_N_,_J_,_MASK_)               (ADCA_VCR_VAL(_N_,_J_) & _MASK_)
+#define __ADCA_GET_VC_CTL(_N_,_J_,_MASK_)               (ADCA_VCR_VAL(_N_,_J_) & (_MASK_))
 /*ADCAnPWDVCR - PWM-Diag Virtual Channel Register,Note that bit8 and bit9 not defined*/
 #define __ADCA_SET_PWDVC_CTL(_N_,_MASK_,_VALUE_)        (MODIFY_REG(&ADCAN_VAL(_N_)._PWDVCR,_MASK_,_VALUE_))
-#define __ADCA_GET_PWDVC_CTL(_N_,_MASK_)                (ADCAN_VAL(_N_)._PWDVCR & _MASK_)
+#define __ADCA_GET_PWDVC_CTL(_N_,_MASK_)                (ADCAN_VAL(_N_)._PWDVCR & (_MASK_))
 
 /*ADCAnDRj - Data Register j, 32-/16-bit read-only register*/
 #define __ADCA_READ_DATA(_N_,_J_)                       (ADCA_DR_VAL(_N_,_J_))
 
 /*ADCAnDIRj - Data Supplementary Information Register j,32-bit read-only register
 only supported by ADCA0*/
-#define __ADCA_READ_DATA_INFO(N_,_J_,_MASK_)            (ADCA_DIR_VAL(_N_,_J_) & _MASK_)
+#define __ADCA_READ_DATA_INFO(_N_,_J_,_MASK_)            (ADCA_DIR_VAL(_N_,_J_) & (_MASK_))
 
 /*ADCAnPWDTSNDR - PWM-Diag Data Register,32-/16-bit read-only,high 16 bits valid*/
 #define __ADCA_READ_PWD_DATA(_N_,_J_)                   (ADCAN_VAL(_N_)._PWDTSNDR)
 
 /*ADCAnPWDDIR - PWM-Diag Data Supplementary Information Register*,32-bit read-only register
 only supported for ADCA0*/
-#define __ADCA_READ_PWD_DATA_INFO(N_,_J_,_MASK_)        (ADCAN_VAL(_N_)._PWDDIR & _MASK_)
+#define __ADCA_READ_PWD_DATA_INFO(_N_,_J_,_MASK_)        (ADCAN_VAL(_N_)._PWDDIR & (_MASK_))
 
 /*ADCAnADHALTR - A/D Force Halt Register,write-only register*/
 #define __ADCA_FORCE_HALT_TRIGGER(_N_)                  (ADCAN_VAL(_N_)._ADHALTR |= ADC_HALT_MASK)
@@ -373,6 +377,9 @@ ADCAnTHBCR - T&H Group B Control Register,only ADCA0 supports this function*/
 #define __ADCA_SET_THA_CTL(_MASK_,_VALUE_)              __ADCA_SET_THA_CTL_(_MASK_,_VALUE_)
 #define __ADCA_SET_THB_CTL(_MASK_,_VALUE_)              __ADCA_SET_THB_CTL_(_MASK_,_VALUE_)
 
+#define __ADCA_GET_THA_CTL_(_MASK_)                     (_ADCA0_VAL._THACR & (_MASK_))
+#define __ADCA_GET_THB_CTL_(_MASK_)                     (_ADCA0_VAL._THBCR & (_MASK_))
+
 /*ADCAnTHER - T&H Enable Register,ADCAnTHER - T&H Enable Register,only ADCA0 supports this function*/
 #define __ADCA_TH_ENABLE_(_MASK_)                       (MODIFY_REG((&_ADCA0_VAL._THER),_MASK_,_MASK_))
 #define __ADCA_TH_DISABLE_(_MASK_)                      (MODIFY_REG((&_ADCA0_VAL._THER),_MASK_,(~_MASK_)))
@@ -393,7 +400,7 @@ ADCAnTHBCR - T&H Group B Control Register,only ADCA0 supports this function*/
                                                            ((_TIME_) == 0x18) )
 /*ADCAnSFTCR - Safety Control Register*/
 #define __ADCA_SET_SAFETY_CTL(_N_,_MASK_,_VALUE_)       (MODIFY_REG((&ADCAN_VAL(_N_)._SFTCR),_MASK_,_VALUE_))
-#define __ADCA_GET_SAFETY_CTL(_N_,_MASK_)               (ADCAN_VAL(_N_)._SFTCR & _MASK_)
+#define __ADCA_GET_SAFETY_CTL(_N_,_MASK_)               (ADCAN_VAL(_N_)._SFTCR & (_MASK_))
 
 /*ADCAnULLMTBR0 to 2 - Upper Limit/Lower Limit Table Registers 0 to 2
 _REG_INDEX:0,1 ,2*/
@@ -454,13 +461,13 @@ to clear of PWM-Diag scan end flag (SEF)*/
 #define __ADCA_CLEAR_SGx_SCAN_END_FLAG(_N_,_X_)         (ADCAN_SGx_VAL(_N_,_X_,_SGSEFCR_BASE)  |= ADC_SEFC_MASK)
 
 /*ADCAnSGSTR - Scan Group Status Register,read-only register*/
-#define __ADCA_GET_SG_STAT(_N_,_MASK_)                  (ADCAN_VAL(_N_)._SGSTR & _MASK_)
+#define __ADCA_GET_SG_STAT(_N_,_MASK_)                  (ADCAN_VAL(_N_)._SGSTR & (_MASK_))
 
 /******************Hardware Trigger Specific Register Operation****************/
 /*ADCAnSGTSELx - Scan Group x Start Trigger Control Register x*/
-#define __ADCA_ENABLE_HARDWARE_TRIGGER(_N_,_X_,_P_)     (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE)  = ADC_TxSELp_MASK(_P_))
-#define __ADCA_DISABLE_HARDWARE_TRIGGER(_N_,_X_,_P_)    (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE)  &= ~ADC_TxSELp_MASK(_P_))
-
+#define __ADCA_ENABLE_HW_TRIGGER(_N_,_X_,_P_)           (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE)  = ADC_TxSELp_MASK(_P_))
+#define __ADCA_DISABLE_HW_TRIGGER(_N_,_X_,_P_)          (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE)  &= ~ADC_TxSELp_MASK(_P_))
+#define __ADCA_GET_HW_TRIGGER_STAT(_N_,_X_)             (ADCAN_SGx_VAL(_N_,_X_,_SGTSEL_BASE) & 0x1FF)
 /**************************Self-Diagnosis Specific Registers*******************/
 /*ADCAnDGCTL0 - Self-Diagnosis Specific Registers 0,controls the self-diagnostic voltage level*/
 #define __ADCA_SELECT_Self_Diag_VOLT_LEVEL(_N_,_VALUE_) (ADCAN_VAL(_N_)._DGCTL0 = _VALUE_ & ADC_PSEL_MASK)
@@ -652,12 +659,12 @@ typedef struct{
 /** @defgroup th_group_selection_mask
   * @{
   */
-#define TH5_GROUP_SELECT_MASK           ADC_TH5GS_MASK
-#define TH4_GROUP_SELECT_MASK           ADC_TH4GS_MASK
-#define TH3_GROUP_SELECT_MASK           ADC_TH3GS_MASK
-#define TH2_GROUP_SELECT_MASK           ADC_TH2GS_MASK
-#define TH1_GROUP_SELECT_MASK           ADC_TH1GS_MASK
-#define TH0_GROUP_SELECT_MASK           ADC_TH0GS_MASK
+#define TH5_SELECT_TO_B_MASK            ADC_TH5GS_MASK
+#define TH4_SELECT_TO_B_MASK            ADC_TH4GS_MASK
+#define TH3_SELECT_TO_B_MASK            ADC_TH3GS_MASK
+#define TH2_SELECT_TO_B_MASK            ADC_TH2GS_MASK
+#define TH1_SELECT_TO_B_MASK            ADC_TH1GS_MASK
+#define TH0_SELECT_TO_B_MASK            ADC_TH0GS_MASK
 /**
  * @}
  */
@@ -764,9 +771,13 @@ static void ADCA_Set_TH_Operation_Ctl(ADCA_THSetTypeDef *set_p);
 
 static void ADCA_Set_SG_Operation(uint8_t adcan,ADCA_SGOptTypeDef *opt_p,bool pwd_used);
 
+void ADCA_Enable_SW_Trigger(uint8_t ADCAn,uint8_t sg_index);
+
+uint8_t ADCA_Enable_Hold_Trigger(uint8_t sg_index);
+
 static void ADCA_Set_SG_Start_Trigger(uint8_t ADCAn,uint8_t sg_index,uint32_t trig_ctl);
 
-int8_t ADCA_Read_Ch_Conv_Data(uint8_t adcan,uint8_t virtual_ch,uint16_t *data_p,
+int8_t ADCA_Read_Conv_Data(uint8_t adcan,uint8_t virtual_ch,uint16_t *data_p,
     uint8_t *phy_ch_p);
 
 int8_t ADCA_Read_SG_Conv_Data(uint8_t adcan,uint8_t sg_index,uint16_t *data_p,
@@ -777,6 +788,7 @@ int8_t ADCA_Get_SG_Status(uint8_t ADCAn,uint8_t sg_index);
 void ADCA_Clear_SG_Status(uint8_t ADCAn,uint8_t sg_index);
 
 void ADCA_Err_Handle(uint8_t ADCAn);
+
 int8_t ADCA_Err_Checked(uint8_t ADCAn,uint8_t *src_err_p);
 
 #endif //RH850F1L_ADC_H

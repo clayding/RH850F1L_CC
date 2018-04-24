@@ -108,18 +108,18 @@
 
 /*CSIGnCTL0 - CSIGn Control Register 0*/
 #define __CSIG_SET_CTL0(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL0_.UINT8,_MASK_,_VALUE_)
-#define __CSIG_GET_CTL0(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL0_.UINT8 & _MASK_)
+#define __CSIG_GET_CTL0(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL0_.UINT8 & (_MASK_))
 
 /*CSIGnCTL1 - CSIGn Control Register 1*/
 #define __CSIG_SET_CTL1(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL1_,_MASK_,_VALUE_)
-#define __CSIG_GET_CTL1(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL1_ & _MASK_)
+#define __CSIG_GET_CTL1(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL1_ & (_MASK_))
 
 /*CSIGnCTL2 - CSIGn Control Register 2*/
 #define __CSIG_SET_CTL2(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CTL2_,_MASK_,_VALUE_)
-#define __CSIG_GET_CTL2(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL2_ & _MASK_)
+#define __CSIG_GET_CTL2(_N_,_MASK_)             (CSIGN_VAL(_N_)._CTL2_ & (_MASK_))
 
 /*CSIGnSTR0 - CSIGn Status Register 0 -- read-only */
-#define __CSIG_GET_STAT(_N_,_MASK_)             (CSIGN_VAL(_N_)._STR0 & _MASK_)
+#define __CSIG_GET_STAT(_N_,_MASK_)             (CSIGN_VAL(_N_)._STR0 & (_MASK_))
 
 /*CSIGnSTCR0 - CSIGn Status Clear Register 0*/
 #define __CSIG_CLEAR_STAT(_N_,_MASK_,_OFFSET_)  MODIFY_REG(&CSIGN_VAL(_N_)._STCR0,_MASK_,0x01 << _OFFSET_)
@@ -129,11 +129,11 @@
 
 /*CSIGnCFG0 - CSIGn Configuration Register 0*/
 #define __CSIG_SET_CFG0(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._CFG0,_MASK_,_VALUE_)
-#define __CSIG_GET_CFG0(_N_,_MASK_)             (CSIGN_VAL(_N_)._CFG0 & _MASK_)
+#define __CSIG_GET_CFG0(_N_,_MASK_)             (CSIGN_VAL(_N_)._CFG0 & (_MASK_))
 
 /*CSIGnTX0W - CSIGn Transmission Register 0 for Word Access*/
 #define __CSIG_SET_TX0W(_N_,_MASK_,_VALUE_)     MODIFY_REG(&CSIGN_VAL(_N_)._TX0W,_MASK_,_VALUE_)
-#define __CSIG_GET_TX0W(_N_,_MASK_)             (CSIGN_VAL(_N_)._TX0W & _MASK_)
+#define __CSIG_GET_TX0W(_N_,_MASK_)             (CSIGN_VAL(_N_)._TX0W & (_MASK_))
 
 /*CSIGnTX0H - CSIGn Transmission Register 0 for Half Word Access*/
 #define __CSIG_WRITE_DATA(_N_,_DATA_)           (CSIGN_VAL(_N_)._TX0H =  _DATA_ & 0xFFFF)

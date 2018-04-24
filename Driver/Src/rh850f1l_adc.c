@@ -23,8 +23,10 @@ enum{
     SG1_END_INT,SG2_END_INT,SG3_END_INT,
 	SG_ERR_INT,SG_END_MAX,
 };
-
+//indicate the interruption state of SGx
 static __IO uint8_t adca_scan_end_int[ADCA_INDEX_TYPE_MAX][SG_END_MAX] = {0};
+
+static bool th_used = FALSE; //T&H set or unset
 
 
 void ADCA_Init(ADCA_InitTypeDef *ADCA_InitStruct)
@@ -52,7 +54,7 @@ void ADCA_Init(ADCA_InitTypeDef *ADCA_InitStruct)
     //Self-diagnosis
 	if(p_init->sd_ctl_p != NULL)
 		ADCA_Set_Self_Diag(ADCAn,p_init->sd_ctl_p);
-    //T&H  setting
+    //T&H  setting, T&H is used
     if(ADCAn == 0 && p_init->th_set_p !=  NULL)
         ADCA_Set_TH_Operation_Ctl(p_init->th_set_p);
     //SG1-3 operation and trigger enable,PWD trigger enable
@@ -174,6 +176,7 @@ void ADCA_Set_TH_Operation_Ctl(ADCA_THSetTypeDef *set_p)
 	/* Check the parameters */
 	assert_param(IS_ALL_NULL(set_p));
 
+    th_used =  TRUE; // T&H set
     //T&H common operation control setting (when T&H is used)
     __ADCA_SET_AUTO_SAMPLING(set_p->auto_samp);
 
@@ -190,6 +193,7 @@ void ADCA_Set_TH_Operation_Ctl(ADCA_THSetTypeDef *set_p)
     __ADCA_TH_ENABLE(set_p->en_mask);
     //T&H group selection setting (when T&H is used)
     __ADCA_TH_SELECT(set_p->grp_sel_mask);
+
 }
 
 void ADCA_Set_SG_Operation(uint8_t ADCAn,ADCA_SGOptTypeDef *opt_p,bool pwd_used)
@@ -204,6 +208,10 @@ void ADCA_Set_SG_Operation(uint8_t ADCAn,ADCA_SGOptTypeDef *opt_p,bool pwd_used)
     ctl_un = opt_p->sg_ctl_un;
 
     mask = ADC_SCANMD_MASK | ADC_SGCRx_ADIE_MASK | ADC_SCT_MASK;
+
+    //set the control register,note that SCANMD should be set 0 for SG2 and SG3
+    if(opt_p->sg_index ==  ADCA_SG_INDEX_2 || opt_p->sg_index == ADCA_SG_INDEX_3)
+        ctl_un.reg_bits.SCANMD = 0;
     __ADCA_SET_SGx_CTL(ADCAn,opt_p->sg_index,mask,ctl_un.sg_ctl);
     //Start virtual channel pointer setting for the scan groups (SG1 to SG3)
     __ADCA_SET_START_POINTER(ADCAn,opt_p->sg_index,opt_p->start_vhp);
@@ -221,16 +229,102 @@ void ADCA_Set_SG_Operation(uint8_t ADCAn,ADCA_SGOptTypeDef *opt_p,bool pwd_used)
 	ADCA_Set_SG_Start_Trigger(ADCAn,opt_p->sg_index,opt_p->hw_trig_ctl);
 }
 
+void ADCA_Enable_SW_Trigger(uint8_t ADCAn,uint8_t sg_index)
+{
+	uint32_t sg_act = 0;
+	
+	/* Check the parameters */
+	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
+	assert_param(IS_ADCA_SG_INDEX(sg_index));
+
+    //get the state of SGx(x = 1 to 3)
+    sg_act = __ADCA_GET_SG_STAT(ADCAn,0x01 << (ADC_SG1_STAT_OFFSET + sg_index - 1));
+    if(!sg_act) //A/D conversion for SGx is completed.
+        __ADCA_START_SGx(ADCAn,sg_index); //Start the SGx
+}
+
+uint8_t ADCA_Enable_Hold_Trigger(uint8_t sg_index)
+{
+	/* Check the parameters */
+	assert_param(IS_ADCA_SG_INDEX(sg_index));
+	
+    //ADCAnTHACR.HLDTE? ADCAnTHBCR.HLDTE?
+	//The SGx (x = 1 to 3) trigger selected in SGS[1:0] is selected for the hold
+	//start trigger of T&H group A.
+    if(__ADCA_GET_THA_CTL_(ADC_HLDTE_MASK) == 0 &&
+		__ADCA_GET_THA_CTL_(ADC_SGS_MASK) == sg_index){
+		INFOR("Hold start trigger A,SG%d start trigger\n",sg_index);
+		__ADCA_START_THA_HOLD();
+		return 1;//SGx(x=1-3) selected to group A enabled in hold trigger
+	}
+	//The SGx (x = 1 to 3) trigger selected in SGS[1:0] is selected for the hold
+	//start trigger of T&H group B.
+	if(__ADCA_GET_THB_CTL_(ADC_HLDTE_MASK) == 0 &&
+		__ADCA_GET_THB_CTL_(ADC_SGS_MASK) == sg_index){
+		INFOR("Hold start trigger B,SG%d start trigger\n",sg_index);
+    	__ADCA_START_THB_HOLD();
+		return 1;//SGx(x=1-3) selected to group B enabled in hold trigger
+	}
+	
+	return 0; //SGx(x=1-3) selected to group A/B is not enable in hold trigger
+}
+
 void ADCA_Set_SG_Start_Trigger(uint8_t ADCAn,uint8_t sg_index,uint32_t trig_ctl)
 {
 	/* Check the parameters */
 	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
 	assert_param(IS_ADCA_SG_INDEX(sg_index));
 
-    __ADCA_ENABLE_HARDWARE_TRIGGER(ADCAn,sg_index,trig_ctl);
+    if(ADCAn == ADCA_0 && th_used){
+        __ADCA_START_TH_SAMPLING(); //T&H sampling start control trigger
+		
+		if(ADCA_Enable_Hold_Trigger(sg_index))
+			return;// if SGx(x=1-3) selected to group A/B enabled in hold trigger,return
+    }
+
+    if(trig_ctl){ //hardware trigger first
+		INFOR("Hardware start trigger,SG%d start trigger\n",sg_index);
+        __ADCA_ENABLE_HW_TRIGGER(ADCAn,sg_index,trig_ctl);
+    }else{
+		INFOR("Software start trigger,SG%d start trigger\n",sg_index);
+      	ADCA_Enable_SW_Trigger(ADCAn,sg_index);
+    }
 }
 
-int8_t ADCA_Read_Ch_Conv_Data(uint8_t ADCAn,__IO uint8_t virtual_ch,uint16_t *data_p,uint8_t *phy_ch_p)
+void ADCA_Set_Conv_End(uint8_t ADCAn,uint8_t sg_index,bool halt)
+{
+    bool halt_first = FALSE;
+    uint32_t sg_ctl = 0,mask = 0;
+
+    /* Check the parameters */
+	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
+	assert_param(IS_ADCA_SG_INDEX(sg_index));
+
+	mask = ADC_SCANMD_MASK | ADC_SGCRx_ADIE_MASK | ADC_SCT_MASK |
+		ADC_TRGMD_MASK;
+    sg_ctl = __ADCA_GET_SGx_CTL(ADCAn,sg_index,mask);
+
+    //When the hardware trigger is used,ADCAnSGCRx.TRGMD = 0
+    //ADCAnPWDSGCR.PWDTRGMD = 0
+    if(__ADCA_GET_HW_TRIGGER_STAT(ADCAn,sg_index))
+        __ADCA_SET_SGx_CTL(ADCAn,sg_index,ADC_TRGMD_MASK,0);
+
+    if((sg_ctl & ADC_SCANMD_MASK) || halt){
+        halt_first = TRUE;
+    }
+    if(halt_first){
+        __ADCA_FORCE_HALT_TRIGGER(ADCAn);//ADCAnADHALTR.HALT = 1
+    }
+
+    //Wait for ADCAnSGSTR.SGACT[5:1] = “00000
+    while(__ADCA_GET_SG_STAT(ADCAn,0x1F << ADC_SG1_STAT_OFFSET));
+
+    if(!halt_first){
+        __ADCA_FORCE_HALT_TRIGGER(ADCAn);//ADCAnADHALTR.HALT = 1
+    }
+}
+
+int8_t ADCA_Read_Conv_Data(uint8_t ADCAn,__IO uint8_t virtual_ch,uint16_t *data_p,uint8_t *phy_ch_p)
 {
     __IO uint32_t format = 0,reg = 0,mask = 0;
 
@@ -269,7 +363,7 @@ int8_t ADCA_Read_SG_Conv_Data(uint8_t ADCAn,uint8_t sg_index,uint16_t *data_p,
     uint8_t *phy_ch_p)
 {
 	__IO uint8_t ch_sptr = 0,ch_eptr = 0,vh_num = 0;
-   
+
 	/* Check the parameters */
 	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
 	assert_param(IS_ALL_NULL(data_p));
@@ -283,7 +377,7 @@ int8_t ADCA_Read_SG_Conv_Data(uint8_t ADCAn,uint8_t sg_index,uint16_t *data_p,
         return -1;
     }
     for(;ch_sptr <= ch_eptr;ch_sptr++){
-        ADCA_Read_Ch_Conv_Data(ADCAn,ch_sptr,&data_p[vh_num],&phy_ch_p[vh_num]);
+        ADCA_Read_Conv_Data(ADCAn,ch_sptr,&data_p[vh_num],&phy_ch_p[vh_num]);
         vh_num++;
     }
     //return the number of virtual channel specified in SGx(x = sg_index, 1 to 3)
@@ -292,11 +386,14 @@ int8_t ADCA_Read_SG_Conv_Data(uint8_t ADCAn,uint8_t sg_index,uint16_t *data_p,
 
 int8_t ADCA_Get_SG_Status(uint8_t ADCAn,uint8_t sg_index)
 {
+    __IO uint32_t sg_act = 0;
     /* Check the parameters */
 	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
 	assert_param(IS_ADCA_SG_INDEX(sg_index));
-
-    return adca_scan_end_int[ADCAn][sg_index - 1];
+    sg_act = __ADCA_GET_SG_STAT(ADCAn,0x01 << (ADC_SG1_STAT_OFFSET + sg_index - 1));
+    if(!sg_act && adca_scan_end_int[ADCAn][sg_index - 1])
+        return 1;//A/D conversion for SGx is completed and interruption occurred.
+    return 0;
 }
 
 void ADCA_Clear_SG_Status(uint8_t ADCAn,uint8_t sg_index)
