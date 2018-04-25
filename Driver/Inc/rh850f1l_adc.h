@@ -724,12 +724,12 @@ typedef struct{
     uint8_t conv_data_fmt;      /*!< Specifies the data format of the conversion result stored in ADCAnDRj.
                                     This parameter can be a value of @ref conv_result_fmt*/
     uint8_t samp_time;          //the sampling time (the number of cycles)
-    ADCA_SafeCtlUnion safe_ctl_un;
-    ADCA_ULLimitSetTypeDef limit[3];
-    ADCA_SDCtlTypeDef *sd_ctl_p;
-    ADCA_THSetTypeDef *th_set_p;
-    uint8_t sg_opt_num;
-    ADCA_SGOptTypeDef *sg_opt_p;
+    ADCA_SafeCtlUnion safe_ctl_un;  //error control setting and upper limit/lower limit setting
+    ADCA_ULLimitSetTypeDef limit[3];//set the threshold for detection of an upper limit or lower limit error
+    ADCA_SDCtlTypeDef *sd_ctl_p; // the pointer to control setting,start/end virtual channel pointer setting
+    ADCA_THSetTypeDef *th_set_p; // the pointer to T&H setting.
+    uint8_t sg_opt_num; //the number of scan group setting.
+    ADCA_SGOptTypeDef *sg_opt_p; //the pointer to scan group setting.
 }ADCA_InitTypeDef;
 
 /** @defgroup ADC_Exported_Constants
@@ -742,15 +742,19 @@ typedef struct{
 #define IS_ADCA_SG_INDEX(INDEX) 	( 	((INDEX) == 1) || \
 										((INDEX) == 2) || \
 										((INDEX) == 3) )
-/** @defgroup ADC_mode
-  * @{
+/**
+  * @}
   */
 
-
+/** @defgroup err_type
+  * @{
+  */
 #define ADCA_LOWER_LIMIT_ERR            ((uint8_t)(0x01 << 0)) //A lower limit error is detected.
 #define ADCA_UPPER_LIMIT_ERR            ((uint8_t)(0x01 << 1)) //An upper limit error is detected.
 #define ADCA_OVERWRITE_ERR              ((uint8_t)(0x01 << 2)) //An overwrite error is detected
-
+/**
+  * @}
+  */
 
 
 void ADCA_Init(ADCA_InitTypeDef *ADCA_InitStruct);
@@ -777,8 +781,7 @@ uint8_t ADCA_Enable_Hold_Trigger(uint8_t sg_index);
 
 static void ADCA_Set_SG_Start_Trigger(uint8_t ADCAn,uint8_t sg_index,uint32_t trig_ctl);
 
-int8_t ADCA_Read_Conv_Data(uint8_t adcan,uint8_t virtual_ch,uint16_t *data_p,
-    uint8_t *phy_ch_p);
+int8_t ADCA_Read_Conv_Data(uint8_t ADCAn,__IO uint8_t virtual_ch,uint16_t *data_p);
 
 int8_t ADCA_Read_SG_Conv_Data(uint8_t adcan,uint8_t sg_index,uint16_t *data_p,
     uint8_t *phy_ch_p);

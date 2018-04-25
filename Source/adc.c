@@ -22,8 +22,8 @@ void adc_init(void)
         uint8_t i = 0;
         for(;i < 16;i++){
             vh_set_p = &vhset[i];
-            vh_set_p->virtual_ch = i; //virtual channel 0
-            vh_set_p->vh_set_un.param_bits.phy_ch = i;//physical channel 0
+            vh_set_p->virtual_ch = i; //virtual channel 0-15
+            vh_set_p->vh_set_un.param_bits.phy_ch = i;//physical channel 0-15
             vh_set_p->vh_set_un.param_bits.limit_sel = 0x01;//01: Upper limit and lower limit are checked for ADCAnULLMTBR0.
         }
 
@@ -38,7 +38,7 @@ void adc_init(void)
 
     adc.limit[0].limit_un.param_bits.ulimit =  0x0FFF;
     adc.limit[0].limit_un.param_bits.llimit =  0x0;
-	
+
 #if ADCA0_HOLD_TRIGGER_TEST
     thset.auto_samp = 1;//Automatic sampling is performed.
     thset.grpa.reg_bits.SGS = 0x02;//10: SG2 is selected for T&H group A.
@@ -47,7 +47,7 @@ void adc_init(void)
     thset.en_mask = TH5_ENABLE_MASK | TH4_ENABLE_MASK | TH3_ENABLE_MASK | \
         TH2_ENABLE_MASK | TH1_ENABLE_MASK | TH0_ENABLE_MASK;
     thset.grp_sel_mask = TH5_SELECT_TO_B_MASK | TH4_SELECT_TO_B_MASK | TH3_SELECT_TO_B_MASK;
-	
+
 	adc.th_set_p = &thset;
 #endif
 
@@ -55,7 +55,7 @@ void adc_init(void)
     sg_opt_p->sg_index = 1;//SG1
     sg_opt_p->sg_ctl_un.sg_ctl = 0x11;//INT_SGx is output when the scan for SGx ends
     sg_opt_p->start_vhp = (uint32_t)0x00; //set ADCA0VCR00
-    sg_opt_p->end_vhp = (uint32_t)0x04; //set ADCA0VCR02
+    sg_opt_p->end_vhp = (uint32_t)0x04; //set ADCA0VCR04
     sg_opt_p->scan_times = (uint32_t)0x00; //Number of scans = 1
 #if HARDWARE_TRIGGER_TEST
 	sg_opt_p->hw_trig_ctl = HW_INTTAUD0I7_TRIG;//hardware triggered by INTTAUD0I7
@@ -64,8 +64,8 @@ void adc_init(void)
     sg_opt_p = &sgopt[1];
     sg_opt_p->sg_index = 2;//SG2
     sg_opt_p->sg_ctl_un.sg_ctl = 0x11;//INT_SGx is output when the scan for SGx ends
-    sg_opt_p->start_vhp = (uint32_t)0x05; //set ADCA0VCR03
-    sg_opt_p->end_vhp = (uint32_t)0x0a; //set ADCA0VCR04
+    sg_opt_p->start_vhp = (uint32_t)0x05; //set ADCA0VCR05
+    sg_opt_p->end_vhp = (uint32_t)0x0a; //set ADCA0VCR10
     sg_opt_p->scan_times = (uint32_t)0x00; //Number of scans = 1
 #if HARDWARE_TRIGGER_TEST
 	sg_opt_p->hw_trig_ctl = HW_INTTAUD0I7_TRIG;//hardware triggered by INTTAUD0I7
@@ -74,8 +74,8 @@ void adc_init(void)
     sg_opt_p = &sgopt[2];
     sg_opt_p->sg_index = 3;//SG3
     sg_opt_p->sg_ctl_un.sg_ctl = 0x11;//INT_SGx is output when the scan for SGx ends
-    sg_opt_p->start_vhp = (uint32_t)0x0b; //set ADCA0VCR07
-    sg_opt_p->end_vhp = (uint32_t)0x0F; //set ADCA0VCR07
+    sg_opt_p->start_vhp = (uint32_t)0x0b; //set ADCA0VCR11
+    sg_opt_p->end_vhp = (uint32_t)0x0F; //set ADCA0VCR15
     sg_opt_p->scan_times = (uint32_t)0x00; //Number of scans = 1
 #if HARDWARE_TRIGGER_TEST
 	sg_opt_p->hw_trig_ctl = HW_INTTAUD0I7_TRIG;//hardware triggered by INTTAUD0I7
@@ -108,7 +108,7 @@ void adca0_test(void)
 #if !HARDWARE_TRIGGER_TEST  // repeat the trigger excluding the hardware trigger
 			if(ADCA_Enable_Hold_Trigger(sg_index) == 0)
 				ADCA_Enable_SW_Trigger(0,sg_index);//trigger repeatedly when software trigger enable
-#endif						
+#endif
         }
     }
     if(sg_index == (ADCA_SG_INDEX_MAX + 1)) {

@@ -28,7 +28,13 @@ static __IO uint8_t adca_scan_end_int[ADCA_INDEX_TYPE_MAX][SG_END_MAX] = {0};
 
 static bool th_used = FALSE; //T&H set or unset
 
-
+/**
+  * @brief  Initializes the ADCAn peripheral according to the specified
+  *   parameters in the ADCA_InitStruct.
+  * @param  ADCA_InitStruct: pointer to a ADCA_InitTypeDef structure that
+  *   contains the configuration information for the ADCAn peripheral.
+  * @retval none
+  */
 void ADCA_Init(ADCA_InitTypeDef *ADCA_InitStruct)
 {
     __IO uint8_t ADCAn = 0; //virtual channel num
@@ -63,8 +69,15 @@ void ADCA_Init(ADCA_InitTypeDef *ADCA_InitStruct)
         ADCA_Set_SG_Operation(ADCAn,&p_init->sg_opt_p[sg_opt_cnt],p_init->pwd_vh_used);
 	}
 }
-
-
+/**
+  * @brief  Used to process the single virtual channel setting
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param vh_set_p the pointer to ADCA_VHSetTypeDef,pass the virtual channel setting
+  * @param  limit_checked: set the checked flag when if upper limit and lower
+  * limit are checked for ADCAnULLMTBRx[x=0 to 2]
+  * @param pwd_used 0: self-diagnostic function disable , 1:  self-diagnostic function enable
+  * @retval none
+  */
 void ADCA_Set_Virtual_Channel(uint8_t ADCAn,ADCA_VHSetTypeDef *vh_set_p,
 	ADCA_ULLimitSetTypeDef *limit_checked,bool pwd_used)
 {
@@ -93,6 +106,15 @@ void ADCA_Set_Virtual_Channel(uint8_t ADCAn,ADCA_VHSetTypeDef *vh_set_p,
     }
 }
 
+/**
+  * @brief  Used to process the multiple virtual channels setting
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param vh_set_p: the pointer to ADCA_VHSetTypeDef,pass the virtual channel setting
+  * @param  limit_checked: set the checked flag when if upper limit and lower
+  * limit are checked for ADCAnULLMTBRx[x=0 to 2]
+  * @param pwd_used 0: self-diagnostic function disable , 1:  self-diagnostic function enable
+  * @retval none
+  */
 void ADCA_Set_Batch_Virtual_Channel(uint8_t ADCAn,ADCA_VHSetTypeDef *vh_set_p,uint8_t vh_set_num,
     ADCA_ULLimitSetTypeDef *limit_checked,bool pwd_used)
 {
@@ -107,6 +129,13 @@ void ADCA_Set_Batch_Virtual_Channel(uint8_t ADCAn,ADCA_VHSetTypeDef *vh_set_p,ui
 	}
 }
 
+/**
+  * @brief  Used to process ADC common operation control setting and sampling control setting
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param ctl_un: the union of adc common setting
+  * @param samp_time: used to set the sampling time (the number of cycles).
+  * @retval none
+  */
 void ADCA_Set_Operation_Ctl(uint8_t ADCAn, ADCA_OptCtlUnion ctl_un,uint8_t samp_time)
 {
     uint32_t mask = 0,val = 0;
@@ -126,6 +155,14 @@ void ADCA_Set_Operation_Ctl(uint8_t ADCAn, ADCA_OptCtlUnion ctl_un,uint8_t samp_
     __ADCA_SET_SAMPLING_TIME(ADCAn,samp_time);
 }
 
+/**
+  * @brief  used to process error control setting and upper limit/lower limit setting
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param ctl_un: the union of error control setting related to safety control
+  * @param limit_p: the pointer to ADCA_ULLimitSetTypeDef,set the threshold for
+  * detection of an upper limit or lower limit error in the A/D converted value
+  * @retval none
+  */
 void ADCA_Set_Error_Check(uint8_t ADCAn,ADCA_SafeCtlUnion ctl_un,ADCA_ULLimitSetTypeDef *limit_p)
 {
     uint32_t mask = 0,val = 0;
@@ -154,6 +191,13 @@ void ADCA_Set_Error_Check(uint8_t ADCAn,ADCA_SafeCtlUnion ctl_un,ADCA_ULLimitSet
     }
 }
 
+/**
+  * @brief  used to process self-diagnostic voltage level setting amd control setting
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param ctl_p: the pointer to ADCA_SDCtlTypeDef,controls the self-diagnostic voltage level
+  * and the self-diagnostic channel.
+  * @retval none
+  */
 void ADCA_Set_Self_Diag(uint8_t ADCAn,ADCA_SDCtlTypeDef *ctl_p)
 {
     /* Check the parameters */
@@ -167,7 +211,13 @@ void ADCA_Set_Self_Diag(uint8_t ADCAn,ADCA_SDCtlTypeDef *ctl_p)
     __ADCA_SELECT_Self_Diag_CHANNEL(ADCAn,ctl_p->sd_ch_select);
 }
 
-//only ADCA0 supports this function
+/**
+  * @brief  used to process T&H common operation control setting,T&H group A/B operation
+  * only ADCA0 supports this function.
+  * control setting,T&H group selection setting and T&H enable setting.
+  * @param set_p: the pointer to ADCA_THSetTypeDef.
+  * @retval none
+  */
 void ADCA_Set_TH_Operation_Ctl(ADCA_THSetTypeDef *set_p)
 {
     uint32_t mask = 0;
@@ -196,6 +246,14 @@ void ADCA_Set_TH_Operation_Ctl(ADCA_THSetTypeDef *set_p)
 
 }
 
+/**
+  * @brief  used to process control setting,start/end virtual channel pointer setting
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * and multicycle count setting for the scan groups (SG1 to SG3).
+  * @param opt_p: the pointer to ADCA_SGOptTypeDef.
+  * @param pwd_used 0: self-diagnostic function disable , 1:  self-diagnostic function enable
+  * @retval none
+  */
 void ADCA_Set_SG_Operation(uint8_t ADCAn,ADCA_SGOptTypeDef *opt_p,bool pwd_used)
 {
     uint32_t mask = 0;
@@ -229,10 +287,16 @@ void ADCA_Set_SG_Operation(uint8_t ADCAn,ADCA_SGOptTypeDef *opt_p,bool pwd_used)
 	ADCA_Set_SG_Start_Trigger(ADCAn,opt_p->sg_index,opt_p->hw_trig_ctl);
 }
 
+/**
+  * @brief  used to enable the software trigger for Scan Groups SG1 to SG3.
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param sg_index: the index of Scan Groups.(sg_index: 1 to 3)
+  * @retval none
+  */
 void ADCA_Enable_SW_Trigger(uint8_t ADCAn,uint8_t sg_index)
 {
 	uint32_t sg_act = 0;
-	
+
 	/* Check the parameters */
 	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
 	assert_param(IS_ADCA_SG_INDEX(sg_index));
@@ -243,11 +307,18 @@ void ADCA_Enable_SW_Trigger(uint8_t ADCAn,uint8_t sg_index)
         __ADCA_START_SGx(ADCAn,sg_index); //Start the SGx
 }
 
+/**
+  * @brief  used to enable the hold trigger for T&H group A and B,only ADCA0
+  * supports this function.
+  * @param sg_index: the index of Scan Groups.(sg_index: 1 to 3)
+  * @retval 0:SGx(x=1-3) selected to group A or B is not enable in hold trigger
+  *  1: SGx(x=1-3) selected to group A or B enabled in hold trigger
+  */
 uint8_t ADCA_Enable_Hold_Trigger(uint8_t sg_index)
 {
 	/* Check the parameters */
 	assert_param(IS_ADCA_SG_INDEX(sg_index));
-	
+
     //ADCAnTHACR.HLDTE? ADCAnTHBCR.HLDTE?
 	//The SGx (x = 1 to 3) trigger selected in SGS[1:0] is selected for the hold
 	//start trigger of T&H group A.
@@ -265,10 +336,18 @@ uint8_t ADCA_Enable_Hold_Trigger(uint8_t sg_index)
     	__ADCA_START_THB_HOLD();
 		return 1;//SGx(x=1-3) selected to group B enabled in hold trigger
 	}
-	
+
 	return 0; //SGx(x=1-3) selected to group A/B is not enable in hold trigger
 }
 
+/**
+  * @brief used to start SGx trigger by software or hardware or hold trigger
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param sg_index: the index of Scan Groups.(sg_index: 1 to 3)
+  * @param trig_ctl:the hardware trigger input signal type.If hardware trigger
+  * disabled,the value of this param is 0.
+  * @retval none
+  */
 void ADCA_Set_SG_Start_Trigger(uint8_t ADCAn,uint8_t sg_index,uint32_t trig_ctl)
 {
 	/* Check the parameters */
@@ -277,7 +356,7 @@ void ADCA_Set_SG_Start_Trigger(uint8_t ADCAn,uint8_t sg_index,uint32_t trig_ctl)
 
     if(ADCAn == ADCA_0 && th_used){
         __ADCA_START_TH_SAMPLING(); //T&H sampling start control trigger
-		
+
 		if(ADCA_Enable_Hold_Trigger(sg_index))
 			return;// if SGx(x=1-3) selected to group A/B enabled in hold trigger,return
     }
@@ -291,6 +370,13 @@ void ADCA_Set_SG_Start_Trigger(uint8_t ADCAn,uint8_t sg_index,uint32_t trig_ctl)
     }
 }
 
+/**
+  * @brief used to end A/D conversion
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param sg_index: the index of Scan Groups.(sg_index: 1 to 3)
+  * @param halt: force halt flag.
+  * @retval none
+  */
 void ADCA_Set_Conv_End(uint8_t ADCAn,uint8_t sg_index,bool halt)
 {
     bool halt_first = FALSE;
@@ -324,14 +410,22 @@ void ADCA_Set_Conv_End(uint8_t ADCAn,uint8_t sg_index,bool halt)
     }
 }
 
-int8_t ADCA_Read_Conv_Data(uint8_t ADCAn,__IO uint8_t virtual_ch,uint16_t *data_p,uint8_t *phy_ch_p)
+/**
+  * @brief used to read the A/D conversion result for ADCAnDRj and information
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * incidental to the A/D converted value corresponding to the virtual channel.
+  * @param virtual_ch: the virtual channel index
+  * @param data_p: the data array to store the A/D conversion result.
+  * @retval phy_ch: physical channel number corresponding to the most recent
+  * conversion result
+  */
+int8_t ADCA_Read_Conv_Data(uint8_t ADCAn, uint8_t virtual_ch,uint16_t *data_p)
 {
     __IO uint32_t format = 0,reg = 0,mask = 0;
-
+    __IO uint8_t phy_ch = 0;
 	/* Check the parameters */
 	assert_param(IS_ADCA_ALL_PERIPH(ADCAn));
 	assert_param(IS_ALL_NULL(data_p));
-	assert_param(IS_ALL_NULL(phy_ch_p));
 
     format = __ADCA_GET_COMMON_CTL(ADCAn,ADC_CRAC_MASK | ADC_CTYP_MASK);
     format = format >> ADC_CTYP_OFFSET;
@@ -343,7 +437,7 @@ int8_t ADCA_Read_Conv_Data(uint8_t ADCAn,__IO uint8_t virtual_ch,uint16_t *data_
     reg = __ADCA_READ_DATA_INFO(adcn,virtual_ch,mask);
     /*get the physical channel number to be stored is the number corresponding
     to the most recent conversion result*/
-    *phy_ch_p = (reg & ADC_ID_MASK) >> ADC_ID_OFFSET;
+    phy_ch = (reg & ADC_ID_MASK) >> ADC_ID_OFFSET;
 
     //check the alignment of data and extract
     if(format == RIGHT_ALIGN_12BIT_FMT){
@@ -356,9 +450,20 @@ int8_t ADCA_Read_Conv_Data(uint8_t ADCAn,__IO uint8_t virtual_ch,uint16_t *data_
         *data_p = (reg >> 6) & 0x3FF;
     }
 
-    return 0;
+    return phy_ch;//return the physical channel
 }
 
+/**
+  * @brief used to read the A/D conversion result for ADCAnDRj and information
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * incidental to the A/D converted value corresponding to all the virtual channels
+  * in the SGx.
+  * @param virtual_ch: the virtual channel index
+  * @param data_p: the data array to store the A/D conversion result.
+  * @param phy_ch_p: the pointer to physical channel number corresponding to the most recent
+  * conversion result
+  * @retval vh_num: return the number of virtual channels got the A/D conversion result.
+  */
 int8_t ADCA_Read_SG_Conv_Data(uint8_t ADCAn,uint8_t sg_index,uint16_t *data_p,
     uint8_t *phy_ch_p)
 {
@@ -377,13 +482,20 @@ int8_t ADCA_Read_SG_Conv_Data(uint8_t ADCAn,uint8_t sg_index,uint16_t *data_p,
         return -1;
     }
     for(;ch_sptr <= ch_eptr;ch_sptr++){
-        ADCA_Read_Conv_Data(ADCAn,ch_sptr,&data_p[vh_num],&phy_ch_p[vh_num]);
+        phy_ch_p[vh_num] = ADCA_Read_Conv_Data(ADCAn,ch_sptr,&data_p[vh_num]);
         vh_num++;
     }
     //return the number of virtual channel specified in SGx(x = sg_index, 1 to 3)
     return vh_num;
 }
 
+/**
+  * @brief used to get the state of SGx (x = 1 to 3)
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param sg_index: the index of Scan Groups.(sg_index: 1 to 3)
+  * @retval 1:A/D conversion for SGx is completed and interruption occurred
+  * 0:A/D conversion for SGx is not completed or interruption never occurred.
+  */
 int8_t ADCA_Get_SG_Status(uint8_t ADCAn,uint8_t sg_index)
 {
     __IO uint32_t sg_act = 0;
@@ -396,6 +508,12 @@ int8_t ADCA_Get_SG_Status(uint8_t ADCAn,uint8_t sg_index)
     return 0;
 }
 
+/**
+  * @brief used to clear the state of SGx (x = 1 to 3)
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param sg_index: the index of Scan Groups.(sg_index: 1 to 3)
+  * @retval none
+  */
 void ADCA_Clear_SG_Status(uint8_t ADCAn,uint8_t sg_index)
 {
     /* Check the parameters */
@@ -405,6 +523,11 @@ void ADCA_Clear_SG_Status(uint8_t ADCAn,uint8_t sg_index)
     adca_scan_end_int[ADCAn][sg_index - 1] = 0;
 }
 
+/**
+  * @brief the handle function of error
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @retval none
+  */
 void ADCA_Err_Handle(uint8_t ADCAn)
 {
 	/* Check the parameters */
@@ -414,6 +537,13 @@ void ADCA_Err_Handle(uint8_t ADCAn)
     __ADCA_CLEAR_ERROR(ADCAn,ADC_ULEC_MASK | ADC_OWEC_MASK);
 }
 
+/**
+  * @brief used to check the error type.
+  * @param ADCAn: the unit of ADCA,0 or 1 optional
+  * @param src_err_p: unused
+  * @retval err_mask: return the error type mask.this parameter can be a value or
+  * combinatiuon of @ref err_type
+  */
 int8_t ADCA_Err_Checked(uint8_t ADCAn,uint8_t *src_err_p)
 {
     __IO uint32_t reg = 0;
