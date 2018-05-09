@@ -4,6 +4,7 @@
   * @author  Automotive Business Division
   * @version V1.0.0
   * @date   8-March-2018
+  * @modify 9-May-2018 add RLIN2 functions
   * @brief   RLIN3 module driver.
   *          This file provides firmware functions to manage the following
   *          functionalities of RLIN3 peripheral:
@@ -12,6 +13,16 @@
   ******************************************************************************
   */
 #include "rh850f1l_rlin.h"
+
+/******************************************************************************/
+/**######  #       ### #     #  #####        #     #    #    ######  #######***/ 
+/**#     # #        #  ##    # #     #       #     #   # #   #     #    #   ***/ 
+/**#     # #        #  # #   #       #       #     #  #   #  #     #    #   ***/ 
+/**######  #        #  #  #  #  #####        #     # #     # ######     #   ***/ 
+/**#   #   #        #  #   # #       #       #     # ####### #   #      #   ***/ 
+/**#    #  #        #  #    ## #     #       #     # #     # #    #     #   ***/ 
+/**#     # ####### ### #     #  #####         #####  #     # #     #    #   ***/
+/******************************************************************************/
 
 typedef struct{
     __IO bool tx_continue;     //uart transmit could continue
@@ -440,7 +451,7 @@ int8_t LIN3_Master_Recv_Resp(uint8_t linn,uint8_t *recv_data)
 
     //Wait for response received
     while(lin3_stat[linn].m_frm_recept == FALSE);
-	if(__RLIN3_GET_LIN_ERR_STAT(linn,LIN3_FTER_MASK)){
+	  if(__RLIN3_GET_LIN_ERR_STAT(linn,LIN3_FTER_MASK)){
 		ERROR("Frame/response timeout error has been detected.\n");
 		return -1;
 	}
@@ -748,4 +759,104 @@ void RLIN31RecvCompleteIntHandler(unsigned long eiic)
 void RLIN31StatusIntHandler(unsigned long eiic)
 {
 	//while(1);
+}
+
+/******************************************************************************/
+/*******************######  #       ### #     #  ##### ************************/ 
+/*******************#     # #        #  ##    # #     #************************/ 
+/*******************#     # #        #  # #   #       #************************/ 
+/*******************######  #        #  #  #  #  ##### ************************/ 
+/*******************#   #   #        #  #   # # #      ************************/ 
+/*******************#    #  #        #  #    ## #      ************************/ 
+/*******************#     # ####### ### #     # #######************************/ 
+/******************************************************************************/
+
+#define LIN2_INVALID_UNIT   4
+/*calculate  n(0 to 3) from m(0 to 9)
+m(0 to 3) ---->n = 0; m(4 to 7) ---->n=1; m(8) ---->n=2; m(9) ----> n = 3;*/
+#define __LIN2_M_to_N(_M_)    ((_M_/4) == 0 ? 0:  \
+                              ((_M_/8) == 0 ? 1:  \
+                              ((_M_/9) == 0 ? 2:  \
+                              ((_M_/10) == 0? 3:LIN2_INVALID_UNIT))))
+
+static void LIN2_Baudrate_Generator(uint8_t linm,LIN2_Mode mode,uint32_t baudrate);
+
+void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct)
+{
+    __IO uint8_t linm  = 0;
+    LIN2_Mode mode = LIN2_MASTER;//default LIN2_MASTER
+
+    //linm = LIN2_InitStruct->linm;
+    mode = LIN2_InitStruct->mode;
+    INFOR("LIN2%d mode:%s\n",linm,(mode == 0?"Master":"Slave"));
+    LIN2_Baudrate_Generator(linm,mode,LIN2_InitStruct->baudrate);
+/*    //Sets noise filter ON/OFF
+    __RLIN2_SET_LIN_MODE(linm,LIN2_LRDNFS_MASK,LIN2_InitStruct->noi_filter_off);
+    //Enables interrupt
+    LIN2_Enable_Int(linm,LIN2_InitStruct->int_out_sel,
+        LIN2_InitStruct->int_en_mask);
+    //Enables error detection
+    LIN2_Enable_Err_Detect(linm,LIN2_InitStruct->timeout_err_sel,
+        LIN2_InitStruct->err_en_mask);
+    //Sets frame configuration parameters
+    LIN2_Set_Frame_Config(linm,mode,&LIN2_InitStruct->cfg_param);
+    //Transitions to LIN master mode/LIN slave mode
+    __RLIN2_SET_LIN_MODE(linm,LIN2_LMD_MASK,(uint8_t)mode);
+    //Exits from LIN reset mode.
+    __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,1);
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK) == 0);
+    //Transitions to LIN operation mode
+    __RLIN2_SET_LIN_CTL(linm,LIN2_OM1_MASK,1 << LIN2_OM1_OFFSET);
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM1_MASK) == 0);
+
+    LIN2_TxRx_State_Init(linm);*/
+}
+
+void LIN2_Baudrate_Generator(uint8_t linm,LIN2_Mode mode,uint32_t baudrate)
+{
+    __IO uint8_t linn = 0,val = 0;
+    LIN2_BaudrateTypeDef br_st;
+
+    linn = __LIN2_M_to_N(linm);
+
+    /* Check the parameters */
+	assert_param(IS_LIN2_ALL_CHANNEL(linm));
+    assert_param(IS_LIN2_ALL_UNIT(linn));
+
+    memset(&br_st,0,sizeof(br_st));
+
+    /*For a LIN2 master*/
+    //br_st.bit_sample_cnt = 16;//not used
+
+    //default fa is 307200 Hz,40MHz / 307200 = 130.2
+    //br_st.prescaler_clk = 1;//not used
+
+    br_st.brp_un.bits.brp0 = 64;//64 + 1 = 65
+
+    switch(baudrate){
+        case 19200:
+            br_st.lin_sys_clk = 0;//fa
+            __RLIN2_SET_BAUDRATE_PRE0(linm,br_st.brp_un.bits.brp0);
+            break;
+        case 2400:
+            br_st.lin_sys_clk = 2;//fc
+            __RLIN2_SET_BAUDRATE_PRE0(linm,br_st.brp_un.bits.brp0);
+            break;
+        case 10417:
+            br_st.prescaler_clk = PRESCALER_CLK_DIV_8;
+            br_st.brp_un.brp = 29;
+            if(mode == LIN2_MASTER){
+                br_st.brp_un.brp = br_st.brp_un.brp << 8;
+            }
+            br_st.lin_sys_clk = 3;//fd
+            __RLIN2_SET_BAUDRATE_PRE1(linm,br_st.brp_un.bits.brp1);
+            break;
+        default://default 9600:
+            br_st.lin_sys_clk = 1;//fb
+            __RLIN2_SET_BAUDRATE_PRE0(linm,br_st.brp_un.bits.brp0);
+            break;
+    }
+
+    //Configure the RLN24nmLiMD / RLN21nmLiMD register when LIN reset mode)
+    __RLIN2_SET_LIN_MODE(linm,LIN2_LCKS_MASK,br_st.lin_sys_clk << LIN2_LCKS_OFFSET);
 }
