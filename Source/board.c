@@ -35,7 +35,8 @@
 
 /************************RSCAN Config *****************************************/
 //#define RSCAN_TEST
-
+/************************RLIN2 Config *****************************************/
+#define RLIN2_TEST
 /************************RLIN3/UART Config ************************************/
 #define RLIN3_UART_MODE_TEST
 //#define RLIN3_LIN_MODE_TEST
@@ -44,7 +45,7 @@
 //#define CSIG_TEST
 
 /***********************ADCA Config*******************************************/
-#define ADCA0_TEST
+//#define ADCA0_TEST
 
 
 /*!
@@ -87,7 +88,8 @@ void System_Clock_Config(void)
 #endif
     //Clock_Domain_Set(AFOUT);
     //Clock_Fout_Config();
-#if defined (RLIN3_LIN_MODE_TEST) || defined(RLIN3_UART_MODE_TEST)
+#if defined (RLIN3_LIN_MODE_TEST) || defined(RLIN3_UART_MODE_TEST) ||  \
+    defined(RLIN2_TEST)
 	Clock_Domain_Set(ILIN);
 #endif
 #ifdef RSCAN_TEST
@@ -188,8 +190,22 @@ void Board_Port_Config(void)
     PM1     &= ~(1U<<1);
     P1	 	|= (1U<<1);*/
 #endif
+#ifdef RLIN2_TEST
+    port.pin_mask = PORT_PIN_7;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum0,&port);
 
-
+    port.pin_mask = PORT_PIN_8;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum0,&port);
+#endif
 #ifdef RLIN3_LIN_MODE_TEST
     port.pin_mask = PORT_PIN_4;
     port.opt_mode = AF_MODE;
@@ -352,6 +368,12 @@ void Board_Port_Config(void)
         eiint.eiint_ch = 28;
         eiint.eiint_ext_int = 0;
         eiint.eiint_priority = INT_PRIORITY_6;
+        Eiit_Init(&eiint);
+#endif
+#ifdef RLIN2_TEST
+        eiint.eiint_ch = 51;
+        eiint.eiint_ext_int = 0;
+        eiint.eiint_priority = INT_PRIORITY_3;
         Eiit_Init(&eiint);
 #endif
 #ifdef RLIN3_LIN_MODE_TEST
@@ -641,7 +663,12 @@ void Board_Port_Config(void)
         CanInit();
     }
 #endif
+#ifdef RLIN2_TEST
+    {
+        lin2_init();
+    }
 
+#endif
 #ifdef RLIN3_LIN_MODE_TEST
     {
         lin3_init();

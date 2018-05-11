@@ -43,7 +43,8 @@ void main(void)
 
     while (1)
     {
-		lin3_test_excute();
+		lin_test_excute();
+
 
     }
 
@@ -102,6 +103,7 @@ void led_blink2(void)
 }
 void assert_failed(uint8_t *file, uint32_t line)
 {
+    ERROR("[FILE]%s [LINE]%d\n",file,line);
     while (1)
     {
     }

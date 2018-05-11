@@ -186,8 +186,8 @@
 	.dw #_Dummy_EI ; INT47
 	.dw #_Dummy_EI ; INT48
 	.dw #_Dummy_EI ; INT49
-	.dw #_Dummy_EI ; INT50
-	.dw #_Dummy_EI ; INT51
+	.dw #_RLIN20IntHandler ; INT50
+	.dw #_RLIN21IntHandler ; INT51
 	.dw #_Dummy_EI ; INT52
 	.dw #_Dummy_EI ; INT53
 	.dw #_Dummy_EI ; INT54
@@ -290,8 +290,8 @@
 	.dw #_Dummy_EI ; INT151
 	.dw #_Dummy_EI ; INT152
 	.dw #_Dummy_EI ; INT153
-	.dw #_Dummy_EI ; INT154
-	.dw #_Dummy_EI ; INT155
+	.dw #_RLIN22IntHandler ; INT154
+	.dw #_RLIN23IntHandler ; INT155
 	.dw #_Dummy_EI ; INT156
 	.dw #_Dummy_EI ; INT157
 	.dw #_Dummy_EI ; INT158
@@ -354,8 +354,8 @@
 	.dw #_Dummy_EI ; INT215
 	.dw #_Dummy_EI ; INT216
 	.dw #_Dummy_EI ; INT217
-	.dw #_Dummy_EI ; INT218
-	.dw #_Dummy_EI ; INT219
+	.dw #_RLIN24IntHandler ; INT218
+	.dw #_RLIN25IntHandler ; INT219
 	.dw #_Dummy_EI ; INT220
 	.dw #_Dummy_EI ; INT221
 	.dw #_Dummy_EI ; INT222
@@ -403,8 +403,8 @@
 	.dw #_RSCAN0CH4ErrorIntHandler ; INT264
 	.dw #_RSCAN0CH4TrFIFORecvCompletionIntHandler ; INT265
 	.dw #_RSCAN0CH4SendCompleteIntHandler ; INT266
-	.dw #_Dummy_EI ; INT267
-	.dw #_Dummy_EI ; INT268
+	.dw #_RLIN26IntHandler ; INT267
+	.dw #_RLIN27IntHandler ; INT268
 	.dw #_Dummy_EI ; INT269
 	.dw #_Dummy_EI ; INT270
 	.dw #_Dummy_EI ; INT271
@@ -413,8 +413,8 @@
 	.dw #_Dummy_EI ; INT274
 	.dw #_Dummy_EI ; INT275
 	.dw #_Dummy_EI ; INT276
-	.dw #_Dummy_EI ; INT277
-	.dw #_Dummy_EI ; INT278
+	.dw #_RLIN28IntHandler ; INT277
+	.dw #_RLIN29IntHandler ; INT278
 	.dw #_RSCAN0CH5ErrorIntHandler ; INT279
 	.dw #_RSCAN0CH5TrFIFORecvCompletionIntHandler ; INT280
 	.dw #_RSCAN0CH5SendCompleteIntHandler ; INT281

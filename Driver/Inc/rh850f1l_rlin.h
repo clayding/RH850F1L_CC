@@ -21,8 +21,8 @@
 /**#     # ####### ### #     #  #####         #####  #     # #     #    #   ***/
 /******************************************************************************/
 
-#define MAX_LIN_NUM     6
-#define MAX_UART_NUM    MAX_LIN_NUM
+#define MAX_LIN3_NUM     6
+#define MAX_UART_NUM    MAX_LIN3_NUM
 
 
 #define _RLIN30         RLN30
@@ -539,6 +539,8 @@ void RLIN3_Self_Mode_Init(LIN3_SelfModeInitTypeDef *LIN3_InitStruct);
 /******************************************************************************/
 
 /*Note: the index n(0 to 3) used in this file  is not consistent with that in the manual(n=0,1).*/
+#define MAX_LIN2_NUM        4   //maximal number of units in LIN2 (0 to 3),corresponding to n
+#define MAX_LIN2_CH_NUM     10 // maximal number of channels in LIN2 (0 to 9),corresponding to m
 
 #define _RLN240     RLN240
 #define _RLN20      RLN2400
@@ -561,7 +563,7 @@ void RLIN3_Self_Mode_Init(LIN3_SelfModeInitTypeDef *LIN3_InitStruct);
 #define LIN210      2
 #define LIN211      3
 
-/*LIn2 channel:m (0 to 9)*/
+/*LIN2 channel:m (0 to 9)*/
 #define LIN20       0
 #define LIN21       1
 #define LIN22       2
@@ -660,9 +662,9 @@ used to control the frequency of baud rate clock source fa, fb, and fc*/
 #define LIN2_FTS_MASK        ((uint8_t)0x01)   //Frame Transmission/Wake-up Transmission/Reception Start
 
 /*RLN24nmLiMST / RLN21nmLiMST - LIN Mode Status Register read-only**/
-#define LIN3_OMM1_OFFSET    1
-#define LIN3_OMM1_MASK      ((uint8_t)(0x01 << LIN3_OMM1_OFFSET))//LIN Mode Status Monitor
-#define LIN3_OMM0_MASK      0x01 //LIN Reset Status Monitor
+#define LIN2_OMM1_OFFSET    1
+#define LIN2_OMM1_MASK      ((uint8_t)(0x01 << LIN2_OMM1_OFFSET))//LIN Mode Status Monitor
+#define LIN2_OMM0_MASK      0x01 //LIN Reset Status Monitor
 
 /*RLN24nmLiST / RLN21nmLiST - LIN Status Register*/
 #define LIN2_HTRC_OFFSET     7
@@ -772,40 +774,61 @@ used to control the frequency of baud rate clock source fa, fb, and fc*/
 #define __RLIN2_CONFIG_ERR_DETECT(_M_,_VALUE_)              (LIN2M_VAL(_M_).LEDE  = _VALUE_ & 0xff)
 
 /*RLN24nmLiCUC / RLN21nmLiCUC - LIN Control Register*/
-#define __RLIN2_SET_LIN_CTL(_N_,_MASK_,_VALUE_)             MODIFY_REG(&LIN2M_VAL(_N_).LCUC,_MASK_,_VALUE_)
-#define __RLIN2_GET_LIN_CTL(_N_,_MASK_)                     (LIN2M_VAL(_N_).LCUC & (_MASK_))
+#define __RLIN2_SET_LIN_CTL(_M_,_MASK_,_VALUE_)             MODIFY_REG(&LIN2M_VAL(_M_).LCUC,_MASK_,_VALUE_)
+#define __RLIN2_GET_LIN_CTL(_M_,_MASK_)                     (LIN2M_VAL(_M_).LCUC & (_MASK_))
 
 /*RLN24nmLiTRC / RLN21nmLiTRC - LIN Transmission Control Register*/
-#define __RLIN2_SET_LIN_TX_CTL(_N_,_MASK_,_VALUE_)          MODIFY_REG(&LIN2M_VAL(_N_).LTRC,_MASK_,_VALUE_)
-#define __RLIN2_GET_LIN_TX_CTL(_N_,_MASK_)                  (LIN2M_VAL(_N_).LTRC & (_MASK_))
+#define __RLIN2_SET_LIN_TX_CTL(_M_,_MASK_,_VALUE_)          MODIFY_REG(&LIN2M_VAL(_M_).LTRC,_MASK_,_VALUE_)
+#define __RLIN2_GET_LIN_TX_CTL(_M_,_MASK_)                  (LIN2M_VAL(_M_).LTRC & (_MASK_))
 
 /*RLN24nmLiMST / RLN21nmLiMST - LIN Mode Status Register read-only*/
-#define __RLIN2_GET_LIN_MODE_STAT(_N_,_MASK_)               (LIN2M_VAL(_N_).LMST & (_MASK_))
+#define __RLIN2_GET_LIN_MODE_STAT(_M_,_MASK_)               (LIN2M_VAL(_M_).LMST & (_MASK_))
 
 /*RLN24nmLiST / RLN21nmLiST - LIN Status Register*/
-#define __RLIN2_SET_LIN_STAT(_N_,_MASK_,_VALUE_)            MODIFY_REG(&LIN2M_VAL(_N_).LST,_MASK_,_VALUE_)
-#define __RLIN2_GET_LIN_STAT(_N_,_MASK_)                    (LIN2M_VAL(_N_).LST & (_MASK_))
+#define __RLIN2_SET_LIN_STAT(_M_,_MASK_,_VALUE_)            MODIFY_REG(&LIN2M_VAL(_M_).LST,_MASK_,_VALUE_)
+#define __RLIN2_GET_LIN_STAT(_M_,_MASK_)                    (LIN2M_VAL(_M_).LST & (_MASK_))
 
 /*RLN24nmLiEST / RLN21nmLiEST - LIN Error Status Register*/
-#define __RLIN2_SET_LIN_ERR_STAT(_N_,_MASK_,_VALUE_)        MODIFY_REG(&LIN2M_VAL(_N_).LEST,_MASK_,_VALUE_)
-#define __RLIN2_GET_LIN_ERR_STAT(_N_,_MASK_)                (LIN2M_VAL(_N_).LEST & (_MASK_))
+#define __RLIN2_SET_LIN_ERR_STAT(_M_,_MASK_,_VALUE_)        MODIFY_REG(&LIN2M_VAL(_M_).LEST,_MASK_,_VALUE_)
+#define __RLIN2_GET_LIN_ERR_STAT(_M_,_MASK_)                (LIN2M_VAL(_M_).LEST & (_MASK_))
 
 /*RLN24nmLiDFC / RLN21nmLiDFC - LIN Data Field Configuration Register*/
-#define __RLIN2_SET_DATA_FIELD_CONFIG(_N_,_MASK_,_VALUE_)   MODIFY_REG(&LIN2M_VAL(_N_).LDFC,_MASK_,_VALUE_)
-#define __RLIN2_GET_DATA_FIELD_CONFIG(_N_,_MASK_)           (LIN2M_VAL(_N_).LDFC & (_MASK_))
+#define __RLIN2_SET_DATA_FIELD_CONFIG(_M_,_MASK_,_VALUE_)   MODIFY_REG(&LIN2M_VAL(_M_).LDFC,_MASK_,_VALUE_)
+#define __RLIN2_GET_DATA_FIELD_CONFIG(_M_,_MASK_)           (LIN2M_VAL(_M_).LDFC & (_MASK_))
 
 /*RLN24nmLiIDB / RLN21nmLiIDB - LIN ID Buffer Register*/
-#define __RLIN2_SET_ID_BUF(_N_,_VALUE_)                     (LIN2N_VAL(_N_).LIDB = _VALUE_ & 0xFF)
-#define __RLIN2_GET_ID_BUF(_N_)                             (LIN2N_VAL(_N_).LIDB & 0xFF)
+#define __RLIN2_SET_ID_BUF(_M_,_VALUE_)                     (LIN2M_VAL(_M_).LIDB = _VALUE_ & 0xFF)
+#define __RLIN2_GET_ID_BUF(_M_)                             (LIN2M_VAL(_M_).LIDB & 0xFF)
 
 /*RLN24nmLiCBR / RLN21nmLiCBR - LIN Checksum Buffer Register*/
-#define __RLIN2_SET_CHECKSUM_BUF(_N_,_VALUE_)               (LIN2N_VAL(_N_).LCBR = _VALUE_ & 0xFF)
-#define __RLIN2_GET_CHECKSUM_BUF(_N_)                       (LIN2N_VAL(_N_).LCBR & 0xFF)
+#define __RLIN2_SET_CHECKSUM_BUF(_M_,_VALUE_)               (LIN2M_VAL(_M_).LCBR = _VALUE_ & 0xFF)
+#define __RLIN2_GET_CHECKSUM_BUF(_M_)                       (LIN2M_VAL(_M_).LCBR & 0xFF)
 
 /*RLN24nmLiDBRb / RLN21nmLiDBRb - LIN Data Buffer b Register (b = 1 to 8)*/
-#define __RLIN2_WRITE_DATA_BUF(_N_,_B_,_VALUE_)             (*(((uint8_t*)&LIN2N_VAL(_N_).LDBR1) + (_B_) - 1) = _VALUE_ & 0xFF)
-#define __RLIN2_READ_DATA_BUF(_N_,_B_)                      (*(((uint8_t*)&LIN2N_VAL(_N_).LDBR1) + (_B_) - 1) & 0xFF)
+#define __RLIN2_WRITE_DATA_BUF(_M_,_B_,_VALUE_)             (*(((uint8_t*)&LIN2M_VAL(_M_).LDBR1) + (_B_) - 1) = _VALUE_ & 0xFF)
+#define __RLIN2_READ_DATA_BUF(_M_,_B_)                      (*(((uint8_t*)&LIN2M_VAL(_M_).LDBR1) + (_B_) - 1) & 0xFF)
 
+
+/** @defgroup int_enable_mask
+  * @{
+  */
+#define LIN2_ERR_DETECT_INT_MASK 4 //Error Detection Interrupt Request mask
+#define LIN2_FRM_WU_RX_INT_MASK  2 //Successful Frame/Wake-up Reception Interrupt Request mask
+#define LIN2_FRM_WU_TX_INT_MASK  1 //Successful Frame/Wake-up Transmission Interrupt Request mask
+/**
+  * @}
+  */
+
+/** @defgroup int_detection_enable_mask
+  * @{
+  */
+#define LIN2_FRM_ERR_DETECT_MASK 8 //Framing Error Detection mask
+#define LIN2_TIO_ERR_DETECT_MASK 4 //Timeout Error Detection mask
+#define LIN2_PHB_ERR_DETECT_MASK 2 //Physical Bus Error Detection mask
+#define LIN2_BIT_ERR_DETECT_MASK 1 //Bit Error Detection mask
+/**
+  * @}
+  */
 
 typedef struct{
     uint8_t bit_sample_cnt; /*<Bit Sampling Count Select,not used, LIN2 master fixed at 16*/
@@ -820,10 +843,41 @@ typedef struct{
                                 1 1: fd (1/2 clock generated by baud rate prescaler 1)*/
 }LIN2_BaudrateTypeDef;
 
+typedef LIN3_Frm_InfoTypeDef LIN2_Frm_InfoTypeDef;
 
-typedef LIN3_InitTypeDef LIN2_InitTypeDef;
-typedef LIN3_Mode        LIN2_Mode;
-#define LIN2_MASTER      LIN3_MASTER
+typedef struct {
+    uint8_t break_delim_width;/*<Transmission Break Delimiter (High Level) Width Select
+                                0 0: 1 Tbit, 0 1: 2 Tbits,1 0: 3 Tbits,1 1: 4 Tbits>*/
+    uint8_t break_width;/*<Transmission Break (Low Level) Width Select
+                            0 0 0 0: 13 Tbits
+                            0 0 0 1: 14 Tbits
+                            0 0 1 0: 15 Tbits
+                            :
+                            1 1 1 0: 27 Tbits
+                            1 1 1 1: 28 Tbits>*/
+    uint8_t inter_byte_space;/*<Inter-Byte Space Select
+                            0 0: 0 Tbit, 0 1: 1 Tbit,1 0: 2 Tbits,1 1: 3 Tbits>*/
+    uint8_t resp_space; /*<Inter-Byte Space (Header)/Response Space Select
+                            0 0 0: 0 Tbit
+                            0 0 1: 1 Tbit
+                            0 1 0: 2 Tbits
+                            0 1 1: 3 Tbits
+                            1 0 0: 4 Tbits
+                            1 0 1: 5 Tbits
+                            1 1 0: 6 Tbits
+                            1 1 1: 7 Tbits>*/
+    uint8_t wu_tx_ll_width;//Wake-up Transmission Low Level Width
+}LIN2_ConfigurationTypeDef;
+
+typedef struct{
+    uint8_t linm; //the channel to initial
+    uint16_t baudrate; // 1- 20K
+    LIN2_ConfigurationTypeDef cfg_param;
+    uint8_t int_en_mask;/*!< Specifies the LIN2 Interrupt Enable bits
+                            This parameter can be a value of @ref int_enable_mask*/
+    uint8_t err_en_mask;/*!< Specifies the LIN2 Interrupt Enable bits
+                            This parameter can be a value of @ref int_detection_enable_mask*/
+}LIN2_InitTypeDef;
 
 /** @defgroup LIN2_Exported_Constants
   * @{
@@ -848,7 +902,7 @@ typedef LIN3_Mode        LIN2_Mode;
   * @}
   */
 
-
-
-
+void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct);
+int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,
+    uint8_t resp_len,uint8_t *resp_data);
 #endif//RH850F1L_RLIN_H
