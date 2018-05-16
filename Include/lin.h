@@ -2,6 +2,12 @@
 #define LIN_H
 
 #include "rh850f1l_rlin.h"
+#include "list.h"
+
+typedef void (* uiLinErrHandlerCallback)(void);
+
+#define uiLin2ErrHandlerCallback uiLinErrHandlerCallback
+#define uiLin3ErrHandlerCallback uiLinErrHandlerCallback
 
 /******************************************************************************/
 /**######  #       ### #     #  #####        #     #    #    ######  #######***/ 
@@ -61,7 +67,15 @@ struct uiLin2InitStruct {
     struct uiLin2Config uiLin2Config;
     uint8_t uiInt_en_mask;//LIN Interrupt Enable mask
     uint8_t err_en_mask;//LIN Error Detection Enable mask
+    uiLin2ErrHandlerCallback uiLin2ErrHandler;
 };
+
+struct uiLin2ErrHandleList{
+    void *next;
+    uint8_t uiLinIndex;
+    uiLin2ErrHandlerCallback uiLin2ErrHandler;
+    uint8_t success; //1 - success; 0 - fail
+};//uiLin2ErrHandleList;
 
 /****************************TEST AREA*****************************************/
 void lin2_init(void);

@@ -1,4 +1,13 @@
 #include "lin.h"
+#include "r_memb.h"
+
+#define LinErrHandleNUM     16
+
+
+void *LIST_CONCAT(error_handle_list,_list) = NULL;
+list_t error_handle_list = (list_t)&LIST_CONCAT(error_handle_list,_list);
+
+R_MEMB(ErrHandleMemb,struct uiLin2ErrHandleList, LinErrHandleNUM);
 
 /******************************************************************************/
 /**######  #       ### #     #  #####        #     #    #    ######  #######***/ 
@@ -11,7 +20,13 @@
 /******************************************************************************/
 #define LIN3_INDEX_USED     1
 
+#define LIN3_MASTER_TEST    0 //the switch between master and slave
+#define LIN3_SLAVE_TEST     0 //!LIN3_MASTER_TEST
+
+#define LIN2_MASTER_TEST 	!LIN3_SLAVE_TEST
+
 #define LIN3_RESP_FROM_MASTER	0  // response direction 1: Master---> Slave, 0 :Slave---->Master
+
 
 void (*lin3_func_excute)(void);
 
@@ -119,7 +134,7 @@ void lin3_slave_excute(void)
 
     memset(&lin3_frm,0,sizeof(lin3_frm));
 
-    lin3_frm.resp_dir = !LIN3_RESP_FROM_MASTER;// 1:transmit 0:receive
+    lin3_frm.resp_dir = LIN3_RESP_FROM_MASTER;// 1:transmit 0:receive
 
     LIN3_Slave_Process(LIN3_INDEX_USED,&lin3_frm,7,resp_data);
 }
@@ -128,9 +143,6 @@ extern uint8_t lin_master_sent_count;//defined in main.c
 
 void lin_test_excute()
 {
-#define LIN3_MASTER_TEST    1 //the switch between master and slave
-#define LIN3_SLAVE_TEST     0 //!LIN3_MASTER_TEST
-
 #if LIN3_MASTER_TEST
     if(lin_master_sent_count){
 		INFOR("LIN3 Master send....\n");
@@ -141,8 +153,6 @@ void lin_test_excute()
 #if LIN3_SLAVE_TEST
 	lin3_slave_excute();
 #endif
-
-#define LIN2_MASTER_TEST 0
 
 #if LIN2_MASTER_TEST 
     if(lin_master_sent_count){
@@ -164,11 +174,21 @@ void lin_test_excute()
 /*Note:
 All the below functions defined according to the requirement of the Gearchief*/
 /******************************************************************************/
+
 void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
 {
+    static bool err_list_init = 0;
+
+    if(!err_list_init)
+        list_init(error_handle_list);
+
     LIN2_Init((LIN2_InitTypeDef*)uiLin2Init_p);
 }
 
+void uiLin2ErrDefaultHandle(void)
+{
+    printf("uiLin2ErrDefaultHandle\n");
+}
 /**
   * @brief  Fills each uiLin2Init_p member with its default value.
   * @param  uiLin2Init_p : pointer to a struct uiLin2Init structure which will be initialized.
@@ -193,6 +213,46 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
     /* Initialize the err_en_mask member */
     uiLin2Init_p->err_en_mask = LIN2_FRM_ERR_DETECT_MASK | LIN2_TIO_ERR_DETECT_MASK |
         LIN2_PHB_ERR_DETECT_MASK | LIN2_BIT_ERR_DETECT_MASK;//LIN Error Detection Enable mask
+    uiLin2Init_p->uiLin2ErrHandler = uiLin2ErrDefaultHandle;
+}
+
+
+struct uiLin2ErrHandleList* uiLinCreateErrHandleInstance(uint8_t uiLinIndex,
+    uiLinErrHandlerCallback uiLin2ErrHandler)
+{
+    uint8_t i = 0; 
+    struct uiLin2ErrHandleList *ErrHandleInstance = NULL;
+    //Lookup for the existing instance
+    ErrHandleInstance = uiLinPopInstanceFromList(uiLinIndex);
+    if(ErrHandleInstance == NULL){
+
+        ErrHandleInstance = memb_alloc(&ErrHandleMemb);
+
+        if(ErrHandleInstance == NULL){
+            ERROR("No no enough ErrHandleMemb \n");
+            return NULL;
+        }
+    }
+    
+    ErrHandleInstance->uiLinm = lin_index;
+    ErrHandleInstance->uiLin2ErrHandler =uiLin2ErrHandler;
+
+    list_add(error_handle_list,ErrHandle);
+}
+
+static struct uiLin2ErrHandleList* uiLinPopInstanceFromList(uint8_t uiLinIndex)
+{
+    struct uiLin2ErrHandleList* ErrHandleInstance  = NULL;
+	ErrHandleInstance = list_head(error_handle_list);
+    
+    while(ErrHandleInstance != NULL){
+		if(ErrHandleInstance->uiLinIndex == uiLinIndex){
+            return ErrHandleInstance;
+        }
+        ErrHandleInstance = list_item_next(ErrHandleInstance);
+	}
+    printf("Not found the ErrHandleInstance with its index:%d\n",uiLinIndex);
+    return NULL;
 }
 
 /*********************************TEST AREA************************************/

@@ -296,7 +296,7 @@ void LIN3_Baudrate_Generator(uint8_t linn,LIN3_Mode mode,uint32_t baudrate)
         set these bits to 0000B or 1111B (16 sampling) */
         br_st.bit_sample_cnt = BAUDRATE_SAMPLE_CNT_16_;
 
-        //default fa is 307200 Hz,40MHz / 307200 = 130.2
+        //default fa is 307200 Hz,40MHz(default CPUCLK2 ) / 307200 = 130.2
         br_st.prescaler_clk = PRESCALER_CLK_DIV_2;
         br_st.brp_un.bits.brp0 = 64;//64 + 1 = 65
 
@@ -375,10 +375,10 @@ int8_t LIN3_Master_Process(uint8_t linn,LIN3_Frm_InfoTypeDef *info_p,uint8_t res
 	__IO int8_t recv_len = resp_len;
 
     //Configures the RLN3nLDFC register,the checksum mode, response direction and
-    mask = LIN3_CSM_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
+    mask = LIN3_LCS_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
     /*In response reception,repeats the transmission of inter-byte spaces as many times as the data
     length specified in bits RFDL[3:0] in the RLN3nLDFC register),so the resp_len mut be specified*/
-    val = (info_p->cs_meth << LIN3_CSM_OFFSET) | (info_p->resp_dir << LIN3_RCDS_OFFSET) |
+    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RCDS_OFFSET) |
         resp_len;
 
     if(info_p->resp_dir == 1){//Response Field Communication Direction: transmission
@@ -482,10 +482,10 @@ int8_t LIN3_Slave_Process(uint8_t linn, LIN3_Frm_InfoTypeDef *info_p,uint8_t res
     __IO int8_t frm_id = 0;
 
     //Configures the RLN3nLDFC register,the checksum mode, response direction and response Field Length
-    mask = LIN3_LCS_MASK | LIN3_RFT_MASK | LIN3_RFDL_MASK;
+    mask = LIN3_LCS_MASK | LIN3_RCDS_MASK | LIN3_RFDL_MASK;
     /*In response reception,repeats the transmission of inter-byte spaces as many times as the data
     length specified in bits RFDL[3:0] in the RLN3nLDFC register),so the resp_len mut be specified*/
-    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RFT_OFFSET) |
+    val = (info_p->cs_meth << LIN3_LCS_OFFSET) | (info_p->resp_dir << LIN3_RCDS_OFFSET) |
         resp_len;
 
     if(info_p->resp_dir == 1){//Response Field Communication Direction: transmission
@@ -792,6 +792,8 @@ static int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data);
 
 static uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len);
 
+typedef void (* LIN2_err_callback_t)(void *ptr);
+
 void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct)
 {
     __IO uint8_t linm  = 0;
@@ -856,7 +858,7 @@ void LIN2_Baudrate_Generator(uint8_t linm,uint32_t baudrate)
     //default fa is 307200 Hz,40MHz / 307200 = 130.2
     //br_st.prescaler_clk = 1;//not used
 
-    br_st.brp_un.bits.brp0 = 64;//64 + 1 = 65
+    br_st.brp_un.bits.brp0 = 129;//129+1=130
 
     switch(baudrate){
         case 19200:
@@ -1062,6 +1064,19 @@ uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len)
     return sum;
 }
 
+err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle,void *ptr)
+{
+    uint8_t all_err_mask = 0x2f;
+    err_statu_t err_flag = 0;
+
+    //Get the error status
+    err_flag = __RLIN2_GET_LIN_ERR_STAT(linm,all_err_mask);
+
+    if(err_handle)
+        err_handle(ptr);// not handle temporiy
+    
+    return err_flag;
+}
 
 #pragma interrupt RLIN20IntHandler(channel = 50, enable = false, callt = false, fpu = false)
 void RLIN20IntHandler(unsigned long eiic)

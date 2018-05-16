@@ -688,7 +688,6 @@ used to control the frequency of baud rate clock source fa, fb, and fc*/
 
 #define LIN2_CSER_MASK      ((uint8_t)(0x01 << LIN2_CSER_OFFSET)) //Checksum Error Flag
 #define LIN2_FER_MASK       ((uint8_t)(0x01 << LIN2_FER_OFFSET))  //Framing Error Flag
-#define LIN2_OER_MASK       ((uint8_t)(0x01 << LIN2_OER_OFFSET))  //Overrun Error Flag
 #define LIN2_FTER_MASK      ((uint8_t)(0x01 << LIN2_FTER_OFFSET)) //Timeout Error Flag
 #define LIN2_PBER_MASK      ((uint8_t)(0x01 << LIN2_PBER_OFFSET)) //Physical Bus Error Flag
 #define LIN2_BER_MASK       ((uint8_t)0x01)                       //Bit Error Flag
@@ -829,6 +828,21 @@ used to control the frequency of baud rate clock source fa, fb, and fc*/
 /**
   * @}
   */
+
+typedef unsigned char err_statu_t;
+/** @defgroup err_status_mask
+  * @{
+  */
+#define LIN2_CKS_ERR_FLAG           LIN2_CSER_MASK //Checksum Error Flag
+#define LIN2_FRM_ERR_FlAG           LIN2_FER_MASK  //Framing Error Flag
+#define LIN2_FRM_TIMEOUT_ERR_FLAG   LIN2_FTER_MASK //Frame Timeout Error Flag
+#define LIN2_PHB_ERR_FLAG           LIN2_PBER_MASK //Physical Bus Error Flag
+#define LIN2_BIT_ERR_FLAG           LIN2_BER_MASK  //Bit Error Flag
+#define LIN2_NO_ERR                 0
+/**
+  * @}
+  */
+
 
 typedef struct{
     uint8_t bit_sample_cnt; /*<Bit Sampling Count Select,not used, LIN2 master fixed at 16*/

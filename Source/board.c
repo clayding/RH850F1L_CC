@@ -36,10 +36,10 @@
 /************************RSCAN Config *****************************************/
 //#define RSCAN_TEST
 /************************RLIN2 Config *****************************************/
-//#define RLIN2_TEST
+#define RLIN2_TEST
 /************************RLIN3/UART Config ************************************/
 #define RLIN3_UART_MODE_TEST
-#define RLIN3_LIN_MODE_TEST
+//#define RLIN3_LIN_MODE_TEST
 
 /***********************CSIG Config*******************************************/
 //#define CSIG_TEST
