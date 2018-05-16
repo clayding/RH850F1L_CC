@@ -10,8 +10,6 @@
 /**#     # ####### ### #     #  #####         #####  #     # #     #    #   ***/
 /******************************************************************************/
 #define LIN3_INDEX_USED     1
-#define LIN3_MASTER_TEST    0 //the switch between master and slave
-#define LIN3_SLAVE_TEST     0 //!LIN3_MASTER_TEST
 
 #define LIN3_RESP_FROM_MASTER	0  // response direction 1: Master---> Slave, 0 :Slave---->Master
 
@@ -130,6 +128,9 @@ extern uint8_t lin_master_sent_count;//defined in main.c
 
 void lin_test_excute()
 {
+#define LIN3_MASTER_TEST    1 //the switch between master and slave
+#define LIN3_SLAVE_TEST     0 //!LIN3_MASTER_TEST
+
 #if LIN3_MASTER_TEST
     if(lin_master_sent_count){
 		INFOR("LIN3 Master send....\n");
@@ -141,12 +142,12 @@ void lin_test_excute()
 	lin3_slave_excute();
 #endif
 
-#define LIN2_MASTER_TEST 1
+#define LIN2_MASTER_TEST 0
 
 #if LIN2_MASTER_TEST 
     if(lin_master_sent_count){
 		INFOR("LIN2 Master send....\n");
-		lin3_master_excute();
+		lin2_master_excute();
 		lin_master_sent_count--;
 	}
 #endif
@@ -187,10 +188,11 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
     uiLin2Init_p->uiLin2Config.uiResp_space = 0x01;//1 Tbit
     uiLin2Init_p->uiLin2Config.uiWu_tx_ll_width= 0x01;//2Tbis
     /* Initialize the uiInt_en_mask member */
-    uiLin2Init_p->uiInt_en_mask = LIN2_ERR_DETECT_INT_MASK | LIN2_FRM_WU_TX_INT_MASK;
+    uiLin2Init_p->uiInt_en_mask = LIN2_ERR_DETECT_INT_MASK | LIN2_FRM_WU_RX_INT_MASK | 
+        LIN2_FRM_WU_TX_INT_MASK;
     /* Initialize the err_en_mask member */
-    uiLin2Init_p->err_en_mask = LIN2_FRM_ERR_DETECT_MASK | LIN2_PHB_ERR_DETECT_MASK | 
-        LIN2_BIT_ERR_DETECT_MASK;//LIN Error Detection Enable mask
+    uiLin2Init_p->err_en_mask = LIN2_FRM_ERR_DETECT_MASK | LIN2_TIO_ERR_DETECT_MASK |
+        LIN2_PHB_ERR_DETECT_MASK | LIN2_BIT_ERR_DETECT_MASK;//LIN Error Detection Enable mask
 }
 
 /*********************************TEST AREA************************************/

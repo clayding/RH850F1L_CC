@@ -896,7 +896,7 @@ void LIN2_Enable_Int(uint8_t linm,uint8_t int_mask)
     __RLIN2_CONFIG_INT(linm,int_mask);
 }
 
-void LIN2_Enable_Err_Detect(uint8_t linm,uint8_t timeout_err_sel,uint8_t err_mask)
+void LIN2_Enable_Err_Detect(uint8_t linm,uint8_t err_mask)
 {
     /* Check the parameters */
 	assert_param(IS_LIN2_ALL_CHANNEL(linm));

@@ -44,8 +44,6 @@ void main(void)
     while (1)
     {
 		lin_test_excute();
-
-
     }
 
 }

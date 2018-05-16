@@ -21,7 +21,7 @@
 /****************************TAUB/D Config*************************************/
 //#define TAUB0_INTERVAL_MODE_TEST
 //#define TAUB0_PWM_OUTPUT_MODE_TEST
-#define TAUD0_INTERVAL_MODE_TEST
+//#define TAUD0_INTERVAL_MODE_TEST
 //#define TAUD0_PWM_OUTPUT_MODE_TEST
 //#define TAUD0_REAL_TIME_OUTPUT_TYPE_1_TEST
 //#define TAUD0_REAL_TIME_OUTPUT_TYPE_2_TEST
@@ -36,16 +36,18 @@
 /************************RSCAN Config *****************************************/
 //#define RSCAN_TEST
 /************************RLIN2 Config *****************************************/
-#define RLIN2_TEST
+//#define RLIN2_TEST
 /************************RLIN3/UART Config ************************************/
 #define RLIN3_UART_MODE_TEST
-//#define RLIN3_LIN_MODE_TEST
+#define RLIN3_LIN_MODE_TEST
 
 /***********************CSIG Config*******************************************/
 //#define CSIG_TEST
 
 /***********************ADCA Config*******************************************/
 //#define ADCA0_TEST
+/***********************INTP_12_Config****************************************/
+#define INTP_12_TEST
 
 
 /*!
@@ -315,13 +317,15 @@ void Board_Port_Config(void)
 
  {//Eiint Init start
         Eiint_InitTypeDef eiint;
-        eiint.eiint_ch = P_12;
-        eiint.eiint_ext_int = 1;
+		eiint.eiint_priority = INT_PRIORITY_7;
         eiint.eiint_process = INT_PROCESS_ENABLE;
         eiint.eiint_refer_method = TABLE_REFER_METHOD;
-        eiint.eiint_priority = INT_PRIORITY_7;
         eiint.eiint_detect = EDGE_DETECTION | FALL_EDGE_ENABLE | RISE_EDGE_DISABLE;
+#ifdef INTP_12_TEST
+        eiint.eiint_ch = P_12;
+        eiint.eiint_ext_int = 1;
         Eiit_Init(&eiint);
+#endif
 #ifdef OSTM_TEST
         eiint.eiint_ch = 76;
         eiint.eiint_ext_int = 0;
