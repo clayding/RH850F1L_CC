@@ -1,13 +1,13 @@
 #include "lin.h"
 #include "r_memb.h"
 
-#define LinErrHandleNUM     16
+#define LinIntHandleNUM     16
 
 
-void *LIST_CONCAT(error_handle_list,_list) = NULL;
-list_t error_handle_list = (list_t)&LIST_CONCAT(error_handle_list,_list);
+void *LIST_CONCAT(int_handle_list,_list) = NULL;
+list_t int_handle_list = (list_t)&LIST_CONCAT(int_handle_list,_list);
 
-R_MEMB(ErrHandleMemb,struct uiLin2ErrHandleList, LinErrHandleNUM);
+R_MEMB(IntHandleMemb,struct uiLin2IntHandleList, LinIntHandleNUM);
 
 /******************************************************************************/
 /**######  #       ### #     #  #####        #     #    #    ######  #######***/ 
@@ -134,7 +134,7 @@ void lin3_slave_excute(void)
 
     memset(&lin3_frm,0,sizeof(lin3_frm));
 
-    lin3_frm.resp_dir = LIN3_RESP_FROM_MASTER;// 1:transmit 0:receive
+    lin3_frm.resp_dir = !LIN3_RESP_FROM_MASTER;// 1:transmit 0:receive
 
     LIN3_Slave_Process(LIN3_INDEX_USED,&lin3_frm,7,resp_data);
 }
@@ -179,8 +179,12 @@ void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
 {
     static bool err_list_init = 0;
 
-    if(!err_list_init)
-        list_init(error_handle_list);
+    if(!err_list_init){
+        err_list_init = 1;
+        list_init(int_handle_list);
+    }
+    
+    uiLinCreateIntHandleInstance(uiLin2Init_p->uiLinm,uiLin2Init_p->uiLin2IntHandler);
 
     LIN2_Init((LIN2_InitTypeDef*)uiLin2Init_p);
 }
@@ -188,6 +192,11 @@ void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
 void uiLin2ErrDefaultHandle(void)
 {
     printf("uiLin2ErrDefaultHandle\n");
+}
+
+void uiLin2CompleteDefaultHandle(void)
+{
+    printf("uiLin2CompleteDefaultHandle\n");
 }
 /**
   * @brief  Fills each uiLin2Init_p member with its default value.
@@ -213,48 +222,75 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
     /* Initialize the err_en_mask member */
     uiLin2Init_p->err_en_mask = LIN2_FRM_ERR_DETECT_MASK | LIN2_TIO_ERR_DETECT_MASK |
         LIN2_PHB_ERR_DETECT_MASK | LIN2_BIT_ERR_DETECT_MASK;//LIN Error Detection Enable mask
-    uiLin2Init_p->uiLin2ErrHandler = uiLin2ErrDefaultHandle;
+	//deflaut interrupt handle function
+    uiLin2Init_p->uiLin2IntHandler->uiLin2ErrHandler = uiLin2ErrDefaultHandle;
+    uiLin2Init_p->uiLin2IntHandler->uiLin2CompleteHandler = uiLin2ErrDefaultHandle;
 }
 
 
-struct uiLin2ErrHandleList* uiLinCreateErrHandleInstance(uint8_t uiLinIndex,
-    uiLinErrHandlerCallback uiLin2ErrHandler)
+struct uiLin2IntHandleList* uiLinCreateIntHandleInstance(uint8_t uiLinIndex,
+    uiLin2IntHandlerCallback uiLin2IntHandler)
 {
-    uint8_t i = 0; 
-    struct uiLin2ErrHandleList *ErrHandleInstance = NULL;
+    struct uiLin2IntHandleList *IntHandleInstance = NULL;
     //Lookup for the existing instance
-    ErrHandleInstance = uiLinPopInstanceFromList(uiLinIndex);
-    if(ErrHandleInstance == NULL){
+    IntHandleInstance = uiLinPopInstanceFromList(uiLinIndex);
+    if(IntHandleInstance == NULL){ //Not found
 
-        ErrHandleInstance = memb_alloc(&ErrHandleMemb);
+        IntHandleInstance = memb_alloc(&IntHandleMemb);//create new
 
-        if(ErrHandleInstance == NULL){
-            ERROR("No no enough ErrHandleMemb \n");
+        if(IntHandleInstance == NULL){
+            ERROR("No no enough IntHandleMemb \n");
             return NULL;
         }
+        
+        IntHandleInstance->uiLinIndex = uiLinIndex;
     }
-    
-    ErrHandleInstance->uiLinm = lin_index;
-    ErrHandleInstance->uiLin2ErrHandler =uiLin2ErrHandler;
+    IntHandleInstance->uiLin2IntHandler = uiLin2IntHandler;
 
-    list_add(error_handle_list,ErrHandle);
+    list_add(int_handle_list,IntHandleInstance);
+	
+	return IntHandleInstance;
 }
 
-static struct uiLin2ErrHandleList* uiLinPopInstanceFromList(uint8_t uiLinIndex)
+struct uiLin2IntHandleList* uiLinPopInstanceFromList(uint8_t uiLinIndex)
 {
-    struct uiLin2ErrHandleList* ErrHandleInstance  = NULL;
-	ErrHandleInstance = list_head(error_handle_list);
+    struct uiLin2IntHandleList* IntHandleInstance  = NULL;
+	IntHandleInstance = list_head(int_handle_list);
     
-    while(ErrHandleInstance != NULL){
-		if(ErrHandleInstance->uiLinIndex == uiLinIndex){
-            return ErrHandleInstance;
+    while(IntHandleInstance != NULL){
+		if(IntHandleInstance->uiLinIndex == uiLinIndex){
+            return IntHandleInstance;
         }
-        ErrHandleInstance = list_item_next(ErrHandleInstance);
+        IntHandleInstance = list_item_next(IntHandleInstance);
 	}
-    printf("Not found the ErrHandleInstance with its index:%d\n",uiLinIndex);
+    printf("Not found the IntHandleInstance with its index:%d\n",uiLinIndex);
     return NULL;
 }
 
+void uiLin2FreeIntHandleInstance(uint8_t uiLinIndex)
+{
+    struct uiLin2IntHandleList* IntHandleInstance  = NULL;
+    IntHandleInstance = list_head(int_handle_list);
+    while(IntHandleInstance != NULL){
+		if(IntHandleInstance->uiLinIndex == uiLinIndex){
+            list_remove(int_handle_list,IntHandleInstance);
+            memb_free(&IntHandleMemb,IntHandleInstance); //Found it
+        }
+        IntHandleInstance = list_item_next(IntHandleInstance);
+	}
+}
+
+void uiLin2FreeIntHandleList(void)
+{
+    struct uiLin2IntHandleList* IntHandleInstance = NULL;
+    IntHandleInstance = list_pop(int_handle_list);
+    while(IntHandleInstance != NULL)
+    {
+        printf("free IntHandleInstance:%p\n",IntHandleInstance);
+        memb_free(&IntHandleMemb, IntHandleInstance);
+        IntHandleInstance = list_pop(int_handle_list);
+    }
+}
 /*********************************TEST AREA************************************/
 void lin2_init(void)
 {
@@ -271,7 +307,7 @@ void lin2_init(void)
 
 // response direction 1: Master---> Slave, 0 :Slave---->Master
 #define LIN2_RESP_FROM_MASTER	1  
-#define LIN2_RESP_TO_MASTER	0
+#define LIN2_RESP_TO_MASTER	    0
 
 void lin2_master_excute(void)
 {
@@ -282,7 +318,7 @@ void lin2_master_excute(void)
 
     lin2_frm.frm_id = test_frm_id++;
     lin2_frm.frm_sep = 0;
-    lin2_frm.resp_dir = LIN2_RESP_FROM_MASTER;//response direction 1:transmit 0:receive
+    lin2_frm.resp_dir = LIN2_RESP_TO_MASTER;//response direction 1:transmit 0:receive
 
     LIN2_Master_Process(LIN2_INDEX_USED,&lin2_frm,7,resp_data);
 	

@@ -202,7 +202,7 @@ __IO static uint32_t s1 = 0,s2 =0;
 typedef struct{
     __IO bool m_hdr_sent;   //lin master header   sent     completely
     __IO bool m_frm_sent;  //lin master frame/wake-up sent completely
-    __IO bool m_frm_recept;//lin master frame/wake-up sent recepted completed
+    __IO bool m_frm_recept;//lin master frame/wake-up recepted completed
     __IO bool s_hdr_recept; //lin slave  header   recepted completely
     __IO bool s_resp_sent;  //lin slave  response sent     completely
     __IO bool s_resp_recept;//lin slave  response recepted completed
@@ -683,8 +683,8 @@ void RLIN3_Self_Mode_Init(LIN3_SelfModeInitTypeDef *LIN3_InitStruct)
     //Transitions to LIN master mode/LIN slave mode
     __RLIN3_SET_LIN_MODE(linn,LIN3_LMD_MASK,(uint8_t)mode);
     //Exits from LIN reset mode.
-    __RLIN3_SET_LIN_CTL(linn,LIN3_OM0_MASK,1);
-    while(__RLIN3_GET_LIN_MODE_STAT(linn,LIN3_OMM0_MASK) == 0);
+    __RLIN3_SET_LIN_CTL(linn,LIN3_OM0_MASK | LIN3_OM1_MASK,0x03);
+    while(__RLIN3_GET_LIN_MODE_STAT(linn,LIN3_OMM0_MASK | LIN3_OMM1_MASK) != 0x03);
 }
 
 
@@ -770,7 +770,7 @@ void RLIN31StatusIntHandler(unsigned long eiic)
 /*******************#    #  #        #  #    ## #      ************************/ 
 /*******************#     # ####### ### #     # #######************************/ 
 /******************************************************************************/
-
+static int_count = 0;
 #define LIN2_INVALID_UNIT_INDEX   MAX_LIN2_NUM //invalid unit index
 /*calculate  n(0 to 3) from m(0 to 9)
 m(0 to 3) ---->n = 0; m(4 to 7) ---->n=1; m(8) ---->n=2; m(9) ----> n = 3;*/
@@ -779,7 +779,17 @@ m(0 to 3) ---->n = 0; m(4 to 7) ---->n=1; m(8) ---->n=2; m(9) ----> n = 3;*/
                               ((_M_/9) == 0 ? 2:  \
                               ((_M_/10) == 0? 3:LIN2_INVALID_UNIT_INDEX))))
 
-LIN_tx_rx_StateTypeDef lin2_stat[MAX_LIN2_CH_NUM];
+#define __LIN2_N_TO_M(_N_,_M_MIN_,_M_MAX_)  \
+                                {   uint8_t index = 0;\
+                                    uint8_t num[5] = {0,4,8,9,10};\
+                                    do{ \
+                                        if(_N_== index){ \
+                                            _M_MIN_ = num[index]; \
+                                            _M_MAX_ = num[index + 1] - 1; \
+                                        } \
+                                    }while(++index < sizeof(num)); \
+                                }
+bool lin2_int[MAX_LIN2_CH_NUM]; //lin2 interruption TRUE --occured FALSE -not occured 
 
 static void LIN2_Baudrate_Generator(uint8_t linm,uint32_t baudrate);
 static void LIN2_Enable_Int(uint8_t linm,uint8_t int_mask);
@@ -792,7 +802,7 @@ static int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data);
 
 static uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len);
 
-typedef void (* LIN2_err_callback_t)(void *ptr);
+typedef void (* LIN2_err_callback_t)(void);
 
 void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct)
 {
@@ -820,22 +830,17 @@ void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct)
     //LIN2_TxRx_State_Init(linm);
 }
 
-void LIN2_TxRx_State_Init(uint8_t linm)
+void LIN2_Int_State_Init(uint8_t linm)
 {
     /* Check the parameters */
 	assert_param(IS_LIN2_ALL_CHANNEL(linm));
 
-    lin3_stat[linm].m_hdr_sent = FALSE;
-    lin3_stat[linm].m_frm_sent = FALSE;
-    lin3_stat[linm].m_frm_recept = FALSE;
-    lin3_stat[linm].s_hdr_recept = FALSE;
-    lin3_stat[linm].s_resp_sent = FALSE;
-    lin3_stat[linm].s_resp_recept = FALSE;
+    lin2_int[linm] = FALSE;
 }
 
-void LIN2_TxRx_State_Reset(uint8_t linm)
+void LIN2_Int_State_Reset(uint8_t linm)
 {
-    LIN2_TxRx_State_Init(linm);
+    LIN2_Int_State_Init(linm);
 }
 
 void LIN2_Baudrate_Generator(uint8_t linm,uint32_t baudrate)
@@ -845,7 +850,6 @@ void LIN2_Baudrate_Generator(uint8_t linm,uint32_t baudrate)
     LIN2_BaudrateTypeDef br_st;
 
     linn = __LIN2_M_to_N(linm);
-
     /* Check the parameters */
 	assert_param(IS_LIN2_ALL_CHANNEL(linm));
     assert_param(IS_LIN2_ALL_UNIT(linn));
@@ -957,15 +961,18 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
     }else{ //Response Field Communication Direction: reception
         recv_len = LIN2_Master_Recv_Resp(linm,resp_data);
     }
+#define  DUMP_DATA_ENABLE
+#ifdef DUMP_DATA_ENABLE
     if(recv_len > 0){//dump the sent/recv data
-        uint8_t dump_data[9] = {0};
+
+        uint8_t dump_data[64] = {0};
         memcpy(&dump_data,resp_data,resp_len);
         dump_data[resp_len] = '\0';
         INFOR("LIN2%d master id:0x%x %s response len:%d data:%s\n",linm,info_p->frm_id,
             info_p->resp_dir == 1 ?"send":"recv",resp_len,dump_data);
     }
-
-    LIN2_TxRx_State_Reset(linm);
+#endif
+    LIN2_Int_State_Reset(linm);
 
     return recv_len;
 }
@@ -985,8 +992,12 @@ int8_t LIN2_Master_Send_Header(uint8_t linm,uint8_t id)
     //frame transmission or wake-up transmission/reception started
     __RLIN2_SET_LIN_TX_CTL(linm,LIN2_FTS_MASK,1);
 
-    while(lin2_stat[linm].m_hdr_sent == FALSE);//failed after 10ms delay
+    while(lin2_int[linm] == FALSE);//failed after 10ms delay
+    LIN2_Int_State_Reset(linm); //reset the interrpt state
 
+    while(__RLIN2_GET_LIN_STAT(linm,LIN2_HTRC_MASK) == 0);
+    __RLIN2_SET_LIN_STAT(linm,LIN2_HTRC_MASK,0); //clear the flag
+	printf("hdr int_cnt= %d\n",int_count);
     return 0;//Successful
 }
 
@@ -1002,7 +1013,11 @@ void LIN2_Master_Send_Resp(uint8_t linm)
         //Frame separate mode is not set.
         //Waits for an interrupt request
     }*/
-
+	printf("res int_cnt= %d\n",int_count);
+    /*if(__RLIN2_GET_INT_STAT(linm,LIN2_FTCIE_MASK)){
+        while(lin2_int[linm] == FALSE);//failed after 10ms delay
+        LIN2_Int_State_Reset(linm); //reset the interrpt state
+    }*/
     // wait for frame or wake-up transmission completed
     while(__RLIN2_GET_LIN_STAT(linm,LIN2_FTC_MASK) == 0);
     //clear the FTC flag
@@ -1018,19 +1033,26 @@ int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
     assert_param(IS_ALL_NULL(recv_data));
 
     //Wait for response received
-    while(lin2_stat[linm].m_frm_recept == FALSE);
-	  if(__RLIN2_GET_LIN_ERR_STAT(linm,LIN2_FTER_MASK)){
+	printf("res2 int_cnt= %d\n",int_count);
+    /*while(lin2_int[linm] == FALSE);
+	if(__RLIN2_GET_LIN_ERR_STAT(linm,LIN2_FTER_MASK)){
 		ERROR("Frame/response timeout error has been detected.\n");
 		return -1;
-	}
-
+	}*/
+	printf("res3 int_cnt= %d\n",int_count);
     //wait for the successful data 1 reception flag set.
 	while(__RLIN2_GET_LIN_STAT(linm,LIN2_D1RC_MASK) == 0);
     //wait for the Frame Transmission/wake-up transmission/reception is stopped
 	while(__RLIN2_GET_LIN_TX_CTL(linm,LIN2_FTS_MASK));
+
+    /*if(__RLIN2_GET_INT_STAT(linm,LIN2_FRCIE_MASK)){
+        while(lin2_int[linm] == FALSE);//failed after 10ms delay
+        LIN2_Int_State_Reset(linm); //reset the interrpt state
+    }*/
 	//Wait for the successful frame/wake-up reception flag set.
     while(__RLIN2_GET_LIN_STAT(linm,LIN2_FRC_MASK) == 0);
-
+    __RLIN2_SET_LIN_STAT(linm,LIN2_FRC_MASK,0);
+    
     recv_len = __RLIN2_GET_DATA_FIELD_CONFIG(linm,LIN2_RFDL_MASK);
 
     for(;i < recv_len;i++){
@@ -1064,7 +1086,7 @@ uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len)
     return sum;
 }
 
-err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle,void *ptr)
+err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle)
 {
     uint8_t all_err_mask = 0x2f;
     err_statu_t err_flag = 0;
@@ -1073,11 +1095,79 @@ err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle,void *p
     err_flag = __RLIN2_GET_LIN_ERR_STAT(linm,all_err_mask);
 
     if(err_handle)
-        err_handle(ptr);// not handle temporiy
+        err_handle();// not handle temporiy
     
     return err_flag;
 }
 
+
+void RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
+{
+     __IO uint8_t linm  = 0;
+
+    linm = LIN2_InitStruct->linm;
+
+    /* Check the parameters */
+	assert_param(IS_LIN2_ALL_CHANNEL(linm));
+
+    //Switch all channels of the unit to LIN reset mode
+    //Set the OM0 bit in the RLN24nmLiCUC / RLN21nmLiCUC register to 0 (LIN reset mode).
+    //Read the OMM0 bit in the RLN24nmLiMST / RLN21nmLiMST register and confirm that it is 0
+    //(LIN reset mode)
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK)){
+        __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,0);
+    }
+
+    //1st write: RLN24nGLSTC / RLN21nGLSTC register = 1010 0111B (A7H)
+    //2nd write: RLN24nGLSTC / RLN21nGLSTC register = 0101 1000B (58H)
+    //3rd write: RLN24nGLSTC / RLN21nGLSTC  register = 0000 0001B (01H)
+    __RLIN2_ENTER_SELF_TEST(linm);
+
+    //Verify the transition to LIN self-test mode
+    //Read the LSTM bit in the RLN24nGLSTC / RLN21nGLSTC register; verify that it is 1 (LIN selftest mode)
+
+    if(__RLIN3_GET_SELF_TEST_STAT(linm) == 0){
+        ERROR("Transition to LIN reset mode failed\n");
+        return;
+    }
+
+    LIN2_Baudrate_Generator(linm,LIN2_InitStruct->baudrate);
+
+    //Enables interrupt
+    LIN2_Enable_Int(linm,LIN2_InitStruct->int_en_mask);
+     //Enables error detection
+    LIN2_Enable_Err_Detect(linm,LIN2_InitStruct->err_en_mask);
+    //Sets frame configuration parameters
+    LIN2_Set_Frame_Config(linm,&LIN2_InitStruct->cfg_param);
+
+    //Exits from LIN reset mode.
+    //Write 11B to the OM1 and OM0 bits in the RLN3nLCUC register, and check that the OMM1 and
+    //OMM0 bits in the RLN3nLMST register are set to 11B.
+    __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK | LIN2_OM1_MASK,0x03);
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK | LIN2_OMM0_MASK) != 0x03);
+}
+
+void RLIN2_Self_Mode_Exit(uint8_t linn)
+{
+    uint8_t linm = 0, linm_max = 0;
+
+    __LIN2_N_TO_M(linn,linm,linm_max);
+
+    for(;linm <= linm_max;linm++){
+        //Switch all channels of the unit to LIN reset mode
+        //Write 0 to the OM0 bit in the RLN24nmLiCUC / RLN21nmLiCUC register to make a transition
+        //to LIN reset mode
+        while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK | LIN2_OMM1_MASK) != 0x03){
+            __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK | LIN2_OM1_MASK,0x03);
+        }
+        
+        do{
+            __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,0);//make it in LIN reset mode
+        }while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK));//not in LIN reset mode
+    }
+
+    __RLIN2_GET_SELF_TEST_STAT(linn);
+}
 #pragma interrupt RLIN20IntHandler(channel = 50, enable = false, callt = false, fpu = false)
 void RLIN20IntHandler(unsigned long eiic)
 {
@@ -1087,7 +1177,9 @@ void RLIN20IntHandler(unsigned long eiic)
 #pragma interrupt RLIN21IntHandler(channel = 51, enable = false, callt = false, fpu = false)
 void RLIN21IntHandler(unsigned long eiic)
 {
-    while(1);
+    //while(1);
+	lin2_int[1] = 1;
+	int_count++;
 }
 
 #pragma interrupt RLIN22IntHandler(channel = 154, enable = false, callt = false, fpu = false)

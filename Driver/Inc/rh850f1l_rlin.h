@@ -734,11 +734,11 @@ used to control the frequency of baud rate clock source fa, fb, and fc*/
 
 /*RLN24nGLSTC / RLN21nGLSTC - LIN Self-Test Control Register*/
 #define __RLIN2_ENTER_SELF_TEST(_N_)                        do{ \
-                                                                LIN2N_VAL(_N_).LSTC = 0xA7; \
-                                                                LIN2N_VAL(_N_).LSTC = 0x58; \
-                                                                LIN2N_VAL(_N_).LSTC = 0x01; \
+                                                                LIN2N_VAL(_N_).GLSTC = 0xA7; \
+                                                                LIN2N_VAL(_N_).GLSTC = 0x58; \
+                                                                LIN2N_VAL(_N_).GLSTC = 0x01; \
                                                             }while(0)
-#define __RLIN2_GET_SELF_TEST_STAT(_N_)                     (LIN2N_VAL(_N_).LSTC & 0x01)
+#define __RLIN2_GET_SELF_TEST_STAT(_N_)                     (LIN2N_VAL(_N_).GLSTC & 0x01)
 
 
 /******************************LIN2 Channel register setting*******************/
@@ -893,6 +893,7 @@ typedef struct{
                             This parameter can be a value of @ref int_detection_enable_mask*/
 }LIN2_InitTypeDef;
 
+typedef LIN2_InitTypeDef LIN2_SelfModeInitTypeDef;
 /** @defgroup LIN2_Exported_Constants
   * @{
   */

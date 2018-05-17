@@ -4,10 +4,10 @@
 #include "rh850f1l_rlin.h"
 #include "list.h"
 
-typedef void (* uiLinErrHandlerCallback)(void);
+typedef void (* uiLinIntHandlerCallback)(void);
 
-#define uiLin2ErrHandlerCallback uiLinErrHandlerCallback
-#define uiLin3ErrHandlerCallback uiLinErrHandlerCallback
+#define uiLin2IntHandlerCallback uiLinIntHandlerCallback
+#define uiLin3IntHandlerCallback uiLinIntHandlerCallback
 
 /******************************************************************************/
 /**######  #       ### #     #  #####        #     #    #    ######  #######***/ 
@@ -61,22 +61,33 @@ struct uiLin2Config {
     uint8_t uiWu_tx_ll_width;//Wake-up Transmission Low Level Width
 };
 
+typedef struct{
+    uiLin2IntHandlerCallback uiLin2ErrHandler; //the pointer to error handle function
+    uiLin2IntHandlerCallback uiLin2CompleteHandler //the pointer to transfer compelte handle function
+}uiLin2IntHandlerStruct;
+
 struct uiLin2InitStruct {
     uint8_t uiLinm;//Channel Name(RLIN20,RLIN21,RLIN22, … …, RLIN29)
     uint16_t uiBaudrate;//lin2 baudrate 1- 20K
     struct uiLin2Config uiLin2Config;
     uint8_t uiInt_en_mask;//LIN Interrupt Enable mask
     uint8_t err_en_mask;//LIN Error Detection Enable mask
-    uiLin2ErrHandlerCallback uiLin2ErrHandler;
+    uiLin2IntHandlerStruct* uiLin2IntHandler;//the pointer to interrupt handle function
 };
 
-struct uiLin2ErrHandleList{
+struct uiLin2IntHandleList{
     void *next;
-    uint8_t uiLinIndex;
-    uiLin2ErrHandlerCallback uiLin2ErrHandler;
+    uint8_t uiLinIndex; // the lin index.to Lin2 index from 0 to 9
+    uiLin2IntHandlerStruct* uiLin2IntHandler; //the pointer to interrupt handle function
     uint8_t success; //1 - success; 0 - fail
-};//uiLin2ErrHandleList;
+};//uiLin2IntHandleList;
 
+
+static struct uiLin2IntHandleList* uiLinCreateIntHandleInstance(uint8_t uiLinIndex,
+    uiLin2IntHandlerStruct *uiLin2IntHandler);
+static struct uiLin2IntHandleList* uiLinPopInstanceFromList(uint8_t uiLinIndex);
+static void uiLin2FreeIntHandleInstance(uint8_t uiLinIndex);
+static void uiLin2FreeIntHandleList(void);
 /****************************TEST AREA*****************************************/
 void lin2_init(void);
 void lin2_master_excute(void);
