@@ -920,4 +920,6 @@ typedef LIN2_InitTypeDef LIN2_SelfModeInitTypeDef;
 void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct);
 int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,
     uint8_t resp_len,uint8_t *resp_data);
+int8_t RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct);
+void RLIN2_Self_Mode_Exit(uint8_t linn);
 #endif//RH850F1L_RLIN_H

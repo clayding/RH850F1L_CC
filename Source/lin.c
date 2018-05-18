@@ -185,8 +185,12 @@ void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
     }
     
     uiLinCreateIntHandleInstance(uiLin2Init_p->uiLinm,uiLin2Init_p->uiLin2IntHandler);
-
+#define LIN2_SELF_TEST_MODE 1
+#ifdef LIN2_SELF_TEST_MODE
+    RLIN2_Self_Mode_Init((LIN2_InitTypeDef*)uiLin2Init_p);
+#else
     LIN2_Init((LIN2_InitTypeDef*)uiLin2Init_p);
+#endif
 }
 
 void uiLin2ErrDefaultHandle(void)
@@ -229,7 +233,7 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
 
 
 struct uiLin2IntHandleList* uiLinCreateIntHandleInstance(uint8_t uiLinIndex,
-    uiLin2IntHandlerCallback uiLin2IntHandler)
+    uiLin2IntHandlerStruct* uiLin2IntHandler)
 {
     struct uiLin2IntHandleList *IntHandleInstance = NULL;
     //Lookup for the existing instance

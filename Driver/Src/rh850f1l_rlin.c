@@ -930,11 +930,14 @@ void LIN2_Set_Frame_Config(uint8_t linm,LIN2_ConfigurationTypeDef *cfg_param_p)
 
 int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data)
 {
+    __IO uint8_t linn = 0;
     __IO uint8_t mask = 0, val = 0;
 	__IO int8_t recv_len = resp_len;
 
+    linn = __LIN2_M_to_N(linm);
     /* Check the parameters */
 	assert_param(IS_LIN2_ALL_CHANNEL(linm));
+    assert_param(IS_LIN2_ALL_UNIT(linn));
     assert_param(IS_ALL_NULL(info_p));
     assert_param(IS_ALL_NULL(resp_data));
 
@@ -943,12 +946,18 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
     /*In response reception,repeats the transmission of inter-byte spaces as many times as the data
     length specified in bits RFDL[3:0] in the RLN3nLDFC register),so the resp_len mut be specified*/
     val = (info_p->cs_meth << LIN2_CSM_OFFSET) | (info_p->resp_dir << LIN2_RFT_OFFSET) | resp_len;
-
-    if(info_p->resp_dir == 1){//Response Field Communication Direction: transmission
+    //Response Field Communication Direction: transmission or in self_mode,Store the date to buf.
+    if(info_p->resp_dir == 1 || __RLIN2_GET_SELF_TEST_STAT(linn)){
         __IO uint8_t i = 0;
-        for(;i < resp_len;i++){
+        if(__RLIN2_GET_SELF_TEST_STAT(linn))
+            INFOR("Store the resp data in self-test mode\n");
+		for(;i < 8;i++){
+            __RLIN2_WRITE_DATA_BUF(linm,(i+1),0);
+        }
+        for(i = 0;i < resp_len;i++){
             __RLIN2_WRITE_DATA_BUF(linm,(i+1),resp_data[i]);
         }
+        __RLIN2_SET_CHECKSUM_BUF(linm,0);
         LIN2_Resp_Data_Checksum(resp_data,resp_len);
 
     }
@@ -962,14 +971,26 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
         recv_len = LIN2_Master_Recv_Resp(linm,resp_data);
     }
 #define  DUMP_DATA_ENABLE
+//#define DUMP_STRING_ENABLE
 #ifdef DUMP_DATA_ENABLE
     if(recv_len > 0){//dump the sent/recv data
-
         uint8_t dump_data[64] = {0};
         memcpy(&dump_data,resp_data,resp_len);
+        INFOR("LIN2%d master id:0x%x %s response len:%d ",linm,
+		info_p->frm_id,info_p->resp_dir == 1 ?"send":"recv",resp_len);
+#ifdef DUMP_STRING_ENABLE
         dump_data[resp_len] = '\0';
-        INFOR("LIN2%d master id:0x%x %s response len:%d data:%s\n",linm,info_p->frm_id,
-            info_p->resp_dir == 1 ?"send":"recv",resp_len,dump_data);
+        INFOR("data:%s\n",dump_data);
+#else
+		{
+			uint8_t i = 0;
+			INFOR("data:");
+			for(;i < resp_len;i++)
+				INFOR("%x ",dump_data[i]);
+			INFOR("\n");
+		}
+#endif
+
     }
 #endif
     LIN2_Int_State_Reset(linm);
@@ -1026,10 +1047,13 @@ void LIN2_Master_Send_Resp(uint8_t linm)
 
 int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
 {
+	__IO linn = 0;
     __IO uint8_t recv_len = 0,i = 0;
 
+	linn = __LIN2_M_to_N(linm);
     /* Check the parameters */
 	assert_param(IS_LIN2_ALL_CHANNEL(linm));
+    assert_param(IS_LIN2_ALL_CHANNEL(linn));
     assert_param(IS_ALL_NULL(recv_data));
 
     //Wait for response received
@@ -1049,9 +1073,12 @@ int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
         while(lin2_int[linm] == FALSE);//failed after 10ms delay
         LIN2_Int_State_Reset(linm); //reset the interrpt state
     }*/
-	//Wait for the successful frame/wake-up reception flag set.
-    while(__RLIN2_GET_LIN_STAT(linm,LIN2_FRC_MASK) == 0);
-    __RLIN2_SET_LIN_STAT(linm,LIN2_FRC_MASK,0);
+	//if not in sel-test mode,check the Successful Frame/Wake-up Reception Flag
+	if(!__RLIN2_GET_SELF_TEST_STAT(linn)){
+		//Wait for the successful frame/wake-up reception flag set.
+	    while(__RLIN2_GET_LIN_STAT(linm,LIN2_FRC_MASK) == 0);
+	    __RLIN2_SET_LIN_STAT(linm,LIN2_FRC_MASK,0);
+	}
     
     recv_len = __RLIN2_GET_DATA_FIELD_CONFIG(linm,LIN2_RFDL_MASK);
 
@@ -1101,34 +1128,36 @@ err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle)
 }
 
 
-void RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
+int8_t RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
 {
-     __IO uint8_t linm  = 0;
+     __IO uint8_t linm  = 0,linn = 0;
 
     linm = LIN2_InitStruct->linm;
-
+    linn = __LIN2_M_to_N(linm); //convert m to n
     /* Check the parameters */
 	assert_param(IS_LIN2_ALL_CHANNEL(linm));
+    assert_param(IS_LIN2_ALL_UNIT(linn));
 
     //Switch all channels of the unit to LIN reset mode
     //Set the OM0 bit in the RLN24nmLiCUC / RLN21nmLiCUC register to 0 (LIN reset mode).
     //Read the OMM0 bit in the RLN24nmLiMST / RLN21nmLiMST register and confirm that it is 0
     //(LIN reset mode)
-    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK)){
-        __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,0);
+    if(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK)){ //if not in reset mode
+        __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,0); //Transition to LIN reset mode
     }
 
     //1st write: RLN24nGLSTC / RLN21nGLSTC register = 1010 0111B (A7H)
     //2nd write: RLN24nGLSTC / RLN21nGLSTC register = 0101 1000B (58H)
     //3rd write: RLN24nGLSTC / RLN21nGLSTC  register = 0000 0001B (01H)
-    __RLIN2_ENTER_SELF_TEST(linm);
+
+    __RLIN2_ENTER_SELF_TEST(linn); //Transition to LIN selftest mode
 
     //Verify the transition to LIN self-test mode
     //Read the LSTM bit in the RLN24nGLSTC / RLN21nGLSTC register; verify that it is 1 (LIN selftest mode)
 
-    if(__RLIN3_GET_SELF_TEST_STAT(linm) == 0){
-        ERROR("Transition to LIN reset mode failed\n");
-        return;
+    if(__RLIN2_GET_SELF_TEST_STAT(linn) == 0){
+        ERROR("Transition to LIN selftest mode failed\n");
+        return -1;
     }
 
     LIN2_Baudrate_Generator(linm,LIN2_InitStruct->baudrate);
@@ -1144,7 +1173,12 @@ void RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
     //Write 11B to the OM1 and OM0 bits in the RLN3nLCUC register, and check that the OMM1 and
     //OMM0 bits in the RLN3nLMST register are set to 11B.
     __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK | LIN2_OM1_MASK,0x03);
-    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK | LIN2_OMM0_MASK) != 0x03);
+    if(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK | LIN2_OMM0_MASK) != 0x03){
+        ERROR("Exit from LIN reset mode failed\n");
+        return -1;
+    }
+
+    return 0;
 }
 
 void RLIN2_Self_Mode_Exit(uint8_t linn)
@@ -1152,6 +1186,12 @@ void RLIN2_Self_Mode_Exit(uint8_t linn)
     uint8_t linm = 0, linm_max = 0;
 
     __LIN2_N_TO_M(linn,linm,linm_max);
+
+    /* Check the parameters */
+	assert_param(IS_LIN2_ALL_CHANNEL(linm));
+    assert_param(IS_LIN2_ALL_CHANNEL(linm_max));
+    assert_param(IS_LIN2_ALL_UNIT(linn));
+
 
     for(;linm <= linm_max;linm++){
         //Switch all channels of the unit to LIN reset mode

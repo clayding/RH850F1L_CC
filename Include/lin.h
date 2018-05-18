@@ -63,7 +63,7 @@ struct uiLin2Config {
 
 typedef struct{
     uiLin2IntHandlerCallback uiLin2ErrHandler; //the pointer to error handle function
-    uiLin2IntHandlerCallback uiLin2CompleteHandler //the pointer to transfer compelte handle function
+    uiLin2IntHandlerCallback uiLin2CompleteHandler; //the pointer to transfer compelte handle function
 }uiLin2IntHandlerStruct;
 
 struct uiLin2InitStruct {
@@ -84,7 +84,7 @@ struct uiLin2IntHandleList{
 
 
 static struct uiLin2IntHandleList* uiLinCreateIntHandleInstance(uint8_t uiLinIndex,
-    uiLin2IntHandlerStruct *uiLin2IntHandler);
+    uiLin2IntHandlerStruct* uiLin2IntHandler);
 static struct uiLin2IntHandleList* uiLinPopInstanceFromList(uint8_t uiLinIndex);
 static void uiLin2FreeIntHandleInstance(uint8_t uiLinIndex);
 static void uiLin2FreeIntHandleList(void);

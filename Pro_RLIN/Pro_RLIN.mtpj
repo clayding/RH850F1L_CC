@@ -500,16 +500,16 @@
     <Instance Guid="98e485d5-e382-49c1-99c4-f95be3ec3e6c">
       <MemoCount>0</MemoCount>
     </Instance>
-    <Instance Guid="026f3a6f-77dc-4a86-9203-7385e3a8cdd9">
-      <MemoCount>0</MemoCount>
-    </Instance>
-    <Instance Guid="7e08a6dd-2fa6-46f6-8370-1a831a3f71f5">
-      <MemoCount>0</MemoCount>
-    </Instance>
     <Instance Guid="10b563cf-6882-4ab7-a205-5d7e24099fdd">
       <MemoCount>0</MemoCount>
     </Instance>
     <Instance Guid="cfe61888-3e0c-4ef4-93fe-5c077fbe0d17">
+      <MemoCount>0</MemoCount>
+    </Instance>
+    <Instance Guid="026f3a6f-77dc-4a86-9203-7385e3a8cdd9">
+      <MemoCount>0</MemoCount>
+    </Instance>
+    <Instance Guid="7e08a6dd-2fa6-46f6-8370-1a831a3f71f5">
       <MemoCount>0</MemoCount>
     </Instance>
   </Class>
