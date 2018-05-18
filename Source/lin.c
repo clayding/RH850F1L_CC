@@ -230,8 +230,34 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
     uiLin2Init_p->uiLin2IntHandler->uiLin2ErrHandler = uiLin2ErrDefaultHandle;
     uiLin2Init_p->uiLin2IntHandler->uiLin2CompleteHandler = uiLin2ErrDefaultHandle;
 }
+// response direction 1: Master---> Slave, 0 :Slave---->Master
+#define LIN2_RESP_FROM_MASTER	1
+#define LIN2_RESP_TO_MASTER	    0
 
+uint8_t uiLin2GetMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiSelfTestLength,uint8_t *pMessage)
+{
+    uint8_t recv_len = 0;
+    LIN2_Frm_InfoTypeDef lin2_frm;
+    memset(&lin2_frm,0,sizeof(lin2_frm));
 
+    lin2_frm.frm_id = uiID;
+    lin2_frm.resp_dir = LIN2_RESP_TO_MASTER;//response direction 1:transmit 0:receive
+
+    recv_len = LIN2_Master_Process(uiLinm,&lin2_frm,uiSelfTestLength,pMessage);
+
+    return recv_len;
+}
+
+void uiLin2PutMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiLength,uint8_t *pMessage)
+{
+    LIN2_Frm_InfoTypeDef lin2_frm;
+    memset(&lin2_frm,0,sizeof(lin2_frm));
+
+    lin2_frm.frm_id = uiID;
+    lin2_frm.resp_dir = LIN2_RESP_FROM_MASTER;//response direction 1:transmit 0:receive
+
+    LIN2_Master_Process(uiLinm,&lin2_frm,uiLength,pMessage);
+}
 struct uiLin2IntHandleList* uiLinCreateIntHandleInstance(uint8_t uiLinIndex,
     uiLin2IntHandlerStruct* uiLin2IntHandler)
 {
@@ -307,25 +333,43 @@ void lin2_init(void)
     Lin2Init(&uiLin2InitStruct);
 }
 
-#define LIN2_INDEX_USED     LIN21
-
-// response direction 1: Master---> Slave, 0 :Slave---->Master
-#define LIN2_RESP_FROM_MASTER	1  
-#define LIN2_RESP_TO_MASTER	    0
+#define LIN2_INDEX_USED     LIN21 //the lin2m
+#define LIN2_RECV_TEST      1     //recv response data test
 
 void lin2_master_excute(void)
 {
-    uint8_t resp_data[10] = "abcdefg";
-    LIN2_Frm_InfoTypeDef lin2_frm;
+    uint8_t resp_data[10] = "abcdefg",len = 7;
 	static uint8_t test_frm_id = 0x30;
-    memset(&lin2_frm,0,sizeof(lin2_frm));
-
-    lin2_frm.frm_id = test_frm_id++;
-    lin2_frm.frm_sep = 0;
-    lin2_frm.resp_dir = LIN2_RESP_TO_MASTER;//response direction 1:transmit 0:receive
-
-    LIN2_Master_Process(LIN2_INDEX_USED,&lin2_frm,7,resp_data);
-	
+#if LIN2_RECV_TEST
+    len = uiLin2GetMessage(LIN2_INDEX_USED,test_frm_id,len,resp_data);
+#else
+    uiLin2PutMessage(LIN2_INDEX_USED,test_frm_id,len,resp_data);
+#endif
 	if(test_frm_id == 0x3f)
 		test_frm_id = 0x30;
+/********************************Dump data*************************************/
+#define  DUMP_DATA_ENABLE //
+//#define DUMP_STRING_ENABLE
+#ifdef DUMP_DATA_ENABLE
+    if(len > 0){//dump the sent/recv data
+        uint8_t dump_data[64] = {0};
+        memcpy(&dump_data,resp_data,len);
+        INFOR("LIN2%d master id:0x%x %s response len:%d ",LIN2_INDEX_USED,
+        test_frm_id,LIN2_RECV_TEST == 0 ?"send":"recv",len);
+#ifdef DUMP_STRING_ENABLE
+        dump_data[len] = '\0';
+        INFOR("data:%s\n",dump_data);
+#else
+		{
+			uint8_t i = 0;
+			INFOR("data:");
+			for(;i < len;i++)
+				INFOR("%x ",dump_data[i]);
+			INFOR("\n");
+		}
+#endif
+
+    }
+#endif
+/********************************Dump data*************************************/
 }

@@ -950,7 +950,7 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
     if(info_p->resp_dir == 1 || __RLIN2_GET_SELF_TEST_STAT(linn)){
         __IO uint8_t i = 0;
         if(__RLIN2_GET_SELF_TEST_STAT(linn))
-            INFOR("Store the resp data in self-test mode\n");
+            INFOR("Self-test mode\n");
 		for(;i < 8;i++){
             __RLIN2_WRITE_DATA_BUF(linm,(i+1),0);
         }
@@ -970,29 +970,7 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
     }else{ //Response Field Communication Direction: reception
         recv_len = LIN2_Master_Recv_Resp(linm,resp_data);
     }
-#define  DUMP_DATA_ENABLE
-//#define DUMP_STRING_ENABLE
-#ifdef DUMP_DATA_ENABLE
-    if(recv_len > 0){//dump the sent/recv data
-        uint8_t dump_data[64] = {0};
-        memcpy(&dump_data,resp_data,resp_len);
-        INFOR("LIN2%d master id:0x%x %s response len:%d ",linm,
-		info_p->frm_id,info_p->resp_dir == 1 ?"send":"recv",resp_len);
-#ifdef DUMP_STRING_ENABLE
-        dump_data[resp_len] = '\0';
-        INFOR("data:%s\n",dump_data);
-#else
-		{
-			uint8_t i = 0;
-			INFOR("data:");
-			for(;i < resp_len;i++)
-				INFOR("%x ",dump_data[i]);
-			INFOR("\n");
-		}
-#endif
 
-    }
-#endif
     LIN2_Int_State_Reset(linm);
 
     return recv_len;
@@ -1007,7 +985,7 @@ int8_t LIN2_Master_Send_Header(uint8_t linm,uint8_t id)
 
     idp = LIN3_ID_Parity_Calculate(id); //Modified later
     idp &= 0x03;
-    INFOR("Master send header\n");
+    INFOR("Master send header...\n");
     __RLIN2_SET_ID_BUF(linm,(idp << LIN2_IDP0_OFFSET) | id);
 
     //frame transmission or wake-up transmission/reception started
@@ -1018,7 +996,7 @@ int8_t LIN2_Master_Send_Header(uint8_t linm,uint8_t id)
 
     while(__RLIN2_GET_LIN_STAT(linm,LIN2_HTRC_MASK) == 0);
     __RLIN2_SET_LIN_STAT(linm,LIN2_HTRC_MASK,0); //clear the flag
-	printf("hdr int_cnt= %d\n",int_count);
+
     return 0;//Successful
 }
 
@@ -1057,13 +1035,13 @@ int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
     assert_param(IS_ALL_NULL(recv_data));
 
     //Wait for response received
-	printf("res2 int_cnt= %d\n",int_count);
+
     /*while(lin2_int[linm] == FALSE);
 	if(__RLIN2_GET_LIN_ERR_STAT(linm,LIN2_FTER_MASK)){
 		ERROR("Frame/response timeout error has been detected.\n");
 		return -1;
 	}*/
-	printf("res3 int_cnt= %d\n",int_count);
+
     //wait for the successful data 1 reception flag set.
 	while(__RLIN2_GET_LIN_STAT(linm,LIN2_D1RC_MASK) == 0);
     //wait for the Frame Transmission/wake-up transmission/reception is stopped
@@ -1108,7 +1086,7 @@ uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len)
     }
 
     sum = 0xff - sum;
-    INFOR("The checksum of data is 0x%x\n",sum);
+    INFOR("Checksum: 0x%x\n",sum);
 
     return sum;
 }
