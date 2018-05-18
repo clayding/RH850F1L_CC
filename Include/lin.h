@@ -75,6 +75,21 @@ struct uiLin2InitStruct {
     uiLin2IntHandlerStruct* uiLin2IntHandler;//the pointer to interrupt handle function
 };
 
+typedef struct{
+    uint8_t uiLinm; //the channel to initial
+    uint16_t uiBaudrate; // 1- 20K
+    uint8_t  uiRateSel; // Wake-up Baud Rate Select
+    uint8_t uiWu_tx_ll_width;/*Wake-up Transmission Low Level Width Select
+                            0 0 0 0: 1 Tbits
+                            0 0 0 1: 2 Tbits
+                            0 0 1 0: 3 Tbits
+                            :
+                            1 1 1 0: 15 Tbits
+                            1 1 1 1: 16 Tbits>*/
+    uint8_t uiTx_int;/*!< Specifies the LIN2 Interrupt Enable bits
+                            This parameter can be the LIN2_FRM_WU_TX_INT_MASK of @ref int_enable_mask*/
+}uiLin2WakeupInitStruct;
+
 struct uiLin2IntHandleList{
     void *next;
     uint8_t uiLinIndex; // the lin index.to Lin2 index from 0 to 9

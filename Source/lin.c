@@ -174,6 +174,9 @@ void lin_test_excute()
 /*Note:
 All the below functions defined according to the requirement of the Gearchief*/
 /******************************************************************************/
+#define LIN2_OPERATE_TEST_MODE
+#define LIN2_SELF_TEST_MODE
+#define LIN2_WAKEUP_TEST_MODE
 
 void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
 {
@@ -183,9 +186,8 @@ void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
         err_list_init = 1;
         list_init(int_handle_list);
     }
-    
     uiLinCreateIntHandleInstance(uiLin2Init_p->uiLinm,uiLin2Init_p->uiLin2IntHandler);
-#define LIN2_SELF_TEST_MODE 1
+
 #ifdef LIN2_SELF_TEST_MODE
     RLIN2_Self_Mode_Init((LIN2_InitTypeDef*)uiLin2Init_p);
 #else
@@ -229,6 +231,19 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
 	//deflaut interrupt handle function
     uiLin2Init_p->uiLin2IntHandler->uiLin2ErrHandler = uiLin2ErrDefaultHandle;
     uiLin2Init_p->uiLin2IntHandler->uiLin2CompleteHandler = uiLin2ErrDefaultHandle;
+}
+
+
+void Lin2WakeupInitStructInit(uiLin2WakeupInitStruct* uiLin2Init_p)
+{
+    uiLin2Init_p->uiLinm = LIN21;
+    uiLin2Init_p->uiBaudrate = 19200; // 1- 20K
+    // Wake-up Baud Rate Select,the clock fa is used regardless of the setting of the
+    //LCKS bit in the RLN24nmLiMD / RLN21nmLiMD registers (when LIN 2.X is used
+    uiLin2Init_p->uiRateSel = 1; 
+    uiLin2Init_p->uiWu_tx_ll_width = 0x0f; //Wake-up Transmission Low Level Width
+    uiLin2Init_p->uiTx_int = LIN2_FRM_WU_TX_INT_MASK;/*!< Specifies the LIN2 Interrupt Enable bits
+                            This parameter can be the LIN2_FRM_WU_TX_INT_MASK of @ref int_enable_mask*/
 }
 // response direction 1: Master---> Slave, 0 :Slave---->Master
 #define LIN2_RESP_FROM_MASTER	1
@@ -322,8 +337,19 @@ void uiLin2FreeIntHandleList(void)
     }
 }
 /*********************************TEST AREA************************************/
+
+#define LIN2_INDEX_USED     LIN21 //the lin2m
+#define LIN2_RECV_TEST      1     //recv response data test
+
 void lin2_init(void)
 {
+#ifdef LIN2_WAKEUP_TEST_MODE
+    uiLin2WakeupInitStruct uiLin2InitStruct;
+    //bzero
+    memset(&uiLin2InitStruct,0,sizeof(uiLin2InitStruct));
+    Lin2WakeupInitStructInit(&uiLin2InitStruct);
+    LIN2_Wakeup_Transmit((LIN2_WakeupModeInitTypeDef*)&uiLin2InitStruct);
+#else
     struct uiLin2InitStruct uiLin2InitStruct;
     //bzero
     memset(&uiLin2InitStruct,0,sizeof(uiLin2InitStruct));
@@ -331,10 +357,8 @@ void lin2_init(void)
     Lin2InitStructInit(&uiLin2InitStruct);
     //initialization
     Lin2Init(&uiLin2InitStruct);
+#endif
 }
-
-#define LIN2_INDEX_USED     LIN21 //the lin2m
-#define LIN2_RECV_TEST      1     //recv response data test
 
 void lin2_master_excute(void)
 {

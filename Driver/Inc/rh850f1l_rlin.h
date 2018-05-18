@@ -880,7 +880,13 @@ typedef struct {
                             1 0 1: 5 Tbits
                             1 1 0: 6 Tbits
                             1 1 1: 7 Tbits>*/
-    uint8_t wu_tx_ll_width;//Wake-up Transmission Low Level Width
+    uint8_t wu_tx_ll_width;/*Wake-up Transmission Low Level Width Select
+                            0 0 0 0: 1 Tbits
+                            0 0 0 1: 2 Tbits
+                            0 0 1 0: 3 Tbits
+                            :
+                            1 1 1 0: 15 Tbits
+                            1 1 1 1: 16 Tbits>*/
 }LIN2_ConfigurationTypeDef;
 
 typedef struct{
@@ -894,6 +900,15 @@ typedef struct{
 }LIN2_InitTypeDef;
 
 typedef LIN2_InitTypeDef LIN2_SelfModeInitTypeDef;
+
+typedef struct{
+    uint8_t linm; //the channel to initial
+    uint16_t baudrate; // 1- 20K
+    uint8_t  rate_sel; // Wake-up Baud Rate Select
+    uint8_t wu_tx_ll_width; //Wake-up Transmission Low Level Width
+    uint8_t tx_int;/*!< Specifies the LIN2 Interrupt Enable bits
+                            This parameter can be the LIN2_FRM_WU_TX_INT_MASK of @ref int_enable_mask*/
+}LIN2_WakeupModeInitTypeDef;
 /** @defgroup LIN2_Exported_Constants
   * @{
   */
@@ -913,6 +928,10 @@ typedef LIN2_InitTypeDef LIN2_SelfModeInitTypeDef;
                                         ((CH) == LIN27) || \
                                         ((CH) == LIN28) || \
                                         ((CH) == LIN29) )
+#define IS_LIN2_ALL_SYS_CLK(CLK)    ( 	((CLK) == 0) || \
+                                        ((CLK) == 1) || \
+                                        ((CLK) == 2) || \
+										((CLK) == 3) )
 /**
   * @}
   */
@@ -922,4 +941,6 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,
     uint8_t resp_len,uint8_t *resp_data);
 int8_t RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct);
 void RLIN2_Self_Mode_Exit(uint8_t linn);
+
+int8_t LIN2_Wakeup_Transmit(LIN2_WakeupModeInitTypeDef *LIN2_InitStruct);
 #endif//RH850F1L_RLIN_H

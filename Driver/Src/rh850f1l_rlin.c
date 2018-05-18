@@ -770,7 +770,7 @@ void RLIN31StatusIntHandler(unsigned long eiic)
 /*******************#    #  #        #  #    ## #      ************************/ 
 /*******************#     # ####### ### #     # #######************************/ 
 /******************************************************************************/
-static int_count = 0;
+static uint8_t int_count = 0;
 #define LIN2_INVALID_UNIT_INDEX   MAX_LIN2_NUM //invalid unit index
 /*calculate  n(0 to 3) from m(0 to 9)
 m(0 to 3) ---->n = 0; m(4 to 7) ---->n=1; m(8) ---->n=2; m(9) ----> n = 3;*/
@@ -1025,7 +1025,7 @@ void LIN2_Master_Send_Resp(uint8_t linm)
 
 int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
 {
-	__IO linn = 0;
+	__IO uint8_t linn = 0;
     __IO uint8_t recv_len = 0,i = 0;
 
 	linn = __LIN2_M_to_N(linm);
@@ -1104,7 +1104,6 @@ err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle)
     
     return err_flag;
 }
-
 
 int8_t RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
 {
@@ -1186,6 +1185,69 @@ void RLIN2_Self_Mode_Exit(uint8_t linn)
 
     __RLIN2_GET_SELF_TEST_STAT(linn);
 }
+
+
+int8_t LIN2_Wakeup_Transmit(LIN2_WakeupModeInitTypeDef *LIN2_InitStruct)
+{
+
+    int8_t err = 0; //error flag
+    uint8_t linm = 0,linn = 0;
+    linm = LIN2_InitStruct->linm;
+    linn = __LIN2_M_to_N(linm);
+    /* Check the parameters */
+    assert_param(IS_LIN2_ALL_CHANNEL(linm));
+    assert_param(IS_LIN2_ALL_UNIT(linn));
+	
+	LIN2_Baudrate_Generator(linm,LIN2_InitStruct->baudrate);
+
+    //Select Wake-up Transmission Low Level Width
+	__RLIN2_SET_WAKEUP_CONIFG(linm,LIN2_WUTL_MASK,LIN2_InitStruct->wu_tx_ll_width << LIN2_WUTL_OFFSET); 
+
+    if(LIN2_InitStruct->rate_sel)
+        //the clock fa is used regardless of the setting of the LCKS bit in the 
+        //RLN24nmLiMD / RLN21nmLiMD registers
+        __RLIN2_SELECT_WAKEUP_BAUDRATE(linn,LIN2_LWBR0_MASK,1);
+    else
+        //the clock specified by the LCKS bit setting in the RLN24nmLiMD / 
+        //RLN21nmLiMD registers is used
+        __RLIN2_SELECT_WAKEUP_BAUDRATE(linn,LIN2_LWBR0_MASK,0);
+    
+    if(LIN2_InitStruct->tx_int == TRUE){
+        __RLIN2_ENABLE_INT(linm,LIN2_FTCIE_MASK,1);
+    }else{
+        __RLIN2_ENABLE_INT(linm,LIN2_FTCIE_MASK,0);
+    }
+    //exit LIN reset mode
+    __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,1);
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK) == 0);
+    //Transitions to LIN wakeup mode
+    __RLIN2_SET_LIN_CTL(linm,LIN2_OM1_MASK,0);
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM1_MASK) == 1);
+    //setting the RFT bit in the RLN24nmLiDFC / RLN21nmLiDFC register to 1 (transmission) 
+    __RLIN2_SET_DATA_FIELD_CONFIG(linm,LIN2_RFT_MASK,1 << LIN2_RFT_OFFSET);
+    // setting the FTS bit in the RLN24nmLiTRC / RLN21nmLiTRC register to 1 (frame
+    //transmission or wake-up transmission/reception started) 
+    __RLIN2_SET_LIN_TX_CTL(linm,LIN2_FTS_MASK,1);
+
+     // wait for frame or wake-up transmission completed
+    while(__RLIN2_GET_LIN_STAT(linm,LIN2_FTC_MASK) == 0 || 
+         (LIN2_Check_Error(linm,NULL) & (LIN2_PBER_MASK | LIN2_PBER_MASK)));
+    
+    if(LIN2_Check_Error(linm,NULL) & (LIN2_PBER_MASK | LIN2_PBER_MASK)){
+        ERROR("Physical bus error detection / bit error detection occurred when  \
+            transmit in wake-up mode\n");
+        err = -1;
+    }
+    //clear the FTC flag
+    __RLIN2_SET_LIN_STAT(linm,LIN2_FTC_MASK,0);
+
+    //Restore to LIN reset mode.
+    __RLIN2_SET_LIN_CTL(linm,LIN2_OM0_MASK,0);
+    while(__RLIN2_GET_LIN_MODE_STAT(linm,LIN2_OMM0_MASK) == 1);
+
+    return err;
+}
+
 #pragma interrupt RLIN20IntHandler(channel = 50, enable = false, callt = false, fpu = false)
 void RLIN20IntHandler(unsigned long eiic)
 {
