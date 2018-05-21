@@ -20,4 +20,9 @@
 
 2018年3月26日
 1.19天前完成RSCAN的驱动，按照客户的要求完成的相关的API。
-2.今天为止完成RLIN的驱动，master 和slave 模式的互相通信顺利完成。
+2.今天为止完成RLIN3的驱动，master 和slave 模式的互相通信顺利完成。
+
+2018年5月21日
+1.完成CSIG0作为master，CSIG1作为slave下的互相通讯
+2.完成ADCA0的基本测试，包含初始化，中断和读取数据等，基本完成ADCA0的代码，包含使用software hardware hold来触发。
+3.根据GearChief的要求编写LIN2的代码（API）,完成operation mode下Lin2x(0-9)的测试。
