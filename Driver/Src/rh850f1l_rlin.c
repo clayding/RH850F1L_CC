@@ -802,8 +802,13 @@ static int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data);
 
 static uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len);
 
-typedef void (* LIN2_err_callback_t)(void);
-
+/**
+  * @brief Initializes the LIN2x peripheral according to the specified
+  *   parameters in the LIN2_InitTypeDef.
+  * @param LIN2_InitStruct: pointer to a LIN2_InitTypeDef structure that
+  *   contains the configuration information for the LIN2x peripheral.
+  * @retval none
+  */
 void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct)
 {
     __IO uint8_t linm  = 0;
@@ -829,7 +834,11 @@ void LIN2_Init(LIN2_InitTypeDef* LIN2_InitStruct)
 
     //LIN2_TxRx_State_Init(linm);
 }
-
+/**
+  * @brief  Initializes the Interrupt flag of LIN2x to default: FALSE
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @retval none
+  */
 void LIN2_Int_State_Init(uint8_t linm)
 {
     /* Check the parameters */
@@ -838,11 +847,23 @@ void LIN2_Int_State_Init(uint8_t linm)
     lin2_int[linm] = FALSE;
 }
 
+/**
+  * @brief  Reset the Interrupt flag of LIN2x to default: FALSE
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @retval none
+  */
 void LIN2_Int_State_Reset(uint8_t linm)
 {
     LIN2_Int_State_Init(linm);
 }
 
+/**
+  * @brief  Reset the Interrupt flag of LIN2x to default: FALSE
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  baudrate: the specified baudrate for trasfer,can be a value of 19200,
+  *     9600,2400,10417.
+  * @retval none
+  */
 void LIN2_Baudrate_Generator(uint8_t linm,uint32_t baudrate)
 {
     __IO uint8_t linn = 0,val = 0;
@@ -893,6 +914,12 @@ void LIN2_Baudrate_Generator(uint8_t linm,uint32_t baudrate)
     __RLIN2_SET_LIN_MODE(linm,LIN2_LCKS_MASK,br_st.lin_sys_clk << LIN2_LCKS_OFFSET);
 }
 
+/**
+  * @brief  Config LIN2 Interrupt Enable Register.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  int_mask: the bits need to be enabled.
+  * @retval none
+  */
 void LIN2_Enable_Int(uint8_t linm,uint8_t int_mask)
 {
     /* Check the parameters */
@@ -902,6 +929,12 @@ void LIN2_Enable_Int(uint8_t linm,uint8_t int_mask)
     __RLIN2_CONFIG_INT(linm,int_mask);
 }
 
+/**
+  * @brief  Config LIN2 Error Detection Enable Register.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  err_mask: the error detection bits need to be enabled.
+  * @retval none
+  */
 void LIN2_Enable_Err_Detect(uint8_t linm,uint8_t err_mask)
 {
     /* Check the parameters */
@@ -911,7 +944,13 @@ void LIN2_Enable_Err_Detect(uint8_t linm,uint8_t err_mask)
     __RLIN2_CONFIG_ERR_DETECT(linm,err_mask);
 }
 
-//Sets frame configuration parameters
+/**
+  * @brief  Sets frame configuration parameters
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  cfg_param_p: pointer to a LIN2_ConfigurationTypeDef structure that
+  *   contains the configuration information for the specified frame.
+  * @retval none
+  */
 void LIN2_Set_Frame_Config(uint8_t linm,LIN2_ConfigurationTypeDef *cfg_param_p)
 {
     /* Check the parameters */
@@ -928,6 +967,16 @@ void LIN2_Set_Frame_Config(uint8_t linm,LIN2_ConfigurationTypeDef *cfg_param_p)
     __RLIN2_SET_WAKEUP_CONIFG(linm,LIN2_WUTL_MASK,cfg_param_p->wu_tx_ll_width << LIN2_WUTL_OFFSET);
 }
 
+/**
+  * @brief  The working process of the LIN2x as a Master.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  info_p: pointer to a LIN2_Frm_InfoTypeDef structure that fills
+  *   the frame information for the specified frame.
+  * @param  resp_len: the response data length to be sent
+  * @param  resp_data: the pointer to response data to be sent.
+  * @retval return the response data length to be sent or received or sent header 
+  *   failed indicated by -1.
+  */
 int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t resp_len,uint8_t *resp_data)
 {
     __IO uint8_t linn = 0;
@@ -963,7 +1012,10 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
     }
     __RLIN2_SET_DATA_FIELD_CONFIG(linm,mask,val);
 
-    LIN2_Master_Send_Header(linm,info_p->frm_id);
+    if(LIN2_Master_Send_Header(linm,info_p->frm_id) == -1){
+        ERROR("Send header failed\n");
+        return -1; //send header failed ,the return
+    }
 
     if(info_p->resp_dir == 1){ //Response Field Communication Direction: transmission
         LIN2_Master_Send_Resp(linm);
@@ -976,6 +1028,12 @@ int8_t LIN2_Master_Process(uint8_t linm,LIN2_Frm_InfoTypeDef *info_p,uint8_t res
     return recv_len;
 }
 
+/**
+  * @brief  The header sending process of the LIN2x as a Master.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  id: the ID to be transmitted in the ID field of the LIN frame
+  * @retval return result of sending the header 0:success -1: failed
+  */
 int8_t LIN2_Master_Send_Header(uint8_t linm,uint8_t id)
 {
     __IO uint8_t idp = 0;
@@ -991,15 +1049,22 @@ int8_t LIN2_Master_Send_Header(uint8_t linm,uint8_t id)
     //frame transmission or wake-up transmission/reception started
     __RLIN2_SET_LIN_TX_CTL(linm,LIN2_FTS_MASK,1);
 
-    while(lin2_int[linm] == FALSE);//failed after 10ms delay
-    LIN2_Int_State_Reset(linm); //reset the interrpt state
+    while(lin2_int[linm] == FALSE && __RLIN2_GET_LIN_STAT(linm,LIN2_HTRC_MASK) == 0);
+    if(lin2_int[linm])
+        LIN2_Int_State_Reset(linm); //reset the interrpt state
 
-    while(__RLIN2_GET_LIN_STAT(linm,LIN2_HTRC_MASK) == 0);
+    if(__RLIN2_GET_LIN_STAT(linm,LIN2_HTRC_MASK) == 0)
+        return -1; //send header failed
     __RLIN2_SET_LIN_STAT(linm,LIN2_HTRC_MASK,0); //clear the flag
 
     return 0;//Successful
 }
 
+/**
+  * @brief  The response sending process of the LIN2x as a Master.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @retval none.
+  */
 void LIN2_Master_Send_Resp(uint8_t linm)
 {
     /* Check the parameters */
@@ -1023,6 +1088,12 @@ void LIN2_Master_Send_Resp(uint8_t linm)
     __RLIN2_SET_LIN_STAT(linm,LIN2_FTC_MASK,0);
 }
 
+/**
+  * @brief  The response eceiving process of the LIN2x as a Master.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  resp_data: the pointer to response data to be sent.
+  * @retval return the response data length to be received.
+  */
 int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
 {
 	__IO uint8_t linn = 0;
@@ -1071,6 +1142,12 @@ int8_t LIN2_Master_Recv_Resp(uint8_t linm,uint8_t *recv_data)
     return recv_len;
 }
 
+/**
+  * @brief  To calculate the checksum of response data.
+  * @param  data_len: the length of response data.
+  * @param  data: the pointer to response data to be calculated the checksum.
+  * @retval return the checksum.
+  */
 uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len)
 {
     uint8_t i = 0;
@@ -1090,21 +1167,44 @@ uint8_t LIN2_Resp_Data_Checksum(uint8_t *data,uint8_t data_len)
 
     return sum;
 }
-
+/**
+  * @brief  To check the error type occurred before.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param  err_handle: the callback function to handle the error.
+  * @retval return the error type.
+  */
 err_statu_t LIN2_Check_Error(uint8_t linm,LIN2_err_callback_t err_handle)
 {
     uint8_t all_err_mask = 0x2f;
-    err_statu_t err_flag = 0;
+    err_statu_t err_flag = LIN2_NO_ERR;
 
     //Get the error status
     err_flag = __RLIN2_GET_LIN_ERR_STAT(linm,all_err_mask);
 
     if(err_handle)
-        err_handle();// not handle temporiy
+        err_handle();// call the error handle function
     
     return err_flag;
 }
 
+/**
+  * @brief  To clear the error occurred before.
+  * @param  linm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @retval none.
+  */
+void LIN2_Clear_Error(uint8_t linm)
+{
+    uint8_t all_err_mask = 0x2f;
+    __RLIN2_SET_LIN_ERR_STAT(linm,all_err_mask,0);
+}
+
+/**
+  * @brief  Initializes the self-test mode setting according to the specified
+  *   parameters in the LIN2_SelfModeInitTypeDef.
+  * @param  LIN2_SelfModeInitTypeDef: pointer to a LIN2_SelfModeInitTypeDef structure that
+  *   contains the setting for the LIN2x.
+  * @retval return result of entering the self-test mode 0:success -1: failed
+  */
 int8_t RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
 {
      __IO uint8_t linm  = 0,linn = 0;
@@ -1158,6 +1258,11 @@ int8_t RLIN2_Self_Mode_Init(LIN2_SelfModeInitTypeDef *LIN2_InitStruct)
     return 0;
 }
 
+/**
+  * @brief Exit the self-test mode.
+  * @param linn: the specified unit in LIN2 (0 to 3),corresponding to n.
+  * @retval none
+  */
 void RLIN2_Self_Mode_Exit(uint8_t linn)
 {
     uint8_t linm = 0, linm_max = 0;
@@ -1186,7 +1291,11 @@ void RLIN2_Self_Mode_Exit(uint8_t linn)
     __RLIN2_GET_SELF_TEST_STAT(linn);
 }
 
-
+/**
+  * @brief To enter the wake up mode and send the wake up signal according the setting
+  *   specified in LIN2_InitStruct pointer to LIN2_WakeupModeInitTypeDef.
+  * @retval err: return result of entering the wake up mode 0:success -1: failed
+  */
 int8_t LIN2_Wakeup_Transmit(LIN2_WakeupModeInitTypeDef *LIN2_InitStruct)
 {
 
@@ -1259,55 +1368,54 @@ void RLIN21IntHandler(unsigned long eiic)
 {
     //while(1);
 	lin2_int[1] = 1;
-	int_count++;
 }
 
 #pragma interrupt RLIN22IntHandler(channel = 154, enable = false, callt = false, fpu = false)
 void RLIN22IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[2] = 1;
 }
 
 #pragma interrupt RLIN23IntHandler(channel = 155, enable = false, callt = false, fpu = false)
 void RLIN23IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[3] = 1;
 }
 
 #pragma interrupt RLIN24IntHandler(channel = 218, enable = false, callt = false, fpu = false)
 void RLIN24IntHandler(unsigned long eiic)
 {
-    while(1);
+   lin2_int[4] = 1;
 }
 
 #pragma interrupt RLIN25IntHandler(channel = 219, enable = false, callt = false, fpu = false)
 void RLIN25IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[5] = 1;
 }
 
 #pragma interrupt RLIN26IntHandler(channel = 267, enable = false, callt = false, fpu = false)
 void RLIN26IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[6] = 1;
 }
 
 #pragma interrupt RLIN27IntHandler(channel = 268, enable = false, callt = false, fpu = false)
 void RLIN27IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[7] = 1;
 }
 
 #pragma interrupt RLIN28IntHandler(channel = 277, enable = false, callt = false, fpu = false)
 void RLIN28IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[8] = 1;
 }
 
 
 #pragma interrupt RLIN29IntHandler(channel = 278, enable = false, callt = false, fpu = false)
 void RLIN29IntHandler(unsigned long eiic)
 {
-    while(1);
+    lin2_int[9] = 1;
 }
 

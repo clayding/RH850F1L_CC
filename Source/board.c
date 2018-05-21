@@ -193,6 +193,24 @@ void Board_Port_Config(void)
     P1	 	|= (1U<<1);*/
 #endif
 #ifdef RLIN2_TEST
+/*************LIN20*************/
+#if 0 //LIN20 Rx:P0.0 Tx:P0.1
+    port.pin_mask = PORT_PIN_0;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
+
+    port.pin_mask = PORT_PIN_1;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_2;
+    Port_Init(PortGroupNum0,&port);
+#endif
+#if 0 //LIN21 Rx:P0.7 Tx:P0.8
     port.pin_mask = PORT_PIN_7;
     port.opt_mode = AF_MODE;
     port.io_mode = PORT_INPUT_MODE;
@@ -207,6 +225,142 @@ void Board_Port_Config(void)
     port.echar_t = OUTPUT_PP | OUTPUT_HDS;
     port.alter_t = ALT_FUNC_1;
     Port_Init(PortGroupNum0,&port);
+#endif
+#if 0 //LIN22 Rx:P0.9 Tx:P0.10
+    port.pin_mask = PORT_PIN_9;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_3;
+    Port_Init(PortGroupNum0,&port);
+
+    port.pin_mask = PORT_PIN_10;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_3;
+    Port_Init(PortGroupNum0,&port);
+#endif
+#if 0 //LIN23 Rx:P1.14 Tx:P1.15
+    port.pin_mask = PORT_PIN_14;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum1,&port);
+
+    port.pin_mask = PORT_PIN_15;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum1,&port);
+#endif
+#if 0 //LIN24 Rx:P1.10 Tx:P1.11
+    port.pin_mask = PORT_PIN_10;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum1,&port);
+
+    port.pin_mask = PORT_PIN_11;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum1,&port);
+#endif
+
+#if 0 //LIN25 Rx:P1.6 Tx:P1.7
+    port.pin_mask = PORT_PIN_6;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum1,&port);
+
+    port.pin_mask = PORT_PIN_7;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum1,&port);
+#endif
+
+#if 0 //LIN26 Rx:P0.11 Tx:P0.12
+    port.pin_mask = PORT_PIN_11;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_4;
+    Port_Init(PortGroupNum0,&port);
+
+    port.pin_mask = PORT_PIN_12;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_4;
+    Port_Init(PortGroupNum0,&port);
+#endif
+
+#if 0 //LIN27 Rx:P2.0 Tx:P2.1
+    port.pin_mask = PORT_PIN_0;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum2,&port);
+
+    port.pin_mask = PORT_PIN_1;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum2,&port);
+#endif
+
+#if 0 //LIN28 Rx:P2.2 Tx:P2.3
+    port.pin_mask = PORT_PIN_2;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum2,&port);
+
+    port.pin_mask = PORT_PIN_3;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum2,&port);
+#endif
+
+
+#if 1 //LIN29 Rx:P2.4 Tx:P2.5
+    port.pin_mask = PORT_PIN_4;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_INPUT_MODE;
+    port.echar_t = INPUT_PU|INPUT_PD|INPUT_SHMT1;
+    port.bmc_t = BIDIRECTION_MODE_ENABLED;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum2,&port);
+
+    port.pin_mask = PORT_PIN_5;
+    port.opt_mode = AF_MODE;
+    port.io_mode = PORT_OUTPUT_MODE;
+    port.echar_t = OUTPUT_PP | OUTPUT_HDS;
+    port.alter_t = ALT_FUNC_1;
+    Port_Init(PortGroupNum2,&port);
+#endif
+
 #endif
 #ifdef RLIN3_LIN_MODE_TEST
     port.pin_mask = PORT_PIN_4;

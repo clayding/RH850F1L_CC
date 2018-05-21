@@ -1,13 +1,14 @@
 #include "lin.h"
-#include "r_memb.h"
+//#include "r_memb.h"
 
+/*
 #define LinIntHandleNUM     16
 
 
 void *LIST_CONCAT(int_handle_list,_list) = NULL;
 list_t int_handle_list = (list_t)&LIST_CONCAT(int_handle_list,_list);
 
-R_MEMB(IntHandleMemb,struct uiLin2IntHandleList, LinIntHandleNUM);
+R_MEMB(IntHandleMemb,struct uiLin2IntHandleList, LinIntHandleNUM); */
 
 /******************************************************************************/
 /**######  #       ### #     #  #####        #     #    #    ######  #######***/ 
@@ -174,20 +175,21 @@ void lin_test_excute()
 /*Note:
 All the below functions defined according to the requirement of the Gearchief*/
 /******************************************************************************/
-#define LIN2_OPERATE_TEST_MODE
-#define LIN2_SELF_TEST_MODE
-#define LIN2_WAKEUP_TEST_MODE
 
+#define LIN2_INDEX_DEFAULT     LIN29 //the lin2m
+#define LIN2_OPERATE_TEST_MODE
+//#define LIN2_SELF_TEST_MODE
+//#define LIN2_WAKEUP_TEST_MODE
+
+/**
+  * @brief Initializes the LIN2x peripheral according to the specified
+  *   parameters in the uiLin2InitStruct.
+  * @param uiLin2Init_p: pointer to a uiLin2InitStruct structure that
+  *   contains the configuration information for the LIN2x peripheral.
+  * @retval none
+  */
 void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
 {
-    static bool err_list_init = 0;
-
-    if(!err_list_init){
-        err_list_init = 1;
-        list_init(int_handle_list);
-    }
-    uiLinCreateIntHandleInstance(uiLin2Init_p->uiLinm,uiLin2Init_p->uiLin2IntHandler);
-
 #ifdef LIN2_SELF_TEST_MODE
     RLIN2_Self_Mode_Init((LIN2_InitTypeDef*)uiLin2Init_p);
 #else
@@ -195,15 +197,6 @@ void Lin2Init(struct uiLin2InitStruct* uiLin2Init_p)
 #endif
 }
 
-void uiLin2ErrDefaultHandle(void)
-{
-    printf("uiLin2ErrDefaultHandle\n");
-}
-
-void uiLin2CompleteDefaultHandle(void)
-{
-    printf("uiLin2CompleteDefaultHandle\n");
-}
 /**
   * @brief  Fills each uiLin2Init_p member with its default value.
   * @param  uiLin2Init_p : pointer to a struct uiLin2Init structure which will be initialized.
@@ -213,7 +206,7 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
 {
 /*--------------- Reset lin2 init structure parameters values -----------------*/
     /* Initialize the uiLinm member */
-    uiLin2Init_p->uiLinm = LIN21;
+    uiLin2Init_p->uiLinm = LIN2_INDEX_DEFAULT;
     /* initialize the uiBaudrate member */
     uiLin2Init_p->uiBaudrate = 19200;
     /* initialize the uiLin2Config member */
@@ -229,14 +222,30 @@ void Lin2InitStructInit(struct uiLin2InitStruct* uiLin2Init_p)
     uiLin2Init_p->err_en_mask = LIN2_FRM_ERR_DETECT_MASK | LIN2_TIO_ERR_DETECT_MASK |
         LIN2_PHB_ERR_DETECT_MASK | LIN2_BIT_ERR_DETECT_MASK;//LIN Error Detection Enable mask
 	//deflaut interrupt handle function
-    uiLin2Init_p->uiLin2IntHandler->uiLin2ErrHandler = uiLin2ErrDefaultHandle;
-    uiLin2Init_p->uiLin2IntHandler->uiLin2CompleteHandler = uiLin2ErrDefaultHandle;
+    uiLin2Init_p->uiLin2IntHandler->uiLin2ErrHandler = NULL;
+    uiLin2Init_p->uiLin2IntHandler->uiLin2CompleteHandler = NULL;
 }
 
+/**
+  * @brief  Reset each uiLin2Init_p member with its reset value.
+  * @param  uiLin2Init_p : pointer to a struct uiLin2Init structure which will be initialized.
+  * @retval None
+  */
+void Lin2InitStructReset(struct uiLin2InitStruct* uiLin2Init_p)
+{
+    memset(uiLin2Init_p,0,sizeof(struct uiLin2InitStruct));
+}
 
+/**
+  * @brief Initializes the setting in wake up mode according to the specified
+  *   parameters in the uiLin2WakeupInitStruct.
+  * @param uiLin2Init_p: pointer to a uiLin2WakeupInitStruct structure that
+  *   contains the configuration information for the LIN2x peripheral.
+  * @retval none
+  */
 void Lin2WakeupInitStructInit(uiLin2WakeupInitStruct* uiLin2Init_p)
 {
-    uiLin2Init_p->uiLinm = LIN21;
+    uiLin2Init_p->uiLinm = LIN2_INDEX_DEFAULT;
     uiLin2Init_p->uiBaudrate = 19200; // 1- 20K
     // Wake-up Baud Rate Select,the clock fa is used regardless of the setting of the
     //LCKS bit in the RLN24nmLiMD / RLN21nmLiMD registers (when LIN 2.X is used
@@ -249,7 +258,15 @@ void Lin2WakeupInitStructInit(uiLin2WakeupInitStruct* uiLin2Init_p)
 #define LIN2_RESP_FROM_MASTER	1
 #define LIN2_RESP_TO_MASTER	    0
 
-uint8_t uiLin2GetMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiSelfTestLength,uint8_t *pMessage)
+/**
+  * @brief Start a LIN Message Frame to get the response data from LIN Slave.
+  * @param uiLinm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param uiID: the ID to be transmitted in the ID field of the LIN frame
+  * @param uiSelfTestLength: the length of response data used in self-test mode
+  * @param pMessage: the pointer to buffer used to store the response data.
+  * @retval return length of response data to be received.
+  */
+int8_t uiLin2GetMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiSelfTestLength,uint8_t *pMessage)
 {
     uint8_t recv_len = 0;
     LIN2_Frm_InfoTypeDef lin2_frm;
@@ -263,6 +280,14 @@ uint8_t uiLin2GetMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiSelfTestLength,ui
     return recv_len;
 }
 
+/**
+  * @brief Start a LIN Message Frame to get the response data from LIN Slave.
+  * @param uiLinm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @param uiID: the ID to be transmitted in the ID field of the LIN frame
+  * @param uiLength: the length of response data to be sent.
+  * @param pMessage: the pointer to the response data to be sent later
+  * @retval None
+  */
 void uiLin2PutMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiLength,uint8_t *pMessage)
 {
     LIN2_Frm_InfoTypeDef lin2_frm;
@@ -273,6 +298,36 @@ void uiLin2PutMessage(uint8_t uiLinm,uint8_t uiID,uint8_t uiLength,uint8_t *pMes
 
     LIN2_Master_Process(uiLinm,&lin2_frm,uiLength,pMessage);
 }
+
+/**
+  * @brief Get the latest occurred LIN transaction error.
+  * @param uiLinm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @retval return the error flag.
+  */
+err_statu_t uiLin2GetLastError(uint8_t uiLinm)
+{   err_statu_t err_stat = LIN2_NO_ERR;
+    err_stat = LIN2_Check_Error(uiLinm,NULL);
+
+    return err_stat;
+}
+
+/**
+  * @brief Clear the occurred error and reset the entire LIN module.
+  * @param uiLinm: the specified channel in LIN2 (0 to 9),corresponding to m.
+  * @retval None
+  */
+void voLin2ExitError(uint8_t uiLinm)
+{
+    struct uiLin2InitStruct uiLin2InitStruct;
+    //reset setting
+    Lin2InitStructReset(&uiLin2InitStruct);
+    //initialization
+    Lin2Init(&uiLin2InitStruct);
+
+    LIN2_Clear_Error(uiLinm); //clear the error status
+}
+
+/*
 struct uiLin2IntHandleList* uiLinCreateIntHandleInstance(uint8_t uiLinIndex,
     uiLin2IntHandlerStruct* uiLin2IntHandler)
 {
@@ -335,10 +390,8 @@ void uiLin2FreeIntHandleList(void)
         memb_free(&IntHandleMemb, IntHandleInstance);
         IntHandleInstance = list_pop(int_handle_list);
     }
-}
+} */
 /*********************************TEST AREA************************************/
-
-#define LIN2_INDEX_USED     LIN21 //the lin2m
 #define LIN2_RECV_TEST      1     //recv response data test
 
 void lin2_init(void)
@@ -362,12 +415,13 @@ void lin2_init(void)
 
 void lin2_master_excute(void)
 {
-    uint8_t resp_data[10] = "abcdefg",len = 7;
+    uint8_t resp_data[10] = "abcdefg";
+    int8_t len = 7;
 	static uint8_t test_frm_id = 0x30;
 #if LIN2_RECV_TEST
-    len = uiLin2GetMessage(LIN2_INDEX_USED,test_frm_id,len,resp_data);
+    len = uiLin2GetMessage(LIN2_INDEX_DEFAULT,test_frm_id++,(uint8_t)len,resp_data);
 #else
-    uiLin2PutMessage(LIN2_INDEX_USED,test_frm_id,len,resp_data);
+    uiLin2PutMessage(LIN2_INDEX_DEFAULT,test_frm_id++,(uint8_t)len,resp_data);
 #endif
 	if(test_frm_id == 0x3f)
 		test_frm_id = 0x30;
@@ -378,7 +432,7 @@ void lin2_master_excute(void)
     if(len > 0){//dump the sent/recv data
         uint8_t dump_data[64] = {0};
         memcpy(&dump_data,resp_data,len);
-        INFOR("LIN2%d master id:0x%x %s response len:%d ",LIN2_INDEX_USED,
+        INFOR("LIN2%d master id:0x%x %s response len:%d ",LIN2_INDEX_DEFAULT,
         test_frm_id,LIN2_RECV_TEST == 0 ?"send":"recv",len);
 #ifdef DUMP_STRING_ENABLE
         dump_data[len] = '\0';
